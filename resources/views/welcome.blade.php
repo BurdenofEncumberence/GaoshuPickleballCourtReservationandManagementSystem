@@ -368,36 +368,36 @@
 
             <!-- Tournament Arena & Regulation Court Showcase -->
             <div class="relative w-full">
-                <div class="relative bg-gradient-to-b from-[#131710] via-[#171D14] to-[#0E120B] text-white rounded-3xl p-5 sm:p-7 border border-[#E5A823]/30 shadow-2xl overflow-hidden">
+                <div id="hero-arena" class="relative rounded-3xl p-5 sm:p-7 border shadow-xl overflow-hidden transition-colors duration-250" style="background: var(--surface); color: var(--ink); border-color: var(--border);">
                     <!-- Subtle Court Glow & Ambient Lighting -->
                     <div class="absolute -top-24 -right-24 w-64 h-64 bg-[#E5A823]/10 rounded-full blur-3xl pointer-events-none"></div>
                     <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-[#E5A823]/10 rounded-full blur-3xl pointer-events-none"></div>
 
                     <!-- Card Header -->
-                    <div class="relative z-10 flex items-center justify-between pb-4 border-b border-white/10 gap-2">
+                    <div class="relative z-10 flex items-center justify-between pb-4 border-b gap-2" style="border-color: var(--border);">
                         <div class="flex items-center gap-2">
                             <span class="relative flex h-2.5 w-2.5">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E5A823] opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E5A823]"></span>
                             </span>
-                            <span class="text-[11px] sm:text-xs font-mono font-bold tracking-wider uppercase text-[#E5A823]">Live Court Hub</span>
+                            <span class="text-[11px] sm:text-xs font-mono font-bold tracking-wider uppercase" style="color: var(--pop-dark);">Live Court Hub</span>
                         </div>
-                        <span class="text-[10px] sm:text-xs text-white/60 font-mono">Open Daily: 8 AM – 10 PM</span>
+                        <span class="text-[10px] sm:text-xs font-mono" style="color: var(--muted);">Open Daily: 8 AM – 10 PM</span>
                     </div>
 
                     <!-- Players Playing Showcase -->
                     <div class="relative z-10 my-5">
-                        <div class="relative bg-[#0A0D08] rounded-2xl p-2 sm:p-3 border border-white/10 shadow-inner">
-                            <div class="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-[#120F09] border border-[#E5A823]/40 shadow-lg group">
+                        <div class="relative rounded-2xl p-2 sm:p-3 border shadow-inner transition-colors duration-250" style="background: var(--bg); border-color: var(--border);">
+                            <div class="relative w-full aspect-[16/9] rounded-xl overflow-hidden border border-[#E5A823]/40 shadow-md group" style="background: var(--surface);">
                                 <img
                                     src="{{ asset('images/players-playing.jpg') }}"
                                     alt="Gaoshou Pickleball players rallying on court"
                                     class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
                                 >
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none"></div>
 
                                 <!-- Official Dimensions Overlay -->
-                                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono text-[#F5C75D] bg-black/75 backdrop-blur-sm border border-[#E5A823]/30 px-3 py-1 rounded-full pointer-events-none shadow">
+                                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono bg-white/90 text-[#12150F] border border-[#E5A823]/50 px-3 py-1 rounded-full pointer-events-none shadow-sm font-semibold">
                                     USA Pickleball Official Spec · 13.41m × 6.10m (44' × 20')
                                 </div>
                             </div>
@@ -406,33 +406,33 @@
 
                     <!-- Court Specs & Features Grid -->
                     <div class="relative z-10 grid grid-cols-2 gap-2.5 sm:gap-3 text-xs">
-                        <div class="bg-white/5 hover:bg-white/[0.08] transition rounded-xl p-3 border border-white/10">
-                            <div class="text-[10px] uppercase font-bold tracking-wider text-[#E5A823]">Regular Courts</div>
-                            <div class="font-display font-bold text-sm sm:text-base text-white mt-0.5">13.41m × 6.10m</div>
-                            <div class="text-[11px] text-white/60 mt-0.5">Official regulation format</div>
+                        <div class="rounded-xl p-3 border transition" style="background: var(--bg); border-color: var(--border);">
+                            <div class="text-[10px] uppercase font-bold tracking-wider" style="color: var(--pop-dark);">Regular Courts</div>
+                            <div class="font-display font-bold text-sm sm:text-base mt-0.5" style="color: var(--ink);">13.41m × 6.10m</div>
+                            <div class="text-[11px] mt-0.5" style="color: var(--muted);">Official regulation format</div>
                         </div>
-                        <div class="bg-white/5 hover:bg-white/[0.08] transition rounded-xl p-3 border border-white/10">
-                            <div class="text-[10px] uppercase font-bold tracking-wider text-[#E5A823]">Junior Courts</div>
-                            <div class="font-display font-bold text-sm sm:text-base text-white mt-0.5">10.00m × 4.50m</div>
-                            <div class="text-[11px] text-white/60 mt-0.5">Youth & training format</div>
+                        <div class="rounded-xl p-3 border transition" style="background: var(--bg); border-color: var(--border);">
+                            <div class="text-[10px] uppercase font-bold tracking-wider" style="color: var(--pop-dark);">Junior Courts</div>
+                            <div class="font-display font-bold text-sm sm:text-base mt-0.5" style="color: var(--ink);">10.00m × 4.50m</div>
+                            <div class="text-[11px] mt-0.5" style="color: var(--muted);">Youth & training format</div>
                         </div>
-                        <div class="bg-white/5 hover:bg-white/[0.08] transition rounded-xl p-3 border border-white/10">
-                            <div class="text-[10px] uppercase font-bold tracking-wider text-white/50">Playing Surface</div>
-                            <div class="font-semibold text-white mt-0.5 text-[11px] sm:text-xs">Pro Cushion-Flex™ Acrylic</div>
-                            <div class="text-[10px] text-white/60">Shock-absorbing joint protection</div>
+                        <div class="rounded-xl p-3 border transition" style="background: var(--bg); border-color: var(--border);">
+                            <div class="text-[10px] uppercase font-bold tracking-wider" style="color: var(--muted);">Playing Surface</div>
+                            <div class="font-semibold mt-0.5 text-[11px] sm:text-xs" style="color: var(--ink);">Pro Cushion-Flex™ Acrylic</div>
+                            <div class="text-[10px]" style="color: var(--muted);">Shock-absorbing joint protection</div>
                         </div>
-                        <div class="bg-white/5 hover:bg-white/[0.08] transition rounded-xl p-3 border border-white/10">
-                            <div class="text-[10px] uppercase font-bold tracking-wider text-white/50">Night Lighting</div>
-                            <div class="font-semibold text-white mt-0.5 text-[11px] sm:text-xs">1,000-Lux Anti-Glare LEDs</div>
-                            <div class="text-[10px] text-white/60">Even ceiling diffusion</div>
+                        <div class="rounded-xl p-3 border transition" style="background: var(--bg); border-color: var(--border);">
+                            <div class="text-[10px] uppercase font-bold tracking-wider" style="color: var(--muted);">Night Lighting</div>
+                            <div class="font-semibold mt-0.5 text-[11px] sm:text-xs" style="color: var(--ink);">1,000-Lux Anti-Glare LEDs</div>
+                            <div class="text-[10px]" style="color: var(--muted);">Even ceiling diffusion</div>
                         </div>
                     </div>
 
                     <!-- Live Fleet Bar & Direct Booking Action -->
-                    <div class="relative z-10 mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="relative z-10 mt-4 pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3" style="border-color: var(--border);">
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-2 rounded-full bg-[#E5A823]"></div>
-                            <span class="text-xs text-white/80 font-medium">
+                            <span class="text-xs font-medium" style="color: var(--ink);">
                                 {{ $courts->count() > 0 ? $courts->count() . ' Courts Ready for Booking' : 'Courts Open for Booking' }}
                             </span>
                         </div>
