@@ -13,9 +13,6 @@ class OpenPlayRegistration extends Model
     protected $fillable = [
         'open_play_session_id',
         'user_id',
-        'player_name',
-        'player_email',
-        'player_phone',
         'slots_count',
         'total_fee',
         'payment_status',
@@ -40,6 +37,21 @@ class OpenPlayRegistration extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getPlayerNameAttribute(): string
+    {
+        return $this->user?->name ?? 'Registered Player';
+    }
+
+    public function getPlayerEmailAttribute(): string
+    {
+        return $this->user?->email ?? '';
+    }
+
+    public function getPlayerPhoneAttribute(): ?string
+    {
+        return $this->user?->phone;
     }
 
     public function isPaid(): bool

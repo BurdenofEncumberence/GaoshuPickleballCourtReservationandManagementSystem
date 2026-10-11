@@ -212,48 +212,17 @@
                                         </p>
                                     </div>
 
-                                    {{-- Player Contact Information --}}
-                                    <div>
-                                        <label for="player_name" class="block text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--gz-muted);">
-                                            Primary Player Name <span class="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="player_name"
-                                            name="player_name"
-                                            value="{{ old('player_name', Auth::user()->name) }}"
-                                            required
-                                            class="gz-input w-full text-xs"
-                                        >
-                                    </div>
-
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label for="player_email" class="block text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--gz-muted);">
-                                                Email <span class="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="email"
-                                                id="player_email"
-                                                name="player_email"
-                                                value="{{ old('player_email', Auth::user()->email) }}"
-                                                required
-                                                class="gz-input w-full text-xs"
-                                            >
-                                        </div>
-
-                                        <div>
-                                            <label for="player_phone" class="block text-xs font-bold uppercase tracking-wider mb-1" style="color: var(--gz-muted);">
-                                                Phone Number
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="player_phone"
-                                                name="player_phone"
-                                                value="{{ old('player_phone', Auth::user()->phone) }}"
-                                                placeholder="09XX XXX XXXX"
-                                                class="gz-input w-full text-xs"
-                                            >
+                                    {{-- Player Account Summary (Inherited via user_id) --}}
+                                    <div class="p-3 rounded-xl border text-xs" style="border-color: var(--gz-border); background: var(--gz-bg);">
+                                        <span class="block text-[10px] font-bold uppercase tracking-wider mb-1" style="color: var(--gz-muted);">
+                                            Registered Player Account
+                                        </span>
+                                        <div class="font-bold" style="color: var(--gz-ink);">{{ Auth::user()->name }}</div>
+                                        <div style="color: var(--gz-muted);">
+                                            {{ Auth::user()->email }}
+                                            @if(Auth::user()->phone)
+                                                • {{ Auth::user()->phone }}
+                                            @endif
                                         </div>
                                     </div>
 

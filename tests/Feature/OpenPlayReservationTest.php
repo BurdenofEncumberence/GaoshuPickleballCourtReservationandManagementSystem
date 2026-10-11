@@ -117,8 +117,6 @@ test('admin can view session roster and update player attendance', function () {
 
     $registration = $session->registrations()->create([
         'user_id' => $player->id,
-        'player_name' => $player->name,
-        'player_email' => $player->email,
         'slots_count' => 1,
         'total_fee' => 250.00,
         'payment_status' => 'paid',
@@ -161,10 +159,11 @@ test('players can browse upcoming open play sessions and view real-time remainin
     ]);
     $session->courts()->attach([$this->court1->id]);
 
+    $existingPlayer = User::factory()->create(['role' => 'player']);
+
     // Pre-register 3 slots
     $session->registrations()->create([
-        'player_name' => 'John Doe',
-        'player_email' => 'john@example.com',
+        'user_id' => $existingPlayer->id,
         'slots_count' => 3,
         'total_fee' => 360.00,
         'payment_status' => 'paid',
@@ -202,9 +201,6 @@ test('player can reserve a slot paying only participation fee instead of full co
 
     $payload = [
         'slots_count' => 1,
-        'player_name' => 'Geoff Player',
-        'player_email' => 'geoff@example.com',
-        'player_phone' => '09171234567',
         'payment_method' => 'cash',
         'notes' => 'Looking forward to play',
     ];
@@ -240,15 +236,13 @@ test('player can reserve multiple slots for friends and participation fee is acc
 
     $payload = [
         'slots_count' => 3,
-        'player_name' => 'Alice Team',
-        'player_email' => 'alice@example.com',
         'payment_method' => 'cash',
         'notes' => 'Reserving for Alice, Bob, and Charlie',
     ];
 
     $this->actingAs($player)->post(route('open-play.reserve', $session), $payload);
 
-    $registration = OpenPlayRegistration::where('player_email', 'alice@example.com')->first();
+    $registration = OpenPlayRegistration::where('user_id', $player->id)->first();
     expect($registration->slots_count)->toBe(3);
     // 3 slots * ₱180 = ₱540
     expect((float) $registration->total_fee)->toBe(540.00);
@@ -275,8 +269,6 @@ test('capacity control rejects the 13th registration when session has 12 slots m
     // Fill up all 12 slots
     $session->registrations()->create([
         'user_id' => $player1->id,
-        'player_name' => 'Full Group',
-        'player_email' => 'group@example.com',
         'slots_count' => 12,
         'total_fee' => 1800.00,
         'payment_status' => 'paid',
@@ -291,8 +283,6 @@ test('capacity control rejects the 13th registration when session has 12 slots m
     $response = $this->actingAs($player2)->from(route('open-play.show', $session))
         ->post(route('open-play.reserve', $session), [
             'slots_count' => 1,
-            'player_name' => '13th Player',
-            'player_email' => 'thirteenth@example.com',
             'payment_method' => 'cash',
         ]);
 
@@ -300,11 +290,12 @@ test('capacity control rejects the 13th registration when session has 12 slots m
     $response->assertSessionHasErrors(['slots_count']);
 
     // Ensure no registration was created
-    expect(OpenPlayRegistration::where('player_email', 'thirteenth@example.com')->exists())->toBeFalse();
+    expect(OpenPlayRegistration::where('user_id', $player2->id)->exists())->toBeFalse();
     expect($session->fresh()->registered_slots_count)->toBe(12);
 });
 
 test('capacity control rejects booking if requested quantity exceeds remaining available slots', function () {
+    $earlyPlayer = User::factory()->create(['role' => 'player']);
     $player = User::factory()->create(['role' => 'player']);
 
     $session = OpenPlaySession::create([
@@ -322,8 +313,7 @@ test('capacity control rejects booking if requested quantity exceeds remaining a
 
     // Already 8 slots registered (2 remaining)
     $session->registrations()->create([
-        'player_name' => 'Early Bird',
-        'player_email' => 'early@example.com',
+        'user_id' => $earlyPlayer->id,
         'slots_count' => 8,
         'total_fee' => 1200.00,
         'payment_status' => 'paid',
@@ -337,14 +327,12 @@ test('capacity control rejects booking if requested quantity exceeds remaining a
     $response = $this->actingAs($player)->from(route('open-play.show', $session))
         ->post(route('open-play.reserve', $session), [
             'slots_count' => 3,
-            'player_name' => 'Greedy Player',
-            'player_email' => 'greedy@example.com',
             'payment_method' => 'cash',
         ]);
 
     $response->assertRedirect(route('open-play.show', $session));
     $response->assertSessionHasErrors(['slots_count']);
-    expect(OpenPlayRegistration::where('player_email', 'greedy@example.com')->exists())->toBeFalse();
+    expect(OpenPlayRegistration::where('user_id', $player->id)->exists())->toBeFalse();
 });
 
 test('private court booking is blocked on courts allocated to an active open play session during session hours', function () {
@@ -414,8 +402,6 @@ test('cancelled registrations release capacity immediately for other players', f
 
     $registration = $session->registrations()->create([
         'user_id' => $player->id,
-        'player_name' => 'Temp Reservation',
-        'player_email' => 'temp@example.com',
         'slots_count' => 4,
         'total_fee' => 400.00,
         'payment_status' => 'pending',

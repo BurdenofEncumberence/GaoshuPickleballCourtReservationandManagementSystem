@@ -93,17 +93,12 @@ class OpenPlayController extends Controller
 
         $validated = $request->validate([
             'slots_count' => ['required', 'integer', 'min:1', 'max:10'],
-            'player_name' => ['required', 'string', 'max:255'],
-            'player_email' => ['required', 'email', 'max:255'],
-            'player_phone' => ['nullable', 'string', 'max:30'],
             'payment_method' => ['required', 'string', 'in:paymongo,cash'],
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
             'slots_count.required' => 'Please select the number of player slots.',
             'slots_count.min' => 'At least 1 slot must be selected.',
             'slots_count.max' => 'You can reserve up to 10 slots per transaction.',
-            'player_name.required' => 'Please provide your full name.',
-            'player_email.required' => 'Please provide a valid email address.',
             'payment_method.required' => 'Please select your preferred payment method.',
         ]);
 
@@ -144,9 +139,6 @@ class OpenPlayController extends Controller
 
                 return $lockedSession->registrations()->create([
                     'user_id' => $user?->id,
-                    'player_name' => $validated['player_name'],
-                    'player_email' => $validated['player_email'],
-                    'player_phone' => $validated['player_phone'] ?? null,
                     'slots_count' => $requestedSlots,
                     'total_fee' => $totalFee,
                     'payment_status' => 'pending',
