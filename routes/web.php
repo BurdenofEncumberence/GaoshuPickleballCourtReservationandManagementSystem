@@ -117,11 +117,14 @@ Route::middleware(['auth', 'verified', 'role:admin,manager'])
         Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
         Route::get('/customization', [AdminCustomizationController::class, 'index'])->name('customization.index');
         Route::patch('/customization', [AdminCustomizationController::class, 'update'])->name('customization.update');
-        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
-        Route::patch('/users/{user}/role', [AdminUserController::class, 'updateRole'])->whereNumber('user')->name('users.role');
-        Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->whereNumber('user')->name('users.status');
-        Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
+
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+            Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+            Route::patch('/users/{user}/role', [AdminUserController::class, 'updateRole'])->whereNumber('user')->name('users.role');
+            Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->whereNumber('user')->name('users.status');
+            Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
+        });
     });
 
 /*
