@@ -52,7 +52,7 @@
                 <span class="gz-badge gz-badge-success">AUDITED</span>
             </div>
             <div class="gz-eyebrow mb-1">Month revenue</div>
-            <div class="gz-kpi-value" style="color: var(--gz-pop-dark); font-size: 24px;">
+            <div class="gz-kpi-value text-right" style="color: var(--gz-pop-dark); font-size: 24px;">
                 ₱{{ number_format($monthlyRevenue, 2) }}
             </div>
             <p class="text-xs mt-2 font-semibold flex items-center gap-1" style="color: {{ $revenueChange !== null ? ($revenueChange >= 0 ? 'var(--gz-pop-dark)' : 'var(--gz-danger)') : 'var(--gz-muted)' }};">
@@ -76,7 +76,7 @@
                 <span class="gz-badge gz-badge-success">Live Fleet</span>
             </div>
             <div class="gz-eyebrow mb-1">Court fleet</div>
-            <div class="gz-kpi-value" style="font-size: 24px;">
+            <div class="gz-kpi-value text-right" style="font-size: 24px;">
                 {{ $courts->where('court_status', 'available')->count() }}
                 <span class="text-sm font-normal" style="color: var(--gz-muted);">/ {{ $courts->count() }}</span>
             </div>
@@ -94,7 +94,7 @@
                 <span class="gz-badge gz-badge-neutral">{{ $today->format('M j') }}</span>
             </div>
             <div class="gz-eyebrow mb-1">Today matches</div>
-            <div class="gz-kpi-value" style="font-size: 24px;">
+            <div class="gz-kpi-value text-right" style="font-size: 24px;">
                 {{ $todayBookings->count() }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">
@@ -114,7 +114,7 @@
                 <span class="gz-badge gz-badge-success">MTD LOAD</span>
             </div>
             <div class="gz-eyebrow mb-1">Court utilization</div>
-            <div class="gz-kpi-value" style="color: var(--gz-pop-dark); font-size: 24px;">
+            <div class="gz-kpi-value text-right" style="color: var(--gz-pop-dark); font-size: 24px;">
                 {{ number_format($utilization['month_utilization_rate'], 1) }}%
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">

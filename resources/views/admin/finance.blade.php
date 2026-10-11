@@ -38,7 +38,7 @@
                 <span class="gz-badge gz-badge-success">Paid</span>
             </div>
             <div class="gz-eyebrow mb-1">This month</div>
-            <div class="gz-kpi-value" style="color: var(--gz-pop-dark); font-size: 24px;">
+            <div class="gz-kpi-value text-right" style="color: var(--gz-pop-dark); font-size: 24px;">
                 ₱{{ number_format($monthlyRevenue, 2) }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">{{ now()->format('F Y') }} audited</p>
@@ -54,7 +54,7 @@
                 <span class="gz-badge gz-badge-neutral">Cumulative</span>
             </div>
             <div class="gz-eyebrow mb-1">Year to date</div>
-            <div class="gz-kpi-value" style="font-size: 24px;">
+            <div class="gz-kpi-value text-right" style="font-size: 24px;">
                 ₱{{ number_format($yearRevenue, 2) }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">All settled {{ now()->format('Y') }}</p>
@@ -70,7 +70,7 @@
                 <span class="gz-badge gz-badge-neutral">Count</span>
             </div>
             <div class="gz-eyebrow mb-1">Transactions</div>
-            <div class="gz-kpi-value" style="font-size: 24px;">
+            <div class="gz-kpi-value text-right" style="font-size: 24px;">
                 {{ number_format($transactionCount) }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">Confirmed paid receipts</p>
@@ -95,12 +95,12 @@
             <div class="grid grid-cols-2 gap-4 pt-2 border-t" style="border-color: var(--gz-border);">
                 <div>
                     <div class="text-xs" style="color: var(--gz-muted);">Total Bookings</div>
-                    <div class="text-xl font-bold mt-0.5">{{ number_format($totalOnlineCount) }}</div>
+                    <div class="text-xl font-bold mt-0.5 text-right">{{ number_format($totalOnlineCount) }}</div>
                 </div>
                 <div>
                     <div class="text-xs" style="color: var(--gz-muted);">Audited Collections</div>
-                    <div class="text-xl font-bold mt-0.5" style="color: var(--gz-pop-dark);">₱{{ number_format($onlineRevenue, 2) }}</div>
-                    <div class="text-[10px]" style="color: var(--gz-muted);">{{ number_format($onlinePaidTransactions) }} receipts</div>
+                    <div class="text-xl font-bold mt-0.5 text-right" style="color: var(--gz-pop-dark);">₱{{ number_format($onlineRevenue, 2) }}</div>
+                    <div class="text-[10px] text-right" style="color: var(--gz-muted);">{{ number_format($onlinePaidTransactions) }} receipts</div>
                 </div>
             </div>
         </div>
@@ -121,12 +121,12 @@
             <div class="grid grid-cols-2 gap-4 pt-2 border-t" style="border-color: var(--gz-border);">
                 <div>
                     <div class="text-xs" style="color: var(--gz-muted);">Total Bookings</div>
-                    <div class="text-xl font-bold mt-0.5">{{ number_format($totalWalkInCount) }}</div>
+                    <div class="text-xl font-bold mt-0.5 text-right">{{ number_format($totalWalkInCount) }}</div>
                 </div>
                 <div>
                     <div class="text-xs" style="color: var(--gz-muted);">Audited Collections</div>
-                    <div class="text-xl font-bold mt-0.5" style="color: var(--red);">₱{{ number_format($walkInRevenue, 2) }}</div>
-                    <div class="text-[10px]" style="color: var(--gz-muted);">{{ number_format($walkInPaidTransactions) }} receipts</div>
+                    <div class="text-xl font-bold mt-0.5 text-right" style="color: var(--red);">₱{{ number_format($walkInRevenue, 2) }}</div>
+                    <div class="text-[10px] text-right" style="color: var(--gz-muted);">{{ number_format($walkInPaidTransactions) }} receipts</div>
                 </div>
             </div>
         </div>

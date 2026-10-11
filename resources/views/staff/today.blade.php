@@ -108,7 +108,7 @@
                 <span class="gz-badge gz-badge-neutral">Today</span>
             </div>
             <div class="gz-eyebrow mb-1">Scheduled</div>
-            <div class="gz-kpi-value" style="font-size: 22px;">
+            <div class="gz-kpi-value text-right" style="font-size: 22px;">
                 {{ $totalBookingsToday }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">Confirmed match slots</p>
@@ -121,7 +121,7 @@
                 <span class="gz-badge gz-badge-success">Present</span>
             </div>
             <div class="gz-eyebrow mb-1">Show</div>
-            <div class="gz-kpi-value" style="font-size: 22px; color: var(--gz-pop-dark);">
+            <div class="gz-kpi-value text-right" style="font-size: 22px; color: var(--gz-pop-dark);">
                 {{ $showCount }}
             </div>
             <p class="text-xs mt-2 font-semibold" style="color: var(--gz-pop-dark);">Arrived &amp; played</p>
@@ -134,7 +134,7 @@
                 <span class="gz-badge {{ $noShowCount > 0 ? 'gz-badge-danger' : 'gz-badge-neutral' }}">Absent</span>
             </div>
             <div class="gz-eyebrow mb-1">No-show</div>
-            <div class="gz-kpi-value" style="font-size: 22px; color: {{ $noShowCount > 0 ? 'var(--gz-danger)' : 'var(--gz-ink)' }};">
+            <div class="gz-kpi-value text-right" style="font-size: 22px; color: {{ $noShowCount > 0 ? 'var(--gz-danger)' : 'var(--gz-ink)' }};">
                 {{ $noShowCount }}
             </div>
             <p class="text-xs mt-2" style="color: {{ $noShowCount > 0 ? 'var(--gz-danger)' : 'var(--gz-muted)' }};">
@@ -149,7 +149,7 @@
                 <span class="gz-badge gz-badge-warning">Arrival</span>
             </div>
             <div class="gz-eyebrow mb-1">Awaiting</div>
-            <div class="gz-kpi-value" style="font-size: 22px;">
+            <div class="gz-kpi-value text-right" style="font-size: 22px;">
                 {{ $awaitingCount }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">Scheduled for today</p>

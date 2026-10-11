@@ -32,7 +32,7 @@
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <div class="gz-kpi-card">
             <div class="gz-eyebrow mb-1">Total Reservations</div>
-            <div class="gz-kpi-value text-xl sm:text-2xl font-bold" style="color: var(--gz-ink);">
+            <div class="gz-kpi-value text-xl sm:text-2xl font-bold text-right" style="color: var(--gz-ink);">
                 {{ number_format($kpis['total']) }}
             </div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">All-time reservations</p>
@@ -40,7 +40,7 @@
 
         <div class="gz-kpi-card">
             <div class="gz-eyebrow mb-1">Confirmed</div>
-            <div class="gz-kpi-value text-xl sm:text-2xl font-bold" style="color: var(--gz-pop-dark);">
+            <div class="gz-kpi-value text-xl sm:text-2xl font-bold text-right" style="color: var(--gz-pop-dark);">
                 {{ number_format($kpis['confirmed']) }}
             </div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Settled and active</p>
@@ -48,7 +48,7 @@
 
         <div class="gz-kpi-card">
             <div class="gz-eyebrow mb-1">Pending</div>
-            <div class="gz-kpi-value text-xl sm:text-2xl font-bold text-amber-600">
+            <div class="gz-kpi-value text-xl sm:text-2xl font-bold text-amber-600 text-right">
                 {{ number_format($kpis['pending']) }}
             </div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Awaiting payment</p>
@@ -56,7 +56,7 @@
 
         <div class="gz-kpi-card">
             <div class="gz-eyebrow mb-1">Today</div>
-            <div class="gz-kpi-value text-xl sm:text-2xl font-bold" style="color: var(--gz-ink);">
+            <div class="gz-kpi-value text-xl sm:text-2xl font-bold text-right" style="color: var(--gz-ink);">
                 {{ number_format($kpis['today']) }}
             </div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Scheduled today</p>
@@ -64,7 +64,7 @@
 
         <div class="gz-kpi-card col-span-2 lg:col-span-1">
             <div class="gz-eyebrow mb-1">Total Collections</div>
-            <div class="gz-kpi-value text-xl sm:text-2xl font-bold" style="color: var(--gz-pop-dark);">
+            <div class="gz-kpi-value text-xl sm:text-2xl font-bold text-right" style="color: var(--gz-pop-dark);">
                 ₱{{ number_format($kpis['revenue'], 2) }}
             </div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Audited payments</p>

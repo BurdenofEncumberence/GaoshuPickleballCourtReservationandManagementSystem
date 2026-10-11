@@ -39,7 +39,7 @@
                 <span class="gz-eyebrow">Total courts</span>
                 <span class="gz-badge gz-badge-neutral">All</span>
             </div>
-            <div class="gz-kpi-value">{{ $courts->count() }}</div>
+            <div class="gz-kpi-value text-right">{{ $courts->count() }}</div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">Registered arenas</p>
         </div>
 
@@ -48,7 +48,7 @@
                 <span class="gz-eyebrow">Available</span>
                 <span class="gz-badge gz-badge-success">Active</span>
             </div>
-            <div class="gz-kpi-value" style="color: var(--gz-pop-dark);">
+            <div class="gz-kpi-value text-right" style="color: var(--gz-pop-dark);">
                 {{ $courts->where('court_status', 'available')->count() }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-pop-dark);">Open for bookings</p>
@@ -61,7 +61,7 @@
                     {{ $courts->where('court_status', '!=', 'available')->count() > 0 ? 'Hold' : 'Clear' }}
                 </span>
             </div>
-            <div class="gz-kpi-value" style="color: {{ $courts->where('court_status', '!=', 'available')->count() > 0 ? 'var(--gz-warning)' : 'inherit' }};">
+            <div class="gz-kpi-value text-right" style="color: {{ $courts->where('court_status', '!=', 'available')->count() > 0 ? 'var(--gz-warning)' : 'inherit' }};">
                 {{ $courts->where('court_status', '!=', 'available')->count() }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">Offline / repair</p>
@@ -72,7 +72,7 @@
                 <span class="gz-eyebrow">Fleet Utilization</span>
                 <span class="gz-badge gz-badge-success">MTD Load</span>
             </div>
-            <div class="gz-kpi-value" style="color: var(--gz-pop-dark);">
+            <div class="gz-kpi-value text-right" style="color: var(--gz-pop-dark);">
                 {{ number_format($utilization['month_utilization_rate'] ?? 0, 1) }}%
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">{{ number_format($utilization['month_booked_hours'] ?? 0, 1) }}h booked this month</p>

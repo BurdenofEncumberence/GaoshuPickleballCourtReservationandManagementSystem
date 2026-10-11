@@ -35,7 +35,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between h-16 items-center gap-2">
             {{-- Left: logo --}}
-            <a href="{{ $homeUrl }}" class="flex items-center gap-2.5 shrink-0">
+            <a href="{{ $homeUrl }}" class="flex items-center shrink-0">
                 @php
                     $logoPath = null;
                     if ($siteSettings && $siteSettings->logo && file_exists(public_path('storage/' . $siteSettings->logo))) {
@@ -47,14 +47,16 @@
                     }
                 @endphp
                 @if($logoPath)
-                    <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}" class="h-9 w-auto max-h-9 max-w-[130px] object-contain rounded-lg shrink-0">
+                    <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}" class="h-10 sm:h-12 w-auto max-h-12 max-w-[200px] sm:max-w-[240px] object-contain shrink-0">
                 @else
-                    <div class="pixel-mark shrink-0" aria-hidden="true" style="width:34px; height:34px; background:#12150F; border:1px solid var(--gz-border); border-radius:10px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); padding:6px;" id="nav-seal"></div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="pixel-mark shrink-0" aria-hidden="true" style="width:34px; height:34px; background:#12150F; border:1px solid var(--gz-border); border-radius:10px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); padding:6px;" id="nav-seal"></div>
+                        <div class="flex flex-col">
+                            <span class="gz-font-display font-bold text-base tracking-tight leading-none" style="color: var(--gz-ink);">{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}</span>
+                            <span class="text-[9px] uppercase tracking-wider font-semibold opacity-70 mt-0.5 leading-none hidden sm:block" style="color: var(--gz-muted);">Pickleball Arena</span>
+                        </div>
+                    </div>
                 @endif
-                <div class="flex flex-col">
-                    <span class="gz-font-display font-bold text-base tracking-tight leading-none" style="color: var(--gz-ink);">{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}</span>
-                    <span class="text-[9px] uppercase tracking-wider font-semibold opacity-70 mt-0.5 leading-none hidden sm:block" style="color: var(--gz-muted);">Pickleball Arena</span>
-                </div>
             </a>
 
             {{-- Center: navigation links (desktop) --}}

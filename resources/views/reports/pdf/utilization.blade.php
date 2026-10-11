@@ -96,6 +96,7 @@
             font-size: 16px;
             font-weight: 800;
             color: #12150f;
+            text-align: right;
         }
         .data-table {
             width: 100%;

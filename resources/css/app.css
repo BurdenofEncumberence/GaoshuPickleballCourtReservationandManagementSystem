@@ -457,6 +457,8 @@ body.dark {
     font-weight: 700;
     font-size: 28px;
     letter-spacing: -0.02em;
+    text-align: right;
+    justify-content: flex-end;
 }
 
 .gz-badge {

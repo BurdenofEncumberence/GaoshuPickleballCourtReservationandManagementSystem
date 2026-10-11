@@ -37,7 +37,7 @@
                 <span class="gz-eyebrow">Total events</span>
                 <span class="gz-badge gz-badge-neutral">All</span>
             </div>
-            <div class="gz-kpi-value">{{ $events->count() }}</div>
+            <div class="gz-kpi-value text-right">{{ $events->count() }}</div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">Registered events</p>
         </div>
 
@@ -46,7 +46,7 @@
                 <span class="gz-eyebrow">Active</span>
                 <span class="gz-badge gz-badge-success">Live</span>
             </div>
-            <div class="gz-kpi-value" style="color: var(--gz-pop-dark);">
+            <div class="gz-kpi-value text-right" style="color: var(--gz-pop-dark);">
                 {{ $events->where('start_date', '<=', now())->where('end_date', '>=', now())->count() }}
             </div>
             <p class="text-xs mt-2" style="color: var(--gz-pop-dark);">Currently running</p>
@@ -57,7 +57,7 @@
                 <span class="gz-eyebrow">Total bookings</span>
                 <span class="gz-badge gz-badge-neutral">Bookings</span>
             </div>
-            <div class="gz-kpi-value">{{ $events->sum('bookings_count') }}</div>
+            <div class="gz-kpi-value text-right">{{ $events->sum('bookings_count') }}</div>
             <p class="text-xs mt-2" style="color: var(--gz-muted);">Event reservations</p>
         </div>
     </div>

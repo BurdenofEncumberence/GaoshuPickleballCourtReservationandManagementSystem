@@ -36,7 +36,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="gz-kpi-card">
             <span class="gz-kpi-label">Upcoming Sessions</span>
-            <div class="gz-kpi-value mt-1">{{ number_format($upcomingCount) }}</div>
+            <div class="gz-kpi-value mt-1 text-right">{{ number_format($upcomingCount) }}</div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Active sessions accepting player registrations</p>
         </div>
 
@@ -47,7 +47,7 @@
                     <span class="gz-badge text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300">Action Required</span>
                 @endif
             </div>
-            <div class="gz-kpi-value mt-1 flex items-baseline gap-2">
+            <div class="gz-kpi-value mt-1 flex items-baseline justify-end gap-2 text-right">
                 <span class="{{ ($pendingRequestsCount ?? 0) > 0 ? 'text-amber-600 dark:text-amber-400 font-extrabold' : '' }}">{{ number_format($pendingRequestsCount ?? 0) }}</span>
                 <span class="text-xs font-normal" style="color: var(--gz-muted);">pending</span>
             </div>
@@ -56,13 +56,13 @@
 
         <div class="gz-kpi-card">
             <span class="gz-kpi-label">Total Player Registrations</span>
-            <div class="gz-kpi-value mt-1">{{ number_format($totalRegistrations) }}</div>
+            <div class="gz-kpi-value mt-1 text-right">{{ number_format($totalRegistrations) }}</div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Total player slot tickets issued</p>
         </div>
 
         <div class="gz-kpi-card">
             <span class="gz-kpi-label">Open Play Revenue</span>
-            <div class="gz-kpi-value mt-1">₱{{ number_format($totalOpenPlayRevenue, 2) }}</div>
+            <div class="gz-kpi-value mt-1 text-right">₱{{ number_format($totalOpenPlayRevenue, 2) }}</div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Total collected participation fees</p>
         </div>
     </div>

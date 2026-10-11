@@ -114,7 +114,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
         <div class="gz-kpi-card">
             <span class="gz-kpi-label">Slots Occupied</span>
-            <div class="gz-kpi-value mt-1">
+            <div class="gz-kpi-value mt-1 text-right">
                 {{ $session->registered_slots_count }} <span class="text-sm font-normal text-muted">/ {{ $session->max_capacity }}</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full mt-2 overflow-hidden">
@@ -125,7 +125,7 @@
 
         <div class="gz-kpi-card">
             <span class="gz-kpi-label">Allocated Courts</span>
-            <div class="gz-kpi-value mt-1 text-base font-bold">
+            <div class="gz-kpi-value mt-1 text-base font-bold text-right">
                 {{ $session->allocated_courts_label ?: 'None' }}
             </div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Reserved exclusively for this event</p>
@@ -133,13 +133,13 @@
 
         <div class="gz-kpi-card">
             <span class="gz-kpi-label">Ticket Fee / Slot</span>
-            <div class="gz-kpi-value mt-1 font-mono">₱{{ number_format($session->price_per_slot, 2) }}</div>
+            <div class="gz-kpi-value mt-1 font-mono text-right">₱{{ number_format($session->price_per_slot, 2) }}</div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Target Skill: {{ $session->skill_level }}</p>
         </div>
 
         <div class="gz-kpi-card">
             <span class="gz-kpi-label">Revenue Collected</span>
-            <div class="gz-kpi-value mt-1 font-mono">
+            <div class="gz-kpi-value mt-1 font-mono text-right">
                 ₱{{ number_format($session->registrations->where('payment_status', 'paid')->sum('total_fee'), 2) }}
             </div>
             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">
