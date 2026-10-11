@@ -15,9 +15,23 @@ class PayMongoService
 
     public function __construct()
     {
-        $this->secretKey = (string) config('services.paymongo.secret_key');
-        $this->publicKey = (string) config('services.paymongo.public_key');
-        $this->baseUrl = (string) config('services.paymongo.base_url', 'https://api.paymongo.com/v1');
+        $rawSecret = (string) (config('services.paymongo.secret_key') ?: env('PAYMONGO_SECRET_KEY') ?: ($_ENV['PAYMONGO_SECRET_KEY'] ?? $_SERVER['PAYMONGO_SECRET_KEY'] ?? ''));
+        $rawPublic = (string) (config('services.paymongo.public_key') ?: env('PAYMONGO_PUBLIC_KEY') ?: ($_ENV['PAYMONGO_PUBLIC_KEY'] ?? $_SERVER['PAYMONGO_PUBLIC_KEY'] ?? ''));
+        $combined = $rawSecret . ' ' . $rawPublic;
+
+        if (preg_match('/(sk_(?:test|live)_[A-Za-z0-9]+)/', $combined, $skMatch)) {
+            $this->secretKey = $skMatch[1];
+        } else {
+            $this->secretKey = trim($rawSecret, " \t\n\r\0\x0B\"'");
+        }
+
+        if (preg_match('/(pk_(?:test|live)_[A-Za-z0-9]+)/', $combined, $pkMatch)) {
+            $this->publicKey = $pkMatch[1];
+        } else {
+            $this->publicKey = trim($rawPublic, " \t\n\r\0\x0B\"'");
+        }
+
+        $this->baseUrl = rtrim((string) config('services.paymongo.base_url', 'https://api.paymongo.com/v1'), '/');
     }
 
     /**
