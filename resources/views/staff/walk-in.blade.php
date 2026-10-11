@@ -36,10 +36,27 @@
 
     <script>
         function walkInBookingData() {
+            const initialCourtId = @json((string) old('court_id', $preselectedCourtId ?? $courts->first()->id ?? ''));
+            const initialSlot = @json(old('time_slot', $preselectedSlot ?? ''));
+            const oldSlotsRaw = @json(old('slots', ''));
+            let initialSlots = [];
+            if (oldSlotsRaw) {
+                try {
+                    const parsed = JSON.parse(oldSlotsRaw);
+                    if (Array.isArray(parsed)) {
+                        initialSlots = parsed;
+                    }
+                } catch (e) {}
+            }
+            if (initialSlots.length === 0 && initialCourtId && initialSlot) {
+                initialSlots = [{ courtId: String(initialCourtId), timeSlot: initialSlot }];
+            }
+
             return {
                 selectedDate: @json(old('date', $selectedDate)),
-                selectedCourtId: @json((string) old('court_id', $preselectedCourtId ?? $courts->first()->id ?? '')),
-                selectedSlot: @json(old('time_slot', $preselectedSlot ?? '')),
+                selectedCourtId: initialCourtId,
+                selectedSlot: initialSlot,
+                selectedSlots: initialSlots,
                 selectedPaymentMethod: @json(old('payment_method', 'cash')),
                 attendanceStatus: @json(old('attendance_status', 'show')),
                 firstName: @json(old('first_name', '')),
@@ -55,12 +72,22 @@
                 recentPlayers: @json($recentPlayers),
                 activeBooking: null,
 
+                getCourtById(courtId) {
+                    return this.courts.find(c => String(c.id) === String(courtId)) || null;
+                },
+
                 get currentCourt() {
-                    return this.courts.find(c => c.id == this.selectedCourtId) || null;
+                    return this.getCourtById(this.selectedCourtId);
                 },
 
                 get courtRate() {
-                    return this.currentCourt ? Number(this.currentCourt.price_per_hour) : 0;
+                    if (this.selectedSlots.length === 0) {
+                        return 0;
+                    }
+                    return this.selectedSlots.reduce((sum, item) => {
+                        const c = this.getCourtById(item.courtId);
+                        return sum + (c ? Number(c.price_per_hour) : 0);
+                    }, 0);
                 },
 
                 get cashTenderedNum() {
@@ -103,7 +130,9 @@
                 },
 
                 isSlotSelectedForCourt(courtId, slot) {
-                    return String(this.selectedCourtId) === String(courtId) && this.selectedSlot === slot;
+                    return this.selectedSlots.some(
+                        s => String(s.courtId) === String(courtId) && s.timeSlot === slot
+                    );
                 },
 
                 getSlotLabelForCourt(courtId, slot) {
@@ -129,8 +158,39 @@
                     if (this.isSlotBookedForCourt(courtId, slot)) {
                         return;
                     }
-                    this.selectedCourtId = String(courtId);
-                    this.selectedSlot = slot;
+
+                    const cId = String(courtId);
+                    const existingIndex = this.selectedSlots.findIndex(
+                        s => String(s.courtId) === cId && s.timeSlot === slot
+                    );
+
+                    if (existingIndex !== -1) {
+                        this.selectedSlots.splice(existingIndex, 1);
+                    } else {
+                        this.selectedSlots.push({ courtId: cId, timeSlot: slot });
+                    }
+
+                    if (this.selectedSlots.length > 0) {
+                        this.selectedCourtId = String(this.selectedSlots[0].courtId);
+                        this.selectedSlot = this.selectedSlots[0].timeSlot;
+                    } else {
+                        this.selectedSlot = '';
+                    }
+                },
+
+                removeSlot(index) {
+                    this.selectedSlots.splice(index, 1);
+                    if (this.selectedSlots.length > 0) {
+                        this.selectedCourtId = String(this.selectedSlots[0].courtId);
+                        this.selectedSlot = this.selectedSlots[0].timeSlot;
+                    } else {
+                        this.selectedSlot = '';
+                    }
+                },
+
+                clearSlots() {
+                    this.selectedSlots = [];
+                    this.selectedSlot = '';
                 },
 
                 closeInspector() {
@@ -164,11 +224,11 @@
                 {{-- Date & Court Chooser --}}
                 <div class="gz-panel gz-panel-body">
                     <h2 class="gz-font-display font-bold text-base mb-4 flex items-center justify-between">
-                        <span>1. Date &amp; Court Selection</span>
+                        <span>1. Reservation Date</span>
                         <span class="text-xs font-normal" style="color: var(--gz-muted);">Matches 1-hour blocks</span>
                     </h2>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                         {{-- Date picker --}}
                         <div>
                             <label for="date" class="gz-label">Reservation Date</label>
@@ -185,44 +245,47 @@
                             <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Changing date refreshes live court availability.</p>
                         </div>
 
-                        {{-- Court picker --}}
-                        <div>
-                            <label for="court_id" class="gz-label">Court</label>
-                            <select
-                                id="court_id"
-                                name="court_id"
-                                x-model="selectedCourtId"
-                                class="gz-input"
-                                required
-                            >
-                                @foreach($courts as $court)
-                                    <option value="{{ $court->id }}">
-                                        {{ $court->court_name }} ({{ $court->size ?: 'Regular (13.41m x 6.10m)' }}) · ₱{{ number_format($court->price_per_hour, 2) }}/hr
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Or click directly on any court column in the schedule matrix below.</p>
+                        <div class="text-xs p-3 rounded-lg border" style="background: var(--gz-bg); border-color: var(--gz-border); color: var(--gz-muted);">
+                            <strong class="block font-bold mb-0.5" style="color: var(--gz-ink);">Multi-Slot Selection Enabled</strong>
+                            Click one or more <strong>Open</strong> slots across any court and time in the schedule matrix below to book them together in a single transaction.
                         </div>
                     </div>
                 </div>
 
                 {{-- Multi-Court Time Slot Schedule Matrix --}}
                 <div class="gz-panel overflow-hidden">
-                    <div class="p-4 border-b flex items-center justify-between flex-wrap gap-2" style="border-color: var(--gz-border);">
-                        <div>
-                            <h2 class="gz-font-display font-bold text-base">
-                                2. Choose Available Time Slot
-                            </h2>
-                            <p class="text-xs mt-0.5" style="color: var(--gz-muted);">
-                                Click an <strong>Open</strong> slot to select it, or click any <strong>Booked</strong> slot to view who booked that court time and how much they paid.
-                            </p>
+                    <div class="p-4 border-b" style="border-color: var(--gz-border);">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h2 class="gz-font-display font-bold text-base">
+                                    2. Choose Available Time Slot(s)
+                                </h2>
+                                <p class="text-xs mt-0.5" style="color: var(--gz-muted);">
+                                    Click any <strong>Open</strong> slot to select or deselect it (multiple slots allowed), or click any <strong>Booked</strong> slot to view customer &amp; payment details.
+                                </p>
+                            </div>
+                            <template x-if="selectedSlots.length > 0">
+                                <button type="button" @click="clearSlots()" class="text-xs font-bold underline cursor-pointer" style="color: var(--red);">
+                                    Clear Selection (<span x-text="selectedSlots.length"></span>)
+                                </button>
+                            </template>
                         </div>
-                        <template x-if="selectedSlot">
-                            <span class="gz-badge gz-badge-success" x-text="(currentCourt ? currentCourt.court_name + ' · ' : '') + selectedSlot"></span>
+
+                        <template x-if="selectedSlots.length > 0">
+                            <div class="flex items-center gap-2 flex-wrap mt-3">
+                                <template x-for="(item, idx) in selectedSlots" :key="item.courtId + '-' + item.timeSlot">
+                                    <span class="gz-badge gz-badge-success inline-flex items-center gap-1.5">
+                                        <span x-text="(getCourtById(item.courtId)?.court_name || 'Court') + ' · ' + item.timeSlot"></span>
+                                        <button type="button" @click="removeSlot(idx)" class="font-bold hover:opacity-75" title="Remove slot">×</button>
+                                    </span>
+                                </template>
+                            </div>
                         </template>
                     </div>
 
-                    <input type="hidden" name="time_slot" :value="selectedSlot" required>
+                    <input type="hidden" name="court_id" :value="selectedCourtId">
+                    <input type="hidden" name="time_slot" :value="selectedSlot">
+                    <input type="hidden" name="slots" :value="JSON.stringify(selectedSlots)">
 
                     <div style="max-height: 360px; overflow-y: auto; overflow-x: auto;">
                         <table class="gz-table" style="font-size: 12px;">
@@ -425,13 +488,19 @@
                     {{-- Rate Calculation --}}
                     <div class="p-3 border mb-4" style="background: var(--gz-bg); border-color: var(--gz-border);">
                         <div class="flex items-center justify-between text-xs mb-1">
-                            <span style="color: var(--gz-muted);">Rate per hour:</span>
-                            <span class="font-mono font-bold" x-text="'₱' + courtRate.toFixed(2)"></span>
+                            <span style="color: var(--gz-muted);">Selected Slots:</span>
+                            <span class="font-mono font-bold" x-text="selectedSlots.length + (selectedSlots.length === 1 ? ' Hour' : ' Hours')"></span>
                         </div>
-                        <div class="flex items-center justify-between text-xs mb-1">
-                            <span style="color: var(--gz-muted);">Duration:</span>
-                            <span class="font-mono">1 Hour</span>
-                        </div>
+                        <template x-if="selectedSlots.length > 0">
+                            <div class="space-y-1 my-2 py-2 border-t border-dashed text-[11px]" style="border-color: var(--gz-border);">
+                                <template x-for="item in selectedSlots" :key="item.courtId + '-' + item.timeSlot">
+                                    <div class="flex items-center justify-between">
+                                        <span style="color: var(--gz-muted);" x-text="(getCourtById(item.courtId)?.court_name || 'Court') + ' (' + item.timeSlot + ')'"></span>
+                                        <span class="font-mono font-semibold" x-text="'₱' + Number(getCourtById(item.courtId)?.price_per_hour || 0).toFixed(2)"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
                         <div class="border-t pt-2 mt-2 flex items-center justify-between" style="border-color: var(--gz-border);">
                             <span class="font-bold text-sm">Total Due:</span>
                             <span class="font-mono font-bold text-lg" style="color: var(--gz-pop-dark);" x-text="'₱' + courtRate.toFixed(2)"></span>
@@ -585,9 +654,9 @@
                     {{-- Submit Button --}}
                     <button
                         type="submit"
-                        :disabled="!selectedSlot || (selectedPaymentMethod === 'cash' && !isCashValid)"
+                        :disabled="selectedSlots.length === 0 || (selectedPaymentMethod === 'cash' && !isCashValid)"
                         class="gz-btn-primary w-full py-3 text-sm justify-center flex items-center gap-2"
-                        :class="{'opacity-50 cursor-not-allowed': !selectedSlot || (selectedPaymentMethod === 'cash' && !isCashValid)}"
+                        :class="{'opacity-50 cursor-not-allowed': selectedSlots.length === 0 || (selectedPaymentMethod === 'cash' && !isCashValid)}"
                     >
                         <template x-if="selectedPaymentMethod === 'paymongo'">
                             <span>Pay Online via PayMongo (<span x-text="'₱' + courtRate.toFixed(2)"></span>) →</span>
@@ -596,10 +665,10 @@
                             <span>Confirm Walk-In Reservation (<span x-text="'₱' + courtRate.toFixed(2)"></span>)</span>
                         </template>
                     </button>
-                    <p x-show="!selectedSlot" class="text-xs text-center mt-2 text-red-600 font-semibold">
-                        Please choose an open time slot above.
+                    <p x-show="selectedSlots.length === 0" class="text-xs text-center mt-2 text-red-600 font-semibold">
+                        Please choose one or more open time slots above.
                     </p>
-                    <p x-show="selectedSlot && selectedPaymentMethod === 'cash' && !isCashValid" class="text-xs text-center mt-2 text-red-600 font-semibold">
+                    <p x-show="selectedSlots.length > 0 && selectedPaymentMethod === 'cash' && !isCashValid" class="text-xs text-center mt-2 text-red-600 font-semibold">
                         Please input customer cash tendered (minimum ₱<span x-text="courtRate.toFixed(2)"></span>).
                     </p>
                 </div>

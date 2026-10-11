@@ -154,7 +154,7 @@ class StaffWalkInController extends Controller
     }
 
     /**
-     * Process and store a walk-in customer booking.
+     * Process and store a walk-in customer booking (single or multiple slots).
      */
     public function store(Request $request, PayMongoService $payMongoService): RedirectResponse
     {
@@ -165,37 +165,109 @@ class StaffWalkInController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'date' => ['required', 'date', 'after_or_equal:today'],
-            'court_id' => ['required', 'integer', 'exists:courts,id'],
-            'time_slot' => ['required', 'string'],
+            'court_id' => ['nullable', 'integer', 'exists:courts,id'],
+            'time_slot' => ['nullable', 'string'],
+            'slots' => ['nullable'],
             'payment_method' => ['required', 'in:cash,paymongo,gcash,maya,card,counter'],
             'cash_tendered' => ['nullable', 'numeric', 'min:0'],
             'attendance_status' => ['required', 'in:show,confirmed'],
             'ref_num' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $times = $this->parseSlotTimes($validated['time_slot']);
-        if ($times === null) {
+        // Parse multi-slot payload or fallback to single court_id + time_slot
+        $rawSlots = [];
+        $slotsInput = $request->input('slots');
+        if (is_string($slotsInput) && $slotsInput !== '') {
+            $decoded = json_decode($slotsInput, true);
+            if (is_array($decoded)) {
+                $rawSlots = $decoded;
+            }
+        } elseif (is_array($slotsInput)) {
+            $rawSlots = $slotsInput;
+        }
+
+        if (empty($rawSlots) && ! empty($validated['court_id']) && ! empty($validated['time_slot'])) {
+            $rawSlots = [
+                [
+                    'courtId' => $validated['court_id'],
+                    'timeSlot' => $validated['time_slot'],
+                ],
+            ];
+        }
+
+        if (empty($rawSlots)) {
             return back()->withInput()->withErrors([
-                'time_slot' => "Invalid time slot format '{$validated['time_slot']}'.",
+                'time_slot' => 'Please select at least one available court and time slot.',
             ]);
         }
 
-        [$startTime, $endTime] = $times;
-        $court = Court::findOrFail($validated['court_id']);
+        $parsedItems = [];
+        $seenKeys = [];
+        $totalAmount = 0.0;
 
-        // Check for booking conflict
-        $conflict = Booking::where('court_id', $court->id)
-            ->where('date', $validated['date'])
-            ->where('booking_status', '!=', 'cancelled')
-            ->where(function ($q) use ($startTime, $endTime) {
-                $q->where('start_time', '<', $endTime)
-                    ->where('end_time', '>', $startTime);
-            })
-            ->exists();
+        foreach ($rawSlots as $slotEntry) {
+            $cId = (int) ($slotEntry['courtId'] ?? $slotEntry['court_id'] ?? 0);
+            $tSlot = trim((string) ($slotEntry['timeSlot'] ?? $slotEntry['time_slot'] ?? ''));
 
-        if ($conflict) {
+            if (! $cId || $tSlot === '') {
+                continue;
+            }
+
+            $dedupKey = "{$cId}|{$tSlot}";
+            if (isset($seenKeys[$dedupKey])) {
+                continue;
+            }
+            $seenKeys[$dedupKey] = true;
+
+            $times = $this->parseSlotTimes($tSlot);
+            if ($times === null) {
+                return back()->withInput()->withErrors([
+                    'time_slot' => "Invalid time slot format '{$tSlot}'.",
+                ]);
+            }
+
+            [$startTime, $endTime] = $times;
+            $court = Court::find($cId);
+            if (! $court) {
+                return back()->withInput()->withErrors([
+                    'time_slot' => 'Selected court does not exist.',
+                ]);
+            }
+
+            // Check for booking conflict
+            $conflict = Booking::where('court_id', $court->id)
+                ->where('date', $validated['date'])
+                ->where('booking_status', '!=', 'cancelled')
+                ->where(function ($q) use ($startTime, $endTime) {
+                    $q->where('start_time', '<', $endTime)
+                        ->where('end_time', '>', $startTime);
+                })
+                ->exists();
+
+            if ($conflict) {
+                return back()->withInput()->withErrors([
+                    'time_slot' => "{$court->court_name} is already booked on {$validated['date']} for {$tSlot}.",
+                ]);
+            }
+
+            $start = Carbon::parse($startTime);
+            $end = Carbon::parse($endTime);
+            $hours = max(1, $start->diffInMinutes($end) / 60);
+            $slotAmount = round($court->price_per_hour * $hours, 2);
+            $totalAmount = round($totalAmount + $slotAmount, 2);
+
+            $parsedItems[] = [
+                'court' => $court,
+                'time_slot' => $tSlot,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'amount' => $slotAmount,
+            ];
+        }
+
+        if (empty($parsedItems)) {
             return back()->withInput()->withErrors([
-                'time_slot' => "{$court->court_name} is already booked on {$validated['date']} for {$validated['time_slot']}.",
+                'time_slot' => 'Please select at least one valid court and time slot.',
             ]);
         }
 
@@ -234,26 +306,21 @@ class StaffWalkInController extends Controller
             ? trim($validated['ref_num'])
             : 'WALK-' . strtoupper(Str::random(8));
 
-        $start = Carbon::parse($startTime);
-        $end = Carbon::parse($endTime);
-        $hours = max(1, $start->diffInMinutes($end) / 60);
-        $amount = round($court->price_per_hour * $hours, 2);
-
         $cashTendered = null;
         $changeAmount = null;
 
         if ($validated['payment_method'] === 'cash') {
             if (isset($validated['cash_tendered']) && $validated['cash_tendered'] !== '' && $validated['cash_tendered'] !== null) {
                 $cashTendered = round((float) $validated['cash_tendered'], 2);
-                if ($cashTendered < $amount) {
+                if ($cashTendered < $totalAmount) {
                     return back()->withInput()->withErrors([
-                        'cash_tendered' => 'Cash tendered (₱' . number_format($cashTendered, 2) . ') must be at least the total amount due (₱' . number_format($amount, 2) . ').',
+                        'cash_tendered' => 'Cash tendered (₱' . number_format($cashTendered, 2) . ') must be at least the total amount due (₱' . number_format($totalAmount, 2) . ').',
                     ]);
                 }
             } else {
-                $cashTendered = $amount;
+                $cashTendered = $totalAmount;
             }
-            $changeAmount = round(max(0, $cashTendered - $amount), 2);
+            $changeAmount = round(max(0, $cashTendered - $totalAmount), 2);
         }
 
         // PayMongo Online Gateway handling
@@ -264,15 +331,16 @@ class StaffWalkInController extends Controller
                 ]);
             }
 
-            $lineItems = [
-                [
-                    'name' => "{$court->court_name} Walk-In Booking",
-                    'description' => "{$validated['date']} ({$validated['time_slot']})",
-                    'amount' => (int) round($amount * 100),
+            $lineItems = [];
+            foreach ($parsedItems as $item) {
+                $lineItems[] = [
+                    'name' => "{$item['court']->court_name} Walk-In Booking",
+                    'description' => "{$validated['date']} ({$item['time_slot']})",
+                    'amount' => (int) round($item['amount'] * 100),
                     'currency' => 'PHP',
                     'quantity' => 1,
-                ],
-            ];
+                ];
+            }
 
             $successUrl = route('staff.walkin.paymongo.success') . '?ref=' . urlencode($paymentRef);
             $cancelUrl = route('staff.walkin.paymongo.cancel') . '?ref=' . urlencode($paymentRef);
@@ -314,35 +382,34 @@ class StaffWalkInController extends Controller
 
             DB::transaction(function () use (
                 $user,
-                $court,
+                $parsedItems,
                 $validated,
-                $startTime,
-                $endTime,
-                $amount,
                 $paymentRef,
                 $sessionId
             ) {
-                $booking = Booking::create([
-                    'user_id' => $user->id,
-                    'court_id' => $court->id,
-                    'event_id' => null,
-                    'date' => $validated['date'],
-                    'start_time' => $startTime,
-                    'end_time' => $endTime,
-                    'booking_status' => 'pending',
-                    'booking_type' => 'walk_in',
-                ]);
+                foreach ($parsedItems as $item) {
+                    $booking = Booking::create([
+                        'user_id' => $user->id,
+                        'court_id' => $item['court']->id,
+                        'event_id' => null,
+                        'date' => $validated['date'],
+                        'start_time' => $item['start_time'],
+                        'end_time' => $item['end_time'],
+                        'booking_status' => 'pending',
+                        'booking_type' => 'walk_in',
+                    ]);
 
-                Payment::create([
-                    'booking_id' => $booking->id,
-                    'payment_method' => 'paymongo',
-                    'payment_status' => 'pending',
-                    'amount' => $amount,
-                    'ref_num' => $paymentRef,
-                    'checkout_session_id' => $sessionId,
-                    'date' => now()->toDateString(),
-                    'time' => now()->format('H:i:s'),
-                ]);
+                    Payment::create([
+                        'booking_id' => $booking->id,
+                        'payment_method' => 'paymongo',
+                        'payment_status' => 'pending',
+                        'amount' => $item['amount'],
+                        'ref_num' => $paymentRef,
+                        'checkout_session_id' => $sessionId,
+                        'date' => now()->toDateString(),
+                        'time' => now()->format('H:i:s'),
+                    ]);
+                }
             });
 
             session(['walkin_attendance_' . $paymentRef => $validated['attendance_status']]);
@@ -351,51 +418,53 @@ class StaffWalkInController extends Controller
         }
 
         // Standard counter payments (cash, manual gcash/maya/card)
-        $createdBooking = null;
+        $createdBookings = [];
 
         DB::transaction(function () use (
             $user,
-            $court,
+            $parsedItems,
             $validated,
-            $startTime,
-            $endTime,
-            $amount,
             $cashTendered,
             $changeAmount,
             $paymentRef,
-            &$createdBooking
+            &$createdBookings
         ) {
-            $createdBooking = Booking::create([
-                'user_id' => $user->id,
-                'court_id' => $court->id,
-                'event_id' => null,
-                'date' => $validated['date'],
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'booking_status' => $validated['attendance_status'],
-                'booking_type' => 'walk_in',
-            ]);
+            foreach ($parsedItems as $item) {
+                $booking = Booking::create([
+                    'user_id' => $user->id,
+                    'court_id' => $item['court']->id,
+                    'event_id' => null,
+                    'date' => $validated['date'],
+                    'start_time' => $item['start_time'],
+                    'end_time' => $item['end_time'],
+                    'booking_status' => $validated['attendance_status'],
+                    'booking_type' => 'walk_in',
+                ]);
 
-            Payment::create([
-                'booking_id' => $createdBooking->id,
-                'payment_method' => $validated['payment_method'],
-                'payment_status' => 'paid',
-                'amount' => $amount,
-                'cash_tendered' => $cashTendered,
-                'change_amount' => $changeAmount,
-                'ref_num' => $paymentRef,
-                'date' => now()->toDateString(),
-                'time' => now()->format('H:i:s'),
-            ]);
+                $booking->setRelation('court', $item['court']);
+
+                Payment::create([
+                    'booking_id' => $booking->id,
+                    'payment_method' => $validated['payment_method'],
+                    'payment_status' => 'paid',
+                    'amount' => $item['amount'],
+                    'cash_tendered' => $cashTendered,
+                    'change_amount' => $changeAmount,
+                    'ref_num' => $paymentRef,
+                    'date' => now()->toDateString(),
+                    'time' => now()->format('H:i:s'),
+                ]);
+
+                $createdBookings[] = $booking;
+            }
         });
 
         // Dispatch receipt email if user has a valid real email
         if ($user && $user->email && ! str_ends_with($user->email, '@gaoshou.local') && ! str_ends_with($user->email, '@kymnet.local')) {
             try {
-                $createdBooking->setRelation('court', $court);
                 Mail::to($user->email)->send(new BookingReceiptMail(
                     user: $user,
-                    bookings: [$createdBooking],
+                    bookings: $createdBookings,
                     refNum: $paymentRef,
                     paymentMethod: $validated['payment_method'],
                     discountPercent: 0,
@@ -406,9 +475,14 @@ class StaffWalkInController extends Controller
             }
         }
 
+        $firstBooking = $createdBookings[0];
+        $slotSummary = collect($parsedItems)->map(fn ($i) => "{$i['court']->court_name} ({$i['time_slot']})")->join(', ');
+        $courtSummary = collect($parsedItems)->pluck('court.court_name')->unique()->join(', ');
+        $timeSummary = collect($parsedItems)->pluck('time_slot')->join(', ');
+
         $methodLabel = strtoupper($validated['payment_method']);
         $statusText = $validated['attendance_status'] === 'show' ? 'SHOW (Present)' : 'SCHEDULED';
-        $statusMessage = "Walk-in booking confirmed for {$fullName} at {$court->court_name} ({$validated['time_slot']}). Attendance: {$statusText}. Payment: ₱" . number_format($amount, 2) . " via {$methodLabel} [{$paymentRef}].";
+        $statusMessage = "Walk-in booking confirmed for {$fullName}: {$slotSummary}. Attendance: {$statusText}. Payment: ₱" . number_format($totalAmount, 2) . " via {$methodLabel} [{$paymentRef}].";
 
         if ($validated['payment_method'] === 'cash') {
             $statusMessage .= " Tendered: ₱" . number_format($cashTendered, 2) . " · Change: ₱" . number_format($changeAmount, 2) . ".";
@@ -416,12 +490,12 @@ class StaffWalkInController extends Controller
 
         return redirect()->route('staff.today')->with([
             'status' => $statusMessage,
-            'print_receipt_booking_id' => $createdBooking->id,
+            'print_receipt_booking_id' => $firstBooking->id,
             'print_receipt_ref' => $paymentRef,
             'receipt_customer_name' => $fullName,
-            'receipt_court_name' => $court->court_name,
-            'receipt_time_slot' => $validated['time_slot'],
-            'receipt_amount' => $amount,
+            'receipt_court_name' => $courtSummary,
+            'receipt_time_slot' => $timeSummary,
+            'receipt_amount' => $totalAmount,
             'receipt_payment_method' => $validated['payment_method'],
             'receipt_cash_tendered' => $cashTendered,
             'receipt_change_amount' => $changeAmount,
@@ -444,21 +518,22 @@ class StaffWalkInController extends Controller
                 ->with('status', 'No payment confirmation details provided.');
         }
 
-        $payment = Payment::where(function ($q) use ($sessionId, $refNum) {
+        $payments = Payment::where(function ($q) use ($sessionId, $refNum) {
             if ($sessionId) {
                 $q->where('checkout_session_id', $sessionId);
             }
             if ($refNum) {
                 $q->orWhere('ref_num', $refNum);
             }
-        })->first();
+        })->get();
 
-        if (! $payment) {
+        if ($payments->isEmpty()) {
             return redirect()->route('staff.today')
                 ->with('status', 'Payment received, but no matching walk-in booking record was found.');
         }
 
-        $actualSessionId = $sessionId ?: $payment->checkout_session_id;
+        $firstPayment = $payments->first();
+        $actualSessionId = $sessionId ?: $firstPayment->checkout_session_id;
         $sessionData = [];
         $isPaid = false;
 
@@ -473,24 +548,28 @@ class StaffWalkInController extends Controller
             $isPaid = true;
         }
 
-        $booking = $payment->booking;
+        $bookingIds = $payments->pluck('booking_id')->filter()->unique();
+        $bookings = Booking::whereIn('id', $bookingIds)->with(['user', 'court'])->get();
+        $firstBooking = $bookings->first();
 
         if ($isPaid) {
             $details = $sessionData ? $payMongoService->extractPaymentDetails($sessionData) : [];
             $paymongoPaymentId = $details['payment_id'] ?? null;
             $sourceType = $details['source_type'] ?? 'online';
 
-            $attendanceStatus = session()->pull('walkin_attendance_' . ($refNum ?: $payment->ref_num), 'show');
+            $attendanceStatus = session()->pull('walkin_attendance_' . ($refNum ?: $firstPayment->ref_num), 'show');
 
-            DB::transaction(function () use ($payment, $booking, $actualSessionId, $paymongoPaymentId, $sourceType, $attendanceStatus) {
-                $payment->update([
-                    'payment_status' => 'paid',
-                    'checkout_session_id' => $actualSessionId ?: $payment->checkout_session_id,
-                    'paymongo_payment_id' => $paymongoPaymentId ?: $payment->paymongo_payment_id,
-                    'payment_method' => 'paymongo_' . $sourceType,
-                ]);
+            DB::transaction(function () use ($payments, $bookings, $actualSessionId, $paymongoPaymentId, $sourceType, $attendanceStatus) {
+                foreach ($payments as $payment) {
+                    $payment->update([
+                        'payment_status' => 'paid',
+                        'checkout_session_id' => $actualSessionId ?: $payment->checkout_session_id,
+                        'paymongo_payment_id' => $paymongoPaymentId ?: $payment->paymongo_payment_id,
+                        'payment_method' => 'paymongo_' . $sourceType,
+                    ]);
+                }
 
-                if ($booking) {
+                foreach ($bookings as $booking) {
                     $booking->update([
                         'booking_status' => $attendanceStatus,
                     ]);
@@ -498,14 +577,13 @@ class StaffWalkInController extends Controller
             });
 
             // Dispatch receipt email if user has a valid real email
-            if ($booking && $booking->user && $booking->user->email && ! str_ends_with($booking->user->email, '@gaoshou.local') && ! str_ends_with($booking->user->email, '@kymnet.local')) {
+            if ($firstBooking && $firstBooking->user && $firstBooking->user->email && ! str_ends_with($firstBooking->user->email, '@gaoshou.local') && ! str_ends_with($firstBooking->user->email, '@kymnet.local')) {
                 try {
-                    $booking->load('court');
                     $methodLabel = 'PayMongo (' . strtoupper(str_replace('_', ' ', $sourceType)) . ')';
-                    Mail::to($booking->user->email)->send(new BookingReceiptMail(
-                        user: $booking->user,
-                        bookings: [$booking],
-                        refNum: $payment->ref_num,
+                    Mail::to($firstBooking->user->email)->send(new BookingReceiptMail(
+                        user: $firstBooking->user,
+                        bookings: $bookings->all(),
+                        refNum: $firstPayment->ref_num,
                         paymentMethod: $methodLabel,
                         discountPercent: 0,
                         event: null,
@@ -516,23 +594,24 @@ class StaffWalkInController extends Controller
             }
 
             $methodLabel = strtoupper(str_replace('_', ' ', $sourceType));
-            $statusText = $booking && $booking->booking_status === 'show' ? 'SHOW (Present)' : 'SCHEDULED';
+            $statusText = $firstBooking && $firstBooking->booking_status === 'show' ? 'SHOW (Present)' : 'SCHEDULED';
+            $totalPaid = (float) $payments->sum('amount');
 
             return redirect()->route('staff.today')->with([
-                'status' => "Walk-in booking confirmed via PayMongo ({$methodLabel}) for {$booking?->user?->name}! Attendance: {$statusText}. Ref: {$payment->ref_num}.",
-                'print_receipt_booking_id' => $booking?->id,
-                'print_receipt_ref' => $payment->ref_num,
-                'receipt_customer_name' => $booking?->user?->name,
-                'receipt_court_name' => $booking?->court?->court_name,
-                'receipt_time_slot' => $booking ? (Carbon::parse($booking->start_time)->format('g:i A') . ' - ' . Carbon::parse($booking->end_time)->format('g:i A')) : null,
-                'receipt_amount' => $payment->amount,
+                'status' => "Walk-in booking confirmed via PayMongo ({$methodLabel}) for {$firstBooking?->user?->name}! Attendance: {$statusText}. Ref: {$firstPayment->ref_num}.",
+                'print_receipt_booking_id' => $firstBooking?->id,
+                'print_receipt_ref' => $firstPayment->ref_num,
+                'receipt_customer_name' => $firstBooking?->user?->name,
+                'receipt_court_name' => $bookings->pluck('court.court_name')->filter()->unique()->join(', '),
+                'receipt_time_slot' => $bookings->map(fn ($b) => Carbon::parse($b->start_time)->format('g:i A') . ' - ' . Carbon::parse($b->end_time)->format('g:i A'))->join(', '),
+                'receipt_amount' => $totalPaid,
                 'receipt_payment_method' => 'paymongo',
             ]);
         }
 
         return redirect()->route('staff.today')->with(
             'status',
-            "Payment for walk-in booking [{$payment->ref_num}] is pending confirmation."
+            "Payment for walk-in booking [{$firstPayment->ref_num}] is pending confirmation."
         );
     }
 
@@ -547,24 +626,28 @@ class StaffWalkInController extends Controller
         }
         $refNum = trim((string) $request->query('ref', ''));
 
-        $payment = Payment::query()
+        $payments = Payment::query()
             ->when($sessionId, fn ($q) => $q->where('checkout_session_id', $sessionId))
             ->when($refNum && ! $sessionId, fn ($q) => $q->where('ref_num', $refNum))
-            ->first();
+            ->get();
 
-        if ($payment && $payment->payment_status === 'pending') {
-            $booking = $payment->booking;
-            DB::transaction(function () use ($payment, $booking) {
-                $payment->update(['payment_status' => 'failed']);
-                if ($booking && $booking->booking_status === 'pending') {
-                    $booking->update(['booking_status' => 'cancelled']);
+        if ($payments->isNotEmpty()) {
+            DB::transaction(function () use ($payments) {
+                foreach ($payments as $payment) {
+                    if ($payment->payment_status === 'pending') {
+                        $payment->update(['payment_status' => 'failed']);
+                        $booking = $payment->booking;
+                        if ($booking && $booking->booking_status === 'pending') {
+                            $booking->update(['booking_status' => 'cancelled']);
+                        }
+                    }
                 }
             });
         }
 
         return redirect()->route('staff.walkin.create')->with(
             'status',
-            'PayMongo checkout session was cancelled. The reserved slot has been released.'
+            'PayMongo checkout session was cancelled. The reserved slot(s) have been released.'
         );
     }
 
