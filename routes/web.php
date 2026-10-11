@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\AdminActivityLogController;
 use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\AdminCourtController;
@@ -216,4 +216,11 @@ Route::middleware('auth')
 | Authentication Routes (Breeze / OTP / Password Management)
 |--------------------------------------------------------------------------
 */
+
+
+
+Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [ContactController::class, 'send'])
+    ->middleware('throttle:5,1')
+    ->name('contact.send');
 require __DIR__.'/auth.php';

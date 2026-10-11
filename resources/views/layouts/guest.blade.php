@@ -2,6 +2,7 @@
     'title' => 'Gaoshou Pickleball',
     'label' => 'Account',
     'cardClass' => '',
+    'wide' => false,
 ])
 
 <!DOCTYPE html>
@@ -35,9 +36,17 @@
 
     <main id="main-content" class="relative z-10 flex-1 flex items-center justify-center py-12 sm:py-16">
         <section class="max-w-6xl w-full mx-auto px-4 sm:px-6 flex justify-center" aria-label="{{ $label }}">
-            <div class="gz-card w-full rounded-3xl {{ $cardClass }}">
-                {{ $slot }}
-            </div>
+            @if($wide)
+                {{-- Wide pages (e.g. Contact): full width, no login-style card --}}
+                <div class="w-full" style="max-width: 72rem;">
+                    {{ $slot }}
+                </div>
+            @else
+                {{-- Default narrow card (login, register, etc.) --}}
+                <div class="gz-card w-full rounded-3xl {{ $cardClass }}">
+                    {{ $slot }}
+                </div>
+            @endif
         </section>
     </main>
 

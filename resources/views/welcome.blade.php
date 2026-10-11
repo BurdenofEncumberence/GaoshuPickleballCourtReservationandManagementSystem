@@ -1055,45 +1055,7 @@
 
     </main>
 
-    <footer class="relative z-10 dark-panel" style="color: rgba(255,255,255,0.7);">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-14 grid md:grid-cols-4 gap-8 sm:gap-10">
-            <div>
-                <span class="font-display font-bold text-lg" style="color: var(--dark-fg);">{{ $siteSettings->business_name ?? 'Gaoshou Pickleball' }}</span>
-                <p class="mt-4 text-sm max-w-xs leading-relaxed">
-                    Court booking for the Davao pickleball community. Built by players, for players.
-                </p>
-            </div>
-            <div>
-                <h4 class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: var(--dark-fg);">Explore</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="{{ $reserveUrl }}" class="footer-link">Reserve a Court</a></li>
-                    <li><a href="#courts" class="footer-link">Court Fleet & Rates</a></li>
-                    <li><a href="#perks" class="footer-link">Facility Amenities</a></li>
-                    <li><a href="#how-it-works" class="footer-link">How It Works</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: var(--dark-fg);">Support & Legal</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="#faq" class="footer-link">Frequently Asked Questions</a></li>
-                    <li><a href="{{ route('terms') }}" class="footer-link">Terms & Conditions</a></li>
-                    <li><a href="{{ route('privacy') }}" class="footer-link">Privacy Policy</a></li>
-                    <li><a href="mailto:{{ $siteSettings->email_address ?? 'support@gaoshou.ph' }}" class="footer-link">Contact Desk</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: var(--dark-fg);">Location & Hours</h4>
-                <p class="text-sm leading-relaxed" style="color: rgba(255,255,255,0.65);">
-                    Davao City, Philippines<br>
-                    Open Daily: 8:00 AM – 10:00 PM<br>
-                    Covered & Stadium-Lit Courts
-                </p>
-            </div>
-        </div>
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 pb-8 text-sm" style="color: rgba(255,255,255,0.4);">
-            © {{ date('Y') }} {{ $siteSettings->business_name ?? 'Gaoshou Pickleball' }}. All rights reserved.
-        </div>
-    </footer>
+   <x-site-footer />
 
     <script>
         try {
