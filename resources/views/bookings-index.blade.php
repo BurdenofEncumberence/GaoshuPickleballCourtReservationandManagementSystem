@@ -86,6 +86,7 @@
             };
 
             $paymentStatus = $firstPayment?->payment_status ?? ($anyPending ? 'pending' : 'paid');
+            $paymongoPaymentId = $firstPayment?->paymongo_payment_id ?: $firstPayment?->checkout_session_id;
 
             // Upcoming check: transaction has at least one active (non-cancelled) slot in the future
             $isUpcoming = $slots->contains(function ($s) {
@@ -106,6 +107,7 @@
             // Search token blob for client-side instant filtering
             $searchBlob = strtolower(implode(' ', array_filter([
                 $refNum,
+                $paymongoPaymentId,
                 $methodLabel,
                 $overallStatus,
                 $paymentStatus,
@@ -115,20 +117,21 @@
             ])));
 
             return [
-                'refNum'        => $refNum,
-                'slots'         => $slots,
-                'courtsCount'   => $slots->count(),
-                'totalAmount'   => $totalAmount,
-                'overallStatus' => $overallStatus,
-                'paymentMethod' => $methodLabel,
-                'paymentStatus' => $paymentStatus,
-                'isUpcoming'    => $isUpcoming,
-                'dateSummary'   => $dateSummary,
-                'earliestStart' => $earliestStart,
-                'latestEnd'     => $latestEnd,
-                'isWalkIn'      => $isWalkIn,
-                'courtNames'    => $slots->pluck('courtName')->unique()->values()->all(),
-                'searchBlob'    => $searchBlob,
+                'refNum'            => $refNum,
+                'paymongoPaymentId' => $paymongoPaymentId,
+                'slots'             => $slots,
+                'courtsCount'       => $slots->count(),
+                'totalAmount'       => $totalAmount,
+                'overallStatus'     => $overallStatus,
+                'paymentMethod'     => $methodLabel,
+                'paymentStatus'     => $paymentStatus,
+                'isUpcoming'        => $isUpcoming,
+                'dateSummary'       => $dateSummary,
+                'earliestStart'     => $earliestStart,
+                'latestEnd'         => $latestEnd,
+                'isWalkIn'          => $isWalkIn,
+                'courtNames'        => $slots->pluck('courtName')->unique()->values()->all(),
+                'searchBlob'        => $searchBlob,
             ];
         })->values();
 
@@ -255,6 +258,10 @@
                                     <span>Courts: {{ $sess?->allocated_courts_label ?: 'Dedicated Courts' }}</span>
                                     <span>•</span>
                                     <span class="font-mono">Ref: {{ $reg->ref_num }}</span>
+                                    @if($reg->paymongo_payment_id || $reg->paymongo_checkout_session_id)
+                                        <span>•</span>
+                                        <span class="font-mono">PayMongo ID: {{ $reg->paymongo_payment_id ?: $reg->paymongo_checkout_session_id }}</span>
+                                    @endif
                                 </div>
                             </div>
 
@@ -420,6 +427,9 @@
                                                     <span class="font-semibold" style="color: var(--gz-ink);">{{ $group['dateSummary'] }}</span>
                                                     · Method: <span class="font-medium">{{ $group['paymentMethod'] }}</span>
                                                     · Payment: <span class="font-semibold capitalize {{ $group['paymentStatus'] === 'paid' ? 'text-emerald-700' : 'text-amber-700' }}">{{ $group['paymentStatus'] }}</span>
+                                                    @if(!empty($group['paymongoPaymentId']))
+                                                        · PayMongo ID: <span class="font-mono font-semibold" style="color: var(--gz-ink);">{{ $group['paymongoPaymentId'] }}</span>
+                                                    @endif
                                                 </p>
                                             </div>
                                         </div>

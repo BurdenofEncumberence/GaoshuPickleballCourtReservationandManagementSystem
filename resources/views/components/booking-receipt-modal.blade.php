@@ -160,6 +160,9 @@
 
                         <div class="text-left sm:text-right">
                             <div class="font-mono font-bold text-sm text-[#12150F]" x-text="'REF: ' + (receipt?.ref_num || '')"></div>
+                            <template x-if="receipt && receipt.paymongo_payment_id">
+                                <div class="font-mono text-[11px] font-semibold text-emerald-800 mt-0.5" x-text="'PayMongo ID: ' + receipt.paymongo_payment_id"></div>
+                            </template>
                             <div class="text-xs text-[#565A4E] mt-0.5" x-text="'Issued: ' + (receipt?.issued_at || '')"></div>
                         </div>
                     </div>
@@ -177,6 +180,11 @@
                             <div class="text-[#565A4E] mt-0.5">
                                 Method: <span class="font-medium text-[#12150F]" x-text="receipt?.payment_method"></span>
                             </div>
+                            <template x-if="receipt && receipt.paymongo_payment_id">
+                                <div class="font-mono text-[11px] text-[#565A4E] mt-0.5">
+                                    PayMongo ID: <span class="font-bold text-[#12150F]" x-text="receipt.paymongo_payment_id"></span>
+                                </div>
+                            </template>
                         </div>
                     </div>
 

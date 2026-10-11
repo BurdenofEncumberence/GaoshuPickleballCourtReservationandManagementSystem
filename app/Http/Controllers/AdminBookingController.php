@@ -34,7 +34,9 @@ class AdminBookingController extends Controller
                             ->orWhere('email', 'like', "%{$search}%");
                     })
                     ->orWhereHas('payments', function ($pq) use ($search) {
-                        $pq->where('ref_num', 'like', "%{$search}%");
+                        $pq->where('ref_num', 'like', "%{$search}%")
+                            ->orWhere('paymongo_payment_id', 'like', "%{$search}%")
+                            ->orWhere('checkout_session_id', 'like', "%{$search}%");
                     })
                     ->orWhereHas('court', function ($cq) use ($search) {
                         $cq->where('court_name', 'like', "%{$search}%");

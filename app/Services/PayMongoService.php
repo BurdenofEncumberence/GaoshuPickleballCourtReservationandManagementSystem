@@ -168,10 +168,16 @@ class PayMongoService
      */
     public function extractPaymentDetails(array $sessionData): array
     {
-        $payments = $sessionData['attributes']['payments'] ?? ($sessionData['payments'] ?? []);
+        $payments = $sessionData['attributes']['payments']
+            ?? $sessionData['payments']
+            ?? $sessionData['attributes']['payment_intent']['attributes']['payments']
+            ?? [];
         $firstPayment = $payments[0] ?? null;
 
-        $paymentId = $firstPayment['id'] ?? null;
+        $paymentId = $firstPayment['id']
+            ?? $sessionData['attributes']['payment_intent']['id']
+            ?? $sessionData['id']
+            ?? null;
         $sourceType = $firstPayment['attributes']['source']['type']
             ?? $firstPayment['attributes']['payment_method_type']
             ?? $firstPayment['source']['type']

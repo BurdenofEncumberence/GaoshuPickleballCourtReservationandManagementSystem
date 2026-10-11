@@ -100,10 +100,29 @@ class BookingReceiptController extends Controller
 
         $paymentStatus = $firstPayment?->payment_status ?? ($booking->booking_status === 'confirmed' ? 'paid' : 'pending');
 
+        // Backfill paymongo_payment_id on the fly if checkout_session_id exists but payment_id was not yet stored
+        $paymongoPaymentId = $firstPayment?->paymongo_payment_id;
+        if (! $paymongoPaymentId && $firstPayment?->checkout_session_id) {
+            try {
+                $payMongoService = app(\App\Services\PayMongoService::class);
+                if ($payMongoService->isConfigured()) {
+                    $sessionData = $payMongoService->getCheckoutSession($firstPayment->checkout_session_id);
+                    $details = $payMongoService->extractPaymentDetails($sessionData);
+                    if (! empty($details['payment_id'])) {
+                        $paymongoPaymentId = $details['payment_id'];
+                        $firstPayment->update(['paymongo_payment_id' => $paymongoPaymentId]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Ignore if offline or test session unavailable
+            }
+        }
+
         $siteSettings = SiteSettings::first();
 
         $receiptData = [
             'ref_num' => $refNum,
+            'paymongo_payment_id' => $paymongoPaymentId ?: $firstPayment?->checkout_session_id,
             'booking_id' => $booking->id,
             'issued_at' => $booking->created_at->format('M d, Y · g:i A'),
             'customer_name' => $booking->user?->name ?? 'Guest Customer',

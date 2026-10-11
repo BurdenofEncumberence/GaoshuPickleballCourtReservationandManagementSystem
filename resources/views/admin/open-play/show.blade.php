@@ -223,7 +223,12 @@
                                 </div>
                             </td>
                             <td class="py-3 px-4 whitespace-nowrap font-mono text-[11px]">
-                                {{ $reg->ref_num }}
+                                <div>{{ $reg->ref_num }}</div>
+                                @if($reg->paymongo_payment_id || $reg->paymongo_checkout_session_id)
+                                    <div class="text-[10px] mt-0.5" style="color: var(--gz-muted);">
+                                        PayMongo: {{ $reg->paymongo_payment_id ?: $reg->paymongo_checkout_session_id }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="py-3 px-4 text-center whitespace-nowrap">
                                 <form method="POST" action="{{ route('admin.open-play.attendance', $reg) }}" class="inline-flex items-center gap-1">

@@ -432,6 +432,12 @@
                                 <span style="color: var(--gz-muted);">Payment Reference:</span>
                                 <span class="font-mono font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_ref"></span>
                             </div>
+                            <template x-if="activeBooking?.paymongo_payment_id">
+                                <div class="flex items-center justify-between">
+                                    <span style="color: var(--gz-muted);">PayMongo Payment ID:</span>
+                                    <span class="font-mono font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.paymongo_payment_id"></span>
+                                </div>
+                            </template>
 
                             <template x-if="activeBooking?.cash_tendered !== null && activeBooking?.cash_tendered !== undefined">
                                 <div class="pt-2 mt-2 border-t space-y-1" style="border-color: var(--gz-border);">
@@ -537,6 +543,12 @@
                                     <div>
                                         <div class="font-bold" x-text="p.name"></div>
                                         <div class="text-[11px]" style="color: var(--gz-muted);" x-text="p.email + ' · ' + p.slots_count + ' slot(s)'"></div>
+                                        <div class="font-mono text-[10px] mt-0.5" style="color: var(--gz-muted);">
+                                            <span x-text="'Ref: ' + (p.ref_num || 'N/A')"></span>
+                                            <template x-if="p.paymongo_payment_id">
+                                                <span x-text="' · PayMongo: ' + p.paymongo_payment_id"></span>
+                                            </template>
+                                        </div>
                                     </div>
                                     <div class="text-right">
                                         <div class="font-mono font-bold" x-text="'₱' + Number(p.total_fee || 0).toFixed(2)"></div>

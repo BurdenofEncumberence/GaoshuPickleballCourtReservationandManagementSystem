@@ -91,6 +91,11 @@
                     <div class="font-mono font-bold text-sm text-[#12150F] mt-2">
                         REF: {{ $receipt['ref_num'] }}
                     </div>
+                    @if(!empty($receipt['paymongo_payment_id']))
+                        <div class="font-mono text-[11px] font-semibold text-emerald-800 mt-0.5">
+                            PayMongo ID: {{ $receipt['paymongo_payment_id'] }}
+                        </div>
+                    @endif
                     <div class="text-[11px] text-[#565A4E] mt-0.5">
                         Issued: {{ $receipt['issued_at'] }}
                     </div>
@@ -114,6 +119,11 @@
                 <div class="font-semibold text-sm text-[#12150F]">
                     Method: {{ $receipt['payment_method'] }}
                 </div>
+                @if(!empty($receipt['paymongo_payment_id']))
+                    <div class="font-mono text-[11px] text-[#12150F]">
+                        PayMongo Payment ID: <span class="font-bold">{{ $receipt['paymongo_payment_id'] }}</span>
+                    </div>
+                @endif
                 <div class="flex items-center sm:justify-end gap-2 pt-1">
                     <span class="text-[11px] text-[#565A4E]">Payment Status:</span>
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ $receipt['payment_status'] === 'paid' ? 'bg-[#E5A823] text-[#12150F]' : 'bg-amber-200 text-amber-900' }}">

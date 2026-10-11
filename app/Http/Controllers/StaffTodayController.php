@@ -128,6 +128,7 @@ class StaffTodayController extends Controller
                 'payment_status' => strtoupper($latestPayment?->payment_status ?? 'PAID'),
                 'payment_method' => ucwords(str_replace('_', ' ', $latestPayment?->payment_method ?? 'cash')),
                 'payment_ref' => $latestPayment?->ref_num ?: 'N/A',
+                'paymongo_payment_id' => $latestPayment?->paymongo_payment_id ?: $latestPayment?->checkout_session_id,
                 'cash_tendered' => $latestPayment?->cash_tendered !== null ? (float) $latestPayment->cash_tendered : null,
                 'change_amount' => $latestPayment?->change_amount !== null ? (float) $latestPayment->change_amount : null,
                 'status_update_url' => route('staff.bookings.status', $b),
@@ -152,6 +153,7 @@ class StaffTodayController extends Controller
                 'payment_status' => strtoupper($r->payment_status),
                 'payment_method' => ucwords(str_replace('_', ' ', $r->payment_method)),
                 'ref_num' => $r->ref_num,
+                'paymongo_payment_id' => $r->paymongo_payment_id ?: $r->paymongo_checkout_session_id,
                 'attendance_status' => $r->attendance_status,
             ])->values()->all();
 

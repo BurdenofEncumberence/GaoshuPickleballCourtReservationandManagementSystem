@@ -226,6 +226,11 @@
                                     <div class="text-[10px]" style="color: var(--gz-muted);">
                                         ID #{{ $booking->id }}
                                     </div>
+                                    @if($payment && ($payment->paymongo_payment_id || $payment->checkout_session_id))
+                                        <div class="font-mono text-[10px] mt-0.5" style="color: var(--gz-muted);">
+                                            PayMongo: {{ $payment->paymongo_payment_id ?: $payment->checkout_session_id }}
+                                        </div>
+                                    @endif
                                 </td>
 
                                 <!-- Date & Time -->
