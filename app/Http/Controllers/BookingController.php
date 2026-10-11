@@ -124,6 +124,9 @@ class BookingController extends Controller
         $slots = $request->parsedSlots();
         $refNum = 'PAY-' . strtoupper(Str::random(8));
         $paymentMethod = $request->input('payment_method', 'paymongo') ?: 'paymongo';
+        if ($paymentMethod === 'cash') {
+            $paymentMethod = 'paymongo';
+        }
         $eventId = $request->input('event_id');
 
         // Calculate potential event discount

@@ -299,13 +299,13 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h3 class="gz-font-display font-bold text-base">Payment Method</h3>
-                                <p class="text-xs" style="color: var(--gz-muted);">Choose how you would like to settle your court reservation.</p>
+                                <p class="text-xs" style="color: var(--gz-muted);">Online payment required to lock in your court reservation.</p>
                             </div>
                             <span class="gz-badge gz-badge-success text-[10px]">Instant Lock</span>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" role="radiogroup" aria-label="Payment method">
-                            {{-- Option 1: PayMongo Online --}}
+                        <div class="grid grid-cols-1 gap-3 mb-6" role="radiogroup" aria-label="Payment method">
+                            {{-- PayMongo Online --}}
                             <button type="button" @click="paymentMethod = 'paymongo'"
                                     role="radio" :aria-checked="paymentMethod === 'paymongo' ? 'true' : 'false'"
                                     class="gz-kpi-card text-left p-3.5 cursor-pointer transition relative"
@@ -330,36 +330,6 @@
                                     <span class="gz-badge gz-badge-neutral text-[9px]">Cards</span>
                                 </div>
                             </button>
-
-                            {{-- Option 2: Cash at Counter --}}
-                            <button type="button" @click="paymentMethod = 'cash'"
-                                    role="radio" :aria-checked="paymentMethod === 'cash' ? 'true' : 'false'"
-                                    class="gz-kpi-card text-left p-3.5 cursor-pointer transition relative"
-                                    :style="paymentMethod === 'cash' ? 'border-color: var(--gz-pop); background: rgba(229,168,35,0.08);' : ''">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0" style="background: rgba(18,21,15,0.08); color: var(--gz-ink);">
-                                            DESK
-                                        </div>
-                                        <div>
-                                            <span class="text-sm font-bold block leading-tight">Cash at Counter</span>
-                                            <span class="text-[11px]" style="color: var(--gz-muted);">Over-the-Counter</span>
-                                        </div>
-                                    </div>
-                                    <span class="gz-badge gz-badge-neutral text-[9px]">Front Desk</span>
-                                </div>
-                                <p class="text-[10px] mt-2 pt-2 border-t leading-snug" style="border-color: var(--gz-border); color: var(--gz-muted);">
-                                    Pay in person at the front desk cashier before your scheduled session starts.
-                                </p>
-                            </button>
-                        </div>
-
-                        {{-- Cash Info Panel --}}
-                        <div x-show="paymentMethod === 'cash'" x-cloak class="mb-6 p-4 rounded-xl text-xs" style="background: var(--gz-surface); border: 1px solid var(--gz-border);">
-                            <strong class="block font-bold text-sm mb-1">Over-the-Counter Payment</strong>
-                            <p style="color: var(--gz-muted); line-height: 1.4;">
-                                Your slots are reserved immediately. Please present your booking reference to the cashier at the Gaoshou Pickleball front desk before stepping onto the court.
-                            </p>
                         </div>
 
                         <form method="POST" action="{{ route('bookings.store') }}">
@@ -372,7 +342,7 @@
                             <input type="hidden" name="date" :value="selectedSlots.length > 0 ? selectedSlots[0].date : selectedDate">
                             <input type="hidden" name="time_slot" :value="selectedTimeSlot">
 
-                            <input type="hidden" name="payment_method" :value="paymentMethod">
+                            <input type="hidden" name="payment_method" value="paymongo">
                             <input type="hidden" name="event_id" :value="selectedEvent">
 
                             {{-- Non-Refundable Payment Notice --}}
@@ -389,15 +359,7 @@
                             </div>
 
                             <button type="submit" :disabled="!canConfirm" class="gz-btn-primary w-full justify-center py-3 text-sm font-bold">
-                                <template x-if="paymentMethod === 'paymongo'">
-                                    <span>Pay Online (<span x-text="'₱' + totalDue.toFixed(2)"></span>) →</span>
-                                </template>
-                                <template x-if="paymentMethod === 'cash'">
-                                    <span>Confirm Reservation & Pay at Counter (<span x-text="'₱' + totalDue.toFixed(2)"></span>)</span>
-                                </template>
-                                <template x-if="paymentMethod !== 'paymongo' && paymentMethod !== 'cash'">
-                                    <span>Confirm & Pay (<span x-text="'₱' + totalDue.toFixed(2)"></span>)</span>
-                                </template>
+                                <span>Pay Online (<span x-text="'₱' + totalDue.toFixed(2)"></span>) →</span>
                             </button>
                         </form>
                     </div>

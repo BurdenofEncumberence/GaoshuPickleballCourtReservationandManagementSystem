@@ -93,17 +93,16 @@ class OpenPlayController extends Controller
 
         $validated = $request->validate([
             'slots_count' => ['required', 'integer', 'min:1', 'max:10'],
-            'payment_method' => ['required', 'string', 'in:paymongo,cash'],
+            'payment_method' => ['nullable', 'string', 'in:paymongo'],
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
             'slots_count.required' => 'Please select the number of player slots.',
             'slots_count.min' => 'At least 1 slot must be selected.',
             'slots_count.max' => 'You can reserve up to 10 slots per transaction.',
-            'payment_method.required' => 'Please select your preferred payment method.',
         ]);
 
         $requestedSlots = (int) $validated['slots_count'];
-        $paymentMethod = $validated['payment_method'];
+        $paymentMethod = 'paymongo';
 
         try {
             /** @var OpenPlayRegistration $registration */

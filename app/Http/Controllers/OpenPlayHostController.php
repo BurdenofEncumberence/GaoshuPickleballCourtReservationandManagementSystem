@@ -233,11 +233,11 @@ class OpenPlayHostController extends Controller
         abort_unless(Auth::id() === $session->created_by, 403);
         abort_unless($session->session_status === 'approved_pending_payment', 400, 'This session is not currently awaiting payment.');
 
-        $validated = $request->validate([
-            'payment_method' => ['required', 'in:paymongo,cash'],
+        $request->validate([
+            'payment_method' => ['nullable', 'in:paymongo'],
         ]);
 
-        $paymentMethod = $validated['payment_method'];
+        $paymentMethod = 'paymongo';
 
         if ($paymentMethod === 'cash') {
             $session->update([

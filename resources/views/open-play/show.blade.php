@@ -134,7 +134,7 @@
                         Reserve Your Slot
                     </h2>
                     <p class="text-xs mb-4" style="color: var(--gz-muted);">
-                        Secure your spot in the communal pool. Pay online or cash upon arrival.
+                        Secure your spot in the communal pool via online payment.
                     </p>
 
                     @guest
@@ -247,41 +247,22 @@
                                             Payment Method <span class="text-red-500">*</span>
                                         </label>
 
+                                        <input type="hidden" name="payment_method" value="paymongo">
+
                                         <div class="space-y-2">
-                                            <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
-                                                   :style="paymentMethod === 'paymongo' ? 'border-color: var(--gz-pop-dark); background: rgba(229, 168, 35, 0.05);' : 'border-color: var(--gz-border);'">
+                                            <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition"
+                                                   style="border-color: var(--gz-pop-dark); background: rgba(229, 168, 35, 0.05);">
                                                 <input
                                                     type="radio"
-                                                    name="payment_method"
-                                                    value="paymongo"
-                                                    x-model="paymentMethod"
+                                                    checked
                                                     class="mt-0.5 text-[#E5A823] focus:ring-[#E5A823]"
                                                 >
                                                 <div>
                                                     <span class="block text-xs font-bold" style="color: var(--gz-ink);">
-                                                         Pay Online
+                                                        Pay Online
                                                     </span>
                                                     <span class="block text-[11px]" style="color: var(--gz-muted);">
                                                         QR Ph, GCash, Maya, Debit/Credit Card, Online Banking
-                                                    </span>
-                                                </div>
-                                            </label>
-
-                                            <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
-                                                   :style="paymentMethod === 'cash' ? 'border-color: var(--gz-pop-dark); background: rgba(229, 168, 35, 0.05);' : 'border-color: var(--gz-border);'">
-                                                <input
-                                                    type="radio"
-                                                    name="payment_method"
-                                                    value="cash"
-                                                    x-model="paymentMethod"
-                                                    class="mt-0.5 text-[#E5A823] focus:ring-[#E5A823]"
-                                                >
-                                                <div>
-                                                    <span class="block text-xs font-bold" style="color: var(--gz-ink);">
-                                                        Cash at Counter
-                                                    </span>
-                                                    <span class="block text-[11px]" style="color: var(--gz-muted);">
-                                                        Hold slots now and pay cash at reception prior to court entry
                                                     </span>
                                                 </div>
                                             </label>
@@ -319,11 +300,8 @@
                                         type="submit"
                                         class="gz-btn-primary w-full justify-center py-3 text-sm font-bold mt-2"
                                     >
-                                        <span x-show="paymentMethod === 'paymongo'">
+                                        <span>
                                             Pay Online (<span x-text="'₱' + (slotsCount * pricePerSlot).toFixed(2)"></span>) →
-                                        </span>
-                                        <span x-show="paymentMethod === 'cash'" x-cloak>
-                                            Confirm & Pay at Counter (<span x-text="'₱' + (slotsCount * pricePerSlot).toFixed(2)"></span>)
                                         </span>
                                     </button>
                                 </div>

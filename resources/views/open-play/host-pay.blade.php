@@ -136,23 +136,23 @@
         {{-- Payment Selection Form --}}
         <div class="gz-panel p-6">
             <h2 class="gz-font-display font-bold text-base mb-1" style="color: var(--gz-ink);">
-                Select Payment Method
+                Payment Method
             </h2>
             <p class="text-xs mb-4" style="color: var(--gz-muted);">
-                Choose how you would like to settle the court hire fee to secure your appointment.
+                Complete online payment of the court hire fee to officially secure your appointment.
             </p>
 
             <form method="POST" action="{{ route('open-play.host.pay.process', $session) }}">
                 @csrf
 
+                <input type="hidden" name="payment_method" value="paymongo">
+
                 <div class="space-y-3 mb-6">
-                    <label class="flex items-start gap-3 p-4 rounded-xl border cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
-                           :style="paymentMethod === 'paymongo' ? 'border-color: #10b981; background: rgba(16, 185, 129, 0.05);' : 'border-color: var(--gz-border);'">
+                    <label class="flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition"
+                           style="border-color: #10b981; background: rgba(16, 185, 129, 0.05);">
                         <input
                             type="radio"
-                            name="payment_method"
-                            value="paymongo"
-                            x-model="paymentMethod"
+                            checked
                             class="mt-1 text-emerald-600 focus:ring-emerald-500"
                         >
                         <div class="flex-1">
@@ -160,26 +160,7 @@
                                 Pay Online (PayMongo)
                             </span>
                             <span class="block text-xs mt-0.5" style="color: var(--gz-muted);">
-                                Instant verification via GCash, Maya, Debit/Credit Card, or Online Banking. Your courts are secured immediately.
-                            </span>
-                        </div>
-                    </label>
-
-                    <label class="flex items-start gap-3 p-4 rounded-xl border cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
-                           :style="paymentMethod === 'cash' ? 'border-color: #10b981; background: rgba(16, 185, 129, 0.05);' : 'border-color: var(--gz-border);'">
-                        <input
-                            type="radio"
-                            name="payment_method"
-                            value="cash"
-                            x-model="paymentMethod"
-                            class="mt-1 text-emerald-600 focus:ring-emerald-500"
-                        >
-                        <div class="flex-1">
-                            <span class="block text-sm font-bold" style="color: var(--gz-ink);">
-                                Cash at Front Desk
-                            </span>
-                            <span class="block text-xs mt-0.5" style="color: var(--gz-muted);">
-                                Reserve and secure courts now. Settle ₱{{ number_format($session->court_fee, 2) }} in cash with the front desk cashier prior to the session start.
+                                Instant verification via QR Ph, GCash, Maya, Debit/Credit Card, or Online Banking. Your courts are secured immediately.
                             </span>
                         </div>
                     </label>
@@ -207,7 +188,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
-                        <span x-text="paymentMethod === 'paymongo' ? 'Proceed to Online Payment (₱' + '{{ number_format($session->court_fee, 2) }}' + ')' : 'Confirm Cash Payment & Secure Courts'"></span>
+                        <span>Proceed to Online Payment (₱{{ number_format($session->court_fee, 2) }})</span>
                     </button>
                 </div>
             </form>
