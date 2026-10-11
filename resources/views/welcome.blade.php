@@ -385,38 +385,19 @@
                         <span class="text-[10px] sm:text-xs text-white/60 font-mono">Open Daily: 8 AM – 10 PM</span>
                     </div>
 
-                    <!-- Architectural Court Diagram -->
+                    <!-- Players Playing Showcase -->
                     <div class="relative z-10 my-5">
-                        <div class="relative bg-[#0A0D08] rounded-2xl p-3 sm:p-4 border border-white/10 shadow-inner">
-                            <!-- Court Blueprint SVG -->
-                            <div class="relative w-full aspect-[2/1] rounded-lg overflow-hidden bg-gradient-to-br from-[#241E13] via-[#1C170E] to-[#120F09] border border-[#E5A823]/40 shadow-lg">
-                                <!-- Outer Boundary Line -->
-                                <div class="absolute inset-2 sm:inset-3 border-2 border-white/90 rounded-sm"></div>
+                        <div class="relative bg-[#0A0D08] rounded-2xl p-2 sm:p-3 border border-white/10 shadow-inner">
+                            <div class="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-[#120F09] border border-[#E5A823]/40 shadow-lg group">
+                                <img
+                                    src="{{ asset('images/players-playing.jpg') }}"
+                                    alt="Gaoshou Pickleball players rallying on court"
+                                    class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                                >
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none"></div>
 
-                                <!-- Center Net with Net Posts -->
-                                <div class="absolute top-0 bottom-0 left-1/2 w-0 border-r-2 border-dashed border-white -translate-x-1/2 z-20 shadow"></div>
-                                <div class="absolute top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white z-20"></div>
-                                <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white z-20"></div>
-
-                                <!-- Non-Volley Zone ("The Kitchen" - 7ft / 2.13m from net each side) -->
-                                <div class="absolute inset-y-2 sm:inset-y-3 left-[34%] right-[34%] bg-[#E5A823]/20 border-x-2 border-white/90 flex items-center justify-center pointer-events-none">
-                                    <span class="text-[9px] sm:text-[11px] font-mono font-black uppercase tracking-widest text-[#F5C75D] drop-shadow select-none">Kitchen / NVZ</span>
-                                </div>
-
-                                <!-- Service Court Centerlines -->
-                                <div class="absolute top-1/2 left-2 sm:left-3 right-[66%] h-0 border-b-2 border-white/90 -translate-y-1/2"></div>
-                                <div class="absolute top-1/2 left-[66%] right-2 sm:right-3 h-0 border-b-2 border-white/90 -translate-y-1/2"></div>
-
-                                <!-- Left Side Service Labels -->
-                                <div class="absolute top-3 left-4 sm:left-6 text-[8px] sm:text-[10px] font-mono text-white/70 select-none uppercase font-semibold">Left Service</div>
-                                <div class="absolute bottom-3 left-4 sm:left-6 text-[8px] sm:text-[10px] font-mono text-white/70 select-none uppercase font-semibold">Right Service</div>
-
-                                <!-- Right Side Service Labels -->
-                                <div class="absolute top-3 right-4 sm:right-6 text-[8px] sm:text-[10px] font-mono text-white/70 select-none uppercase font-semibold">Right Service</div>
-                                <div class="absolute bottom-3 right-4 sm:right-6 text-[8px] sm:text-[10px] font-mono text-white/70 select-none uppercase font-semibold">Left Service</div>
-
-                                <!-- Official Dimensions Overlays -->
-                                <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[8px] sm:text-[9px] font-mono text-[#F5C75D]/90 bg-black/60 px-2 py-0.5 rounded-full pointer-events-none">
+                                <!-- Official Dimensions Overlay -->
+                                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono text-[#F5C75D] bg-black/75 backdrop-blur-sm border border-[#E5A823]/30 px-3 py-1 rounded-full pointer-events-none shadow">
                                     USA Pickleball Official Spec · 13.41m × 6.10m (44' × 20')
                                 </div>
                             </div>
