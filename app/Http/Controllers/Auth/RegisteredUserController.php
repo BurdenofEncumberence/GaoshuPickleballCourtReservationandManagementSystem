@@ -82,13 +82,23 @@ class RegisteredUserController extends Controller
             'attempts' => 0,
         ];
 
-        $request->session()->put('pending_registration', $pendingData);
-
+        $mailSent = false;
         try {
-            Mail::to($request->email)->send(new RegistrationOtpMail($otp, $fullName, 10));
+            if (config('mail.default') && config('mail.default') !== 'log' && config('mail.default') !== 'array') {
+                Mail::to($request->email)->send(new RegistrationOtpMail($otp, $fullName, 10));
+                $mailSent = true;
+            } else {
+                Mail::to($request->email)->send(new RegistrationOtpMail($otp, $fullName, 10));
+            }
         } catch (\Throwable $e) {
             report($e);
         }
+
+        if (! $mailSent) {
+            $pendingData['otp_plain_dev'] = $otp;
+        }
+
+        $request->session()->put('pending_registration', $pendingData);
 
         return redirect()->route('register.otp.show');
     }
@@ -218,13 +228,23 @@ class RegisteredUserController extends Controller
         $pending['resend_available_at'] = now()->addSeconds(60)->timestamp;
         $pending['attempts'] = 0;
 
-        $request->session()->put('pending_registration', $pending);
-
+        $mailSent = false;
         try {
-            Mail::to($pending['email'])->send(new RegistrationOtpMail($otp, $pending['name'], 10));
+            if (config('mail.default') && config('mail.default') !== 'log' && config('mail.default') !== 'array') {
+                Mail::to($pending['email'])->send(new RegistrationOtpMail($otp, $pending['name'], 10));
+                $mailSent = true;
+            } else {
+                Mail::to($pending['email'])->send(new RegistrationOtpMail($otp, $pending['name'], 10));
+            }
         } catch (\Throwable $e) {
             report($e);
         }
+
+        if (! $mailSent) {
+            $pending['otp_plain_dev'] = $otp;
+        }
+
+        $request->session()->put('pending_registration', $pending);
 
         return back()->with('status', 'A new verification code has been sent to your email.');
     }

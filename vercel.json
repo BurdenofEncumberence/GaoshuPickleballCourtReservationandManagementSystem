@@ -44,6 +44,14 @@
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "DB_CONNECTION": "sqlite",
-        "DB_DATABASE": "/tmp/database.sqlite"
+        "DB_DATABASE": "/tmp/database.sqlite",
+        "MAIL_MAILER": "smtp",
+        "MAIL_HOST": "smtp.gmail.com",
+        "MAIL_PORT": "587",
+        "MAIL_USERNAME": "geoffpatrick29@gmail.com",
+        "MAIL_PASSWORD": "pscutgqahipcnrsi",
+        "MAIL_ENCRYPTION": "tls",
+        "MAIL_FROM_ADDRESS": "geoffpatrick29@gmail.com",
+        "MAIL_FROM_NAME": "Gaoshou Pickleball"
     }
 }
