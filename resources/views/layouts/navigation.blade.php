@@ -79,6 +79,9 @@
                             <a href="{{ route('admin.customization.index') }}" class="nav-link" @if(request()->routeIs('admin.customization.*')) aria-current="page" @endif>
                                 Customization
                             </a>
+                            <a href="{{ route('admin.activity-logs.index') }}" class="nav-link" @if(request()->routeIs('admin.activity-logs.*')) aria-current="page" @endif>
+                                Activity Logs
+                            </a>
                         @elseif(Auth::user()->hasRole('staff'))
                             <a href="{{ route('staff.today') }}" class="nav-link" @if(request()->routeIs('staff.today')) aria-current="page" @endif>
                                 Today's Schedule
@@ -160,6 +163,7 @@
                                 <a href="{{ route('admin.events.index') }}" class="gz-dropdown-item">Events Management</a>
                                 <a href="{{ route('admin.finance') }}" class="gz-dropdown-item">Financial Reports</a>
                                 <a href="{{ route('admin.customization.index') }}" class="gz-dropdown-item">Customization</a>
+                                <a href="{{ route('admin.activity-logs.index') }}" class="gz-dropdown-item">Activity Logs</a>
                             @elseif(Auth::user()->hasRole('staff'))
                                 <a href="{{ route('staff.today') }}" class="gz-dropdown-item">Today's Schedule</a>
                                 <a href="{{ route('staff.walkin.create') }}" class="gz-dropdown-item">Walk-In Booking</a>
@@ -232,6 +236,11 @@
             </div>
             @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
                 <a href="{{ route('admin.dashboard') }}" class="gz-dropdown-item font-bold">Admin Dashboard</a>
+                <a href="{{ route('admin.courts.index') }}" class="gz-dropdown-item">Courts Inventory</a>
+                <a href="{{ route('admin.events.index') }}" class="gz-dropdown-item">Events Management</a>
+                <a href="{{ route('admin.finance') }}" class="gz-dropdown-item">Financial Reports</a>
+                <a href="{{ route('admin.customization.index') }}" class="gz-dropdown-item">Customization</a>
+                <a href="{{ route('admin.activity-logs.index') }}" class="gz-dropdown-item">Activity Logs</a>
             @elseif(Auth::user()->hasRole('staff'))
                 <a href="{{ route('staff.today') }}" class="gz-dropdown-item">Today's Schedule</a>
                 <a href="{{ route('staff.walkin.create') }}" class="gz-dropdown-item">Walk-In Booking</a>

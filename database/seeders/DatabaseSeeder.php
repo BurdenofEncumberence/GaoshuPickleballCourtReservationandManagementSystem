@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // Seed Admin account
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@kymnet.com'],
             [
                 'first_name' => 'Admin',
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // Seed Manager account
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'manager@kymnet.com'],
             [
                 'first_name' => 'Manager',
@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // Seed Staff account
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'staff@kymnet.com'],
             [
                 'first_name' => 'Staff',
@@ -69,7 +69,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // Seed Gaoshou accounts
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@gaoshou.ph'],
             [
                 'first_name' => 'Admin',
@@ -80,7 +80,7 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'manager@gaoshou.ph'],
             [
                 'first_name' => 'Manager',
@@ -91,7 +91,7 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'staff@gaoshou.ph'],
             [
                 'first_name' => 'Staff',
@@ -102,9 +102,20 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+        User::updateOrCreate(
+            ['email' => 'player@gaoshou.ph'],
+            [
+                'first_name' => 'Player',
+                'last_name' => 'Demo',
+                'name' => 'Player Demo',
+                'password' => Hash::make('player123'),
+                'role' => 'player',
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Seed Player test account
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'test@example.com'],
             [
                 'first_name' => 'Test',
@@ -134,5 +145,8 @@ class DatabaseSeeder extends Seeder
                 ]
             );
         }
+
+        // Backfill activity logs across all user types
+        \App\Models\ActivityLog::backfillIfEmpty();
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminActivityLogController;
 use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\AdminCourtController;
 use App\Http\Controllers\AdminCustomizationController;
@@ -115,6 +116,7 @@ Route::middleware(['auth', 'verified', 'role:admin,manager'])
         Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
         Route::get('/customization', [AdminCustomizationController::class, 'index'])->name('customization.index');
         Route::patch('/customization', [AdminCustomizationController::class, 'update'])->name('customization.update');
+        Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 
 /*
