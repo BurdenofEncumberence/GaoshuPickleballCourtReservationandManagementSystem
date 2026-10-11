@@ -164,9 +164,9 @@
                             <table class="gz-table text-xs w-full">
                                 <thead style="position: sticky; top: 0; background: var(--gz-surface); z-index: 2;">
                                     <tr>
-                                        <th class="py-2 px-3 text-left">Time Slot</th>
+                                        <th class="py-2 px-3 text-left" style="min-width: 145px;">Time Slot</th>
                                         @foreach($courts as $court)
-                                            <th class="py-2 px-2 text-center whitespace-nowrap">
+                                            <th class="py-2 px-2 text-center whitespace-nowrap" style="min-width: 130px;">
                                                 {{ $court->court_name }}
                                                 <span class="block text-[10px] font-normal" style="color: var(--gz-muted);">
                                                     ₱{{ number_format($court->price_per_hour, 2) }}/hr
@@ -229,8 +229,8 @@
                                         <div class="text-xs font-bold" style="color: var(--gz-ink);">{{ $court->court_name }}</div>
                                         <div class="text-[11px] mt-0.5" style="color: var(--gz-muted);">
                                             ₱{{ number_format($court->price_per_hour, 2) }}/hr
-                                            @if($court->court_type)
-                                                • {{ ucfirst($court->court_type) }}
+                                            @if($court->size)
+                                                • {{ $court->size }}
                                             @endif
                                         </div>
                                         <div class="court-conflict-badge hidden text-[10px] font-bold text-red-600 dark:text-red-400 mt-1">

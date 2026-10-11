@@ -152,9 +152,9 @@
                         <table class="gz-table text-xs w-full">
                             <thead style="position: sticky; top: 0; background: var(--gz-surface); z-index: 2;">
                                 <tr>
-                                    <th class="py-2 px-3 text-left">Time Slot</th>
+                                    <th class="py-2 px-3 text-left" style="min-width: 145px;">Time Slot</th>
                                     @foreach($courts as $court)
-                                        <th class="py-2 px-2 text-center whitespace-nowrap">
+                                        <th class="py-2 px-2 text-center whitespace-nowrap" style="min-width: 130px;">
                                             {{ $court->court_name }}
                                             <span class="block text-[10px] font-normal" style="color: var(--gz-muted);">
                                                 ₱{{ number_format($court->price_per_hour, 2) }}/hr
@@ -211,7 +211,12 @@
                                 >
                                 <div class="min-w-0 flex-1">
                                     <span class="text-xs font-bold block" style="color: var(--gz-ink);">{{ $court->court_name }}</span>
-                                    <span class="text-[10px] block" style="color: var(--gz-muted);">₱{{ number_format($court->price_per_hour, 2) }}/hr</span>
+                                    <span class="text-[10px] block" style="color: var(--gz-muted);">
+                                        ₱{{ number_format($court->price_per_hour, 2) }}/hr
+                                        @if($court->size)
+                                            • {{ $court->size }}
+                                        @endif
+                                    </span>
                                     <span class="admin-court-conflict-badge hidden text-[10px] font-bold text-red-600 dark:text-red-400 block mt-0.5">Occupied</span>
                                 </div>
                             </label>

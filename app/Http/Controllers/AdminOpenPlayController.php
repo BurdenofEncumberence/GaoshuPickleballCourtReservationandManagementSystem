@@ -70,8 +70,9 @@ class AdminOpenPlayController extends Controller
         abort_unless(Auth::user()?->isManager(), 403, 'Only managers are authorized to create Open Play and Tournament sessions.');
 
         $courts = Court::where('court_status', 'available')
-            ->orderBy('court_name')
-            ->get();
+            ->orderBy('id')
+            ->get()
+            ->values();
 
         $session = new OpenPlaySession([
             'date' => today()->addDay()->toDateString(),
@@ -179,7 +180,7 @@ class AdminOpenPlayController extends Controller
     {
         abort_unless(Auth::user()?->isManager(), 403, 'Only managers are authorized to manage Open Play and Tournament sessions.');
 
-        $courts = Court::orderBy('court_name')->get();
+        $courts = Court::orderBy('id')->get()->values();
         $allocatedCourtIds = $open_play->courts->pluck('id')->all();
 
         $bookings = Booking::query()

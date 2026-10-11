@@ -13,7 +13,7 @@ class AdminCourtController extends Controller
     public function index(CourtUtilizationService $utilizationService): View
     {
         return view('admin.courts.index', [
-            'courts' => Court::withCount('bookings')->orderBy('court_name')->get(),
+            'courts' => Court::withCount('bookings')->orderBy('id')->get(),
             'utilization' => $utilizationService->getFacilityMetrics(),
             'courtUtilization' => $utilizationService->getCourtBreakdown(),
         ]);
@@ -21,7 +21,12 @@ class AdminCourtController extends Controller
 
     public function create(): View
     {
-        return view('admin.courts.form', ['court' => new Court()]);
+        return view('admin.courts.form', [
+            'court' => new Court([
+                'size' => 'Regular (13.41m x 6.10m)',
+                'court_status' => 'available',
+            ]),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -56,6 +61,10 @@ class AdminCourtController extends Controller
 
     private function validatedData(Request $request): array
     {
+        if (! $request->filled('court_status')) {
+            $request->merge(['court_status' => 'available']);
+        }
+
         return $request->validate([
             'court_name' => ['required', 'string', 'max:100'],
             'size' => ['required', 'string', 'max:50'],

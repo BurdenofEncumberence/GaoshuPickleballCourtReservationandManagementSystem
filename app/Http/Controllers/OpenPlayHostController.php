@@ -20,8 +20,9 @@ class OpenPlayHostController extends Controller
     public function create(): View
     {
         $courts = Court::where('court_status', 'available')
-            ->orderBy('court_name')
-            ->get();
+            ->orderBy('id')
+            ->get()
+            ->values();
 
         $session = new OpenPlaySession([
             'date' => today()->addDays(2)->toDateString(),

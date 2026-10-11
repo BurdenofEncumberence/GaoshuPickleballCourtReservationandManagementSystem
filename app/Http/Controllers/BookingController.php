@@ -39,13 +39,15 @@ class BookingController extends Controller
 
         $courts = Court::query()
             ->where('court_status', 'available')
+            ->orderBy('id')
             ->get()
             ->map(fn (Court $court) => [
                 'id' => $court->id,
                 'name' => $court->court_name,
                 'size' => $court->size ?: 'Regular (13.41m x 6.10m)',
                 'rate' => (float) $court->price_per_hour,
-            ]);
+            ])
+            ->values();
 
         $bookings = Booking::query()
             ->where('date', '>=', now()->toDateString())

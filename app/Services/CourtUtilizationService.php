@@ -111,7 +111,7 @@ class CourtUtilizationService
 
         $courts = Court::with(['bookings' => function ($query) {
             $query->where('booking_status', '!=', 'cancelled')->with('payments');
-        }])->orderBy('court_name')->get();
+        }])->orderBy('id')->get();
 
         return $courts->map(function (Court $court) use ($targetDate, $monthStart, $monthEnd, $courtDailyCapacity, $courtMonthlyCapacity) {
             $allBookings = $court->bookings;

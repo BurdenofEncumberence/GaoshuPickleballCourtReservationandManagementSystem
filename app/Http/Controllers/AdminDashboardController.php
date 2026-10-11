@@ -21,7 +21,7 @@ class AdminDashboardController extends Controller
             'bookings as active_bookings_count' => fn ($query) => $query
                 ->whereIn('booking_status', ['pending', 'confirmed'])
                 ->whereDate('date', '>=', today()),
-        ])->orderBy('court_name')->get();
+        ])->orderBy('id')->get();
 
         $todayBookings = Booking::with(['court', 'user'])
             ->whereDate('date', today())

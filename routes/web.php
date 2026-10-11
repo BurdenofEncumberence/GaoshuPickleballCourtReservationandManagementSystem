@@ -35,7 +35,7 @@ Route::get('/', function () {
         return redirect()->route('staff.today');
     }
 
-    $courts = \App\Models\Court::where('court_status', 'available')->get();
+    $courts = \App\Models\Court::where('court_status', 'available')->orderBy('id')->get();
     $events = \App\Models\Event::query()
         ->where('start_date', '<=', now()->addDays(30)->toDateString())
         ->where('end_date', '>=', now()->toDateString())

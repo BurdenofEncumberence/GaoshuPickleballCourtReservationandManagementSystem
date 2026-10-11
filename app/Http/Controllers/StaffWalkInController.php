@@ -52,8 +52,9 @@ class StaffWalkInController extends Controller
         }
 
         $courts = Court::where('court_status', 'available')
-            ->orderBy('court_name')
-            ->get();
+            ->orderBy('id')
+            ->get()
+            ->values();
 
         $existingBookings = Booking::with(['user', 'court', 'payments'])
             ->where('date', $selectedDate)

@@ -181,7 +181,11 @@ class StaffTodayController extends Controller
             }
         }
 
-        $courts = Court::orderBy('court_name')->get();
+        $courts = Court::where('court_status', 'available')
+            ->orWhereHas('bookings', fn ($q) => $q->whereDate('date', $selectedDate)->where('booking_status', '!=', 'cancelled'))
+            ->orderBy('id')
+            ->get()
+            ->values();
 
         return view('staff.today', [
             'today' => $today,

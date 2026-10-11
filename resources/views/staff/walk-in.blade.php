@@ -160,7 +160,7 @@
             @csrf
 
             {{-- LEFT 2 COLUMNS: Booking Options & Slot Selection --}}
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 min-w-0 space-y-6">
                 {{-- Date & Court Chooser --}}
                 <div class="gz-panel gz-panel-body">
                     <h2 class="gz-font-display font-bold text-base mb-4 flex items-center justify-between">

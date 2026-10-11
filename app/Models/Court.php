@@ -16,6 +16,10 @@ class Court extends Model
         'court_status',
     ];
 
+    protected $attributes = [
+        'court_status' => 'available',
+    ];
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);

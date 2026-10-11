@@ -92,7 +92,7 @@ class AdminBookingController extends Controller
         $todayCount = Booking::whereDate('date', today())->count();
         $totalRevenue = Payment::where('payment_status', 'paid')->sum('amount');
 
-        $courts = Court::orderBy('court_name')->get();
+        $courts = Court::orderBy('id')->get();
 
         return view('admin.bookings.index', [
             'bookings' => $bookings,

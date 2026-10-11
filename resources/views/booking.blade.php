@@ -96,44 +96,54 @@
                     </div>
 
                     {{-- Court Availability Table --}}
-                    <div class="lg:col-span-8">
+                    <div class="lg:col-span-8 min-w-0">
+                        @php
+                            $bookingTimeSlots = [
+                                "6:00 AM - 7:00 AM", "7:00 AM - 8:00 AM", "8:00 AM - 9:00 AM", "9:00 AM - 10:00 AM",
+                                "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 1:00 PM", "1:00 PM - 2:00 PM",
+                                "2:00 PM - 3:00 PM", "3:00 PM - 4:00 PM", "4:00 PM - 5:00 PM", "5:00 PM - 6:00 PM",
+                                "6:00 PM - 7:00 PM", "7:00 PM - 8:00 PM", "8:00 PM - 9:00 PM", "9:00 PM - 10:00 PM",
+                            ];
+                        @endphp
                         <div class="gz-panel overflow-hidden">
-                            <div style="max-height: 290px; overflow-y: auto; overflow-x: auto;">
+                            <div style="max-height: 320px; overflow-y: auto; overflow-x: auto;">
                                 <table class="gz-table" style="font-size: 12px;">
                                     <caption class="sr-only">Court availability by time slot. Click to select multiple.</caption>
                                     <thead style="position: sticky; top: 0; z-index: 2; background: var(--gz-surface);">
                                         <tr>
-                                            <th style="padding: 7px 10px;">Time</th>
-                                            <template x-for="court in courts" :key="'head'+court.id">
-                                                <th class="text-center" style="padding: 7px 8px;">
-                                                    <span class="font-semibold block" x-text="court.name"></span>
-                                                    <span x-show="court.size" class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded mt-0.5" style="background: rgba(46, 125, 50, 0.12); color: #1b5e20;" x-text="court.size"></span>
-                                                    <span class="block text-[10px] font-normal mt-0.5" style="color: var(--gz-muted);" x-text="'₱' + Number(court.rate).toFixed(2) + '/hr'"></span>
+                                            <th style="padding: 8px 10px; min-width: 135px;">Time</th>
+                                            @foreach($courts as $court)
+                                                <th class="text-center" style="padding: 8px 10px; min-width: 145px;">
+                                                    <span class="font-semibold block" style="color: var(--gz-ink);">{{ $court['name'] }}</span>
+                                                    @if(!empty($court['size']))
+                                                        <span class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded mt-0.5 whitespace-nowrap" style="background: rgba(46, 125, 50, 0.12); color: #1b5e20;">{{ $court['size'] }}</span>
+                                                    @endif
+                                                    <span class="block text-[10px] font-normal mt-0.5" style="color: var(--gz-muted);">₱{{ number_format((float) $court['rate'], 2) }}/hr</span>
                                                 </th>
-                                            </template>
+                                            @endforeach
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <template x-for="time in timeSlots" :key="time">
+                                        @foreach($bookingTimeSlots as $time)
                                             <tr>
-                                                <th scope="row" class="text-left font-semibold whitespace-nowrap" style="padding: 5px 10px;" x-text="time"></th>
-                                                <template x-for="court in courts" :key="time + '-' + court.id">
-                                                    <td style="padding: 4px;">
+                                                <th scope="row" class="text-left font-semibold whitespace-nowrap" style="padding: 5px 10px; min-width: 135px;">{{ $time }}</th>
+                                                @foreach($courts as $court)
+                                                    <td style="padding: 4px 6px; min-width: 145px;">
                                                         <button
                                                             type="button"
-                                                            @click="toggleSlot(time, court.id)"
-                                                            :disabled="isBooked(time, court.id)"
-                                                            :aria-pressed="isSelected(time, court.id) ? 'true' : 'false'"
-                                                            :title="getSlotTitle(time, court.id)"
+                                                            @click="toggleSlot(@js($time), {{ (int) $court['id'] }})"
+                                                            :disabled="isBooked(@js($time), {{ (int) $court['id'] }})"
+                                                            :aria-pressed="isSelected(@js($time), {{ (int) $court['id'] }}) ? 'true' : 'false'"
+                                                            :title="getSlotTitle(@js($time), {{ (int) $court['id'] }})"
                                                             class="w-full text-[11px] font-semibold rounded-lg transition"
                                                             style="height: 28px;"
-                                                            :style="getSlotStyle(time, court.id)"
-                                                            x-text="getSlotLabel(time, court.id)"
-                                                        ></button>
+                                                            :style="getSlotStyle(@js($time), {{ (int) $court['id'] }})"
+                                                            x-text="getSlotLabel(@js($time), {{ (int) $court['id'] }})"
+                                                        >Open</button>
                                                     </td>
-                                                </template>
+                                                @endforeach
                                             </tr>
-                                        </template>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
