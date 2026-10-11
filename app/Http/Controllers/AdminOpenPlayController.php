@@ -303,7 +303,7 @@ class AdminOpenPlayController extends Controller
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'session_type' => ['required', 'in:open_play,tournament'],
-            'date' => ['required', 'date'],
+            'date' => ['required', 'date', 'after_or_equal:today'],
             'start_time' => ['required', 'string'],
             'end_time' => ['required', 'string'],
             'allocated_courts' => ['required', 'array', 'min:1'],

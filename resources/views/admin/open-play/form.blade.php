@@ -85,6 +85,7 @@
                             type="date"
                             id="date"
                             name="date"
+                            min="{{ today()->toDateString() }}"
                             value="{{ old('date', $session->date ? $session->date->format('Y-m-d') : '') }}"
                             required
                             class="gz-input w-full text-sm"
@@ -341,6 +342,17 @@
             const conflictWarning = document.getElementById('admin-conflict-warning');
             const conflictMessage = document.getElementById('admin-conflict-message');
 
+            if (dateInput) {
+                const now = new Date();
+                const localToday = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                if (!dateInput.min || localToday > dateInput.min) {
+                    dateInput.min = localToday;
+                }
+                if (dateInput.value && dateInput.value < dateInput.min) {
+                    dateInput.value = dateInput.min;
+                }
+            }
+
             const bookedSlots = @json($bookedSlots ?? []);
             const specialSlots = @json($specialSlots ?? []);
             const courts = @json($courts ?? []);
@@ -384,6 +396,9 @@
             }
 
             function renderScheduleMatrix() {
+                if (dateInput && dateInput.min && dateInput.value && dateInput.value < dateInput.min) {
+                    dateInput.value = dateInput.min;
+                }
                 const date = dateInput.value;
                 if (!slotMatrixBody) return;
 

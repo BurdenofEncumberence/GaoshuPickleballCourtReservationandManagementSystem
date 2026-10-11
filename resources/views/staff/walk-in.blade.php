@@ -208,7 +208,23 @@
                     }
                 },
 
+                init() {
+                    const dateEl = document.getElementById('date');
+                    const now = new Date();
+                    const localToday = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                    if (dateEl && (!dateEl.min || localToday > dateEl.min)) {
+                        dateEl.min = localToday;
+                    }
+                    if (this.selectedDate && this.selectedDate < localToday) {
+                        this.selectedDate = localToday;
+                    }
+                },
+
                 onDateChange() {
+                    const dateEl = document.getElementById('date');
+                    if (dateEl && dateEl.min && this.selectedDate < dateEl.min) {
+                        this.selectedDate = dateEl.min;
+                    }
                     window.location.href = @json(route('staff.walkin.create')) + '?date=' + this.selectedDate;
                 }
             };
