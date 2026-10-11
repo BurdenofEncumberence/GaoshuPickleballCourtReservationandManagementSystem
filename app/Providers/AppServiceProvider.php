@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        if ($isVercel && ! $this->app->runningInConsole() && config('database.default') === 'sqlite') {
+        if ($isVercel && ! $this->app->runningInConsole()) {
             try {
                 if (! Schema::hasTable('users')) {
                     Artisan::call('migrate', ['--force' => true]);

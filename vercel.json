@@ -43,8 +43,6 @@
         "CACHE_STORE": "array",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
-        "DB_CONNECTION": "sqlite",
-        "DB_DATABASE": "/tmp/database.sqlite",
         "MAIL_MAILER": "smtp",
         "MAIL_HOST": "smtp.gmail.com",
         "MAIL_PORT": "587",
