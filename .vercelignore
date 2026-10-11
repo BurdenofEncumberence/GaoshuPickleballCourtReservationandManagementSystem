@@ -1,0 +1,8 @@
+/node_modules
+/vendor
+/tests
+/storage/*.key
+/.git
+/.idea
+/.vscode
+IT12_Final_Documentation_Gaoshou_Pickleball.docx
