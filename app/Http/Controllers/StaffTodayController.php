@@ -13,13 +13,32 @@ use Illuminate\View\View;
 
 class StaffTodayController extends Controller
 {
+    protected array $standardTimeSlots = [
+        '6:00 AM - 7:00 AM',
+        '7:00 AM - 8:00 AM',
+        '8:00 AM - 9:00 AM',
+        '9:00 AM - 10:00 AM',
+        '10:00 AM - 11:00 AM',
+        '11:00 AM - 12:00 PM',
+        '12:00 PM - 1:00 PM',
+        '1:00 PM - 2:00 PM',
+        '2:00 PM - 3:00 PM',
+        '3:00 PM - 4:00 PM',
+        '4:00 PM - 5:00 PM',
+        '5:00 PM - 6:00 PM',
+        '6:00 PM - 7:00 PM',
+        '7:00 PM - 8:00 PM',
+        '8:00 PM - 9:00 PM',
+        '9:00 PM - 10:00 PM',
+    ];
+
     public function index(Request $request): View
     {
         $today = Carbon::today();
         $dateParam = $request->input('date', $today->toDateString());
         $selectedDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dateParam) ? Carbon::parse($dateParam) : $today;
 
-        $query = Booking::with(['court', 'user'])
+        $query = Booking::with(['court', 'user', 'payments'])
             ->whereDate('date', $selectedDate)
             ->where('booking_status', '!=', 'cancelled')
             ->orderBy('start_time');
@@ -65,18 +84,101 @@ class StaffTodayController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        // Baseline attendance statistics for the selected date
-        $selectedDateAll = Booking::whereDate('date', $selectedDate)->where('booking_status', '!=', 'cancelled')->get();
+        // Baseline attendance statistics & full slot matrix for the selected date
+        $selectedDateAll = Booking::with(['court', 'user', 'payments'])
+            ->whereDate('date', $selectedDate)
+            ->where('booking_status', '!=', 'cancelled')
+            ->get();
+
         $totalBookingsToday = $selectedDateAll->count();
         $showCount = $selectedDateAll->where('booking_status', 'show')->count();
         $noShowCount = $selectedDateAll->filter(fn ($b) => in_array($b->booking_status, ['no_show', 'no-show']))->count();
         $awaitingCount = max(0, $totalBookingsToday - $showCount - $noShowCount);
         $uniqueCustomersCount = $selectedDateAll->pluck('user_id')->unique()->count();
 
-        // Open Play attendee counts
+        // Build Booked Slot Details map indexed by [court_id][slot_label]
+        $bookedSlotDetails = [];
+        foreach ($selectedDateAll as $b) {
+            $slotLabel = Carbon::parse($b->start_time)->format('g:i A') . ' - ' . Carbon::parse($b->end_time)->format('g:i A');
+            $latestPayment = $b->payments->sortByDesc('id')->first();
+            $courtRate = (float) ($b->court?->price_per_hour ?? 0);
+            $paidAmount = $latestPayment ? (float) $latestPayment->amount : $courtRate;
+
+            $bookedSlotDetails[$b->court_id][$slotLabel] = [
+                'booking_id' => $b->id,
+                'booking_ref' => 'BK-' . str_pad((string) $b->id, 6, '0', STR_PAD_LEFT),
+                'customer_name' => $b->user?->name ?? 'Guest Player',
+                'customer_email' => $b->user?->email ?? 'No email on file',
+                'booking_type' => $b->isWalkIn() ? 'Walk-In Counter' : 'Online Reservation',
+                'booking_status' => $b->booking_status,
+                'attendance_label' => match (true) {
+                    $b->booking_status === 'show' => 'Show (Present)',
+                    in_array($b->booking_status, ['no_show', 'no-show']) => 'No-Show (Absent)',
+                    default => 'Scheduled (Awaiting)',
+                },
+                'court_id' => $b->court_id,
+                'court_name' => $b->court?->court_name ?? 'Court',
+                'court_size' => $b->court?->size ?: 'Regular (13.41m x 6.10m)',
+                'court_rate' => $courtRate,
+                'date_formatted' => $selectedDate->format('F j, Y'),
+                'date_iso' => $selectedDate->toDateString(),
+                'is_today' => $selectedDate->isToday(),
+                'time_slot' => $slotLabel,
+                'payment_amount' => $paidAmount,
+                'payment_status' => strtoupper($latestPayment?->payment_status ?? 'PAID'),
+                'payment_method' => ucwords(str_replace('_', ' ', $latestPayment?->payment_method ?? 'cash')),
+                'payment_ref' => $latestPayment?->ref_num ?: 'N/A',
+                'cash_tendered' => $latestPayment?->cash_tendered !== null ? (float) $latestPayment->cash_tendered : null,
+                'change_amount' => $latestPayment?->change_amount !== null ? (float) $latestPayment->change_amount : null,
+                'status_update_url' => route('staff.bookings.status', $b),
+                'receipt_print_url' => route('bookings.receipt', ['booking' => $b->id, 'autoprint' => 1]),
+            ];
+        }
+
+        // Open Play attendee counts and special slot matrix details
         $openPlayAttendeesCount = 0;
+        $specialSlotDetails = [];
         foreach ($openPlaySessions as $session) {
-            $openPlayAttendeesCount += $session->registrations->whereIn('payment_status', ['paid', 'pending'])->sum('slots_count');
+            $activeRegs = $session->registrations->whereIn('payment_status', ['paid', 'pending']);
+            $sessionSlotsBooked = (int) $activeRegs->sum('slots_count');
+            $openPlayAttendeesCount += $sessionSlotsBooked;
+            $sessionRevenue = (float) $activeRegs->sum('total_fee');
+
+            $playersList = $activeRegs->map(fn ($r) => [
+                'name' => $r->player_name,
+                'email' => $r->player_email,
+                'slots_count' => $r->slots_count,
+                'total_fee' => (float) $r->total_fee,
+                'payment_status' => strtoupper($r->payment_status),
+                'payment_method' => ucwords(str_replace('_', ' ', $r->payment_method)),
+                'ref_num' => $r->ref_num,
+                'attendance_status' => $r->attendance_status,
+            ])->values()->all();
+
+            $sessionStart = Carbon::parse($session->start_time);
+            $sessionEnd = Carbon::parse($session->end_time);
+            $cur = $sessionStart->copy();
+            while ($cur->lt($sessionEnd)) {
+                $next = $cur->copy()->addHour();
+                $slotLabel = $cur->format('g:i A') . ' - ' . $next->format('g:i A');
+                foreach ($session->courts as $allocatedCourt) {
+                    $specialSlotDetails[$allocatedCourt->id][$slotLabel] = [
+                        'session_id' => $session->id,
+                        'type' => $session->session_type,
+                        'type_label' => $session->session_type === 'tournament' ? 'Tournament' : 'Open Play',
+                        'title' => $session->title,
+                        'skill_level' => $session->skill_level,
+                        'time_window' => $session->time_window,
+                        'court_name' => $allocatedCourt->court_name,
+                        'price_per_slot' => (float) $session->price_per_slot,
+                        'registered_slots' => $sessionSlotsBooked,
+                        'max_capacity' => (int) $session->max_capacity,
+                        'total_revenue' => $sessionRevenue,
+                        'players' => $playersList,
+                    ];
+                }
+                $cur = $next;
+            }
         }
 
         $courts = Court::orderBy('court_name')->get();
@@ -93,6 +195,9 @@ class StaffTodayController extends Controller
             'uniqueCustomersCount' => $uniqueCustomersCount,
             'openPlayAttendeesCount' => $openPlayAttendeesCount,
             'courts' => $courts,
+            'timeSlots' => $this->standardTimeSlots,
+            'bookedSlotDetails' => $bookedSlotDetails,
+            'specialSlotDetails' => $specialSlotDetails,
             'selectedCourt' => $request->input('court_id'),
             'selectedStatus' => $request->input('status'),
             'searchTerm' => $request->input('search'),

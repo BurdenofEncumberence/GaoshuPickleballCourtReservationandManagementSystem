@@ -38,8 +38,8 @@
         function walkInBookingData() {
             return {
                 selectedDate: @json(old('date', $selectedDate)),
-                selectedCourtId: @json((string) old('court_id', $courts->first()->id ?? '')),
-                selectedSlot: @json(old('time_slot', '')),
+                selectedCourtId: @json((string) old('court_id', $preselectedCourtId ?? $courts->first()->id ?? '')),
+                selectedSlot: @json(old('time_slot', $preselectedSlot ?? '')),
                 selectedPaymentMethod: @json(old('payment_method', 'cash')),
                 attendanceStatus: @json(old('attendance_status', 'show')),
                 firstName: @json(old('first_name', '')),
@@ -50,8 +50,10 @@
 
                 courts: @json($courts),
                 bookedSlots: @json($bookedSlots),
+                bookedSlotDetails: @json($bookedSlotDetails ?? []),
                 specialSlots: @json($specialSlots ?? []),
                 recentPlayers: @json($recentPlayers),
+                activeBooking: null,
 
                 get currentCourt() {
                     return this.courts.find(c => c.id == this.selectedCourtId) || null;
@@ -90,28 +92,49 @@
                     this.cashTendered = Number(val).toFixed(2);
                 },
 
-                getSpecialSlot(slot) {
-                    const courtSpecial = this.specialSlots[this.selectedCourtId] || {};
+                getSpecialSlotForCourt(courtId, slot) {
+                    const courtSpecial = this.specialSlots[courtId] || {};
                     return courtSpecial[slot] || null;
                 },
 
-                isSlotBooked(slot) {
-                    const courtBookings = this.bookedSlots[this.selectedCourtId] || [];
+                isSlotBookedForCourt(courtId, slot) {
+                    const courtBookings = this.bookedSlots[courtId] || [];
                     return courtBookings.includes(slot);
                 },
 
-                getSlotLabel(slot) {
-                    const special = this.getSpecialSlot(slot);
+                isSlotSelectedForCourt(courtId, slot) {
+                    return String(this.selectedCourtId) === String(courtId) && this.selectedSlot === slot;
+                },
+
+                getSlotLabelForCourt(courtId, slot) {
+                    const special = this.getSpecialSlotForCourt(courtId, slot);
                     if (special) {
                         return special.type === 'tournament' ? 'Tournament' : 'Open Play';
                     }
-                    if (this.isSlotBooked(slot)) {
+                    if (this.isSlotBookedForCourt(courtId, slot)) {
                         return 'Booked';
                     }
-                    if (this.selectedSlot === slot) {
+                    if (this.isSlotSelectedForCourt(courtId, slot)) {
                         return 'Selected';
                     }
                     return 'Open';
+                },
+
+                handleCellClick(courtId, slot) {
+                    const bookedDetail = (this.bookedSlotDetails[courtId] || {})[slot] || null;
+                    if (bookedDetail) {
+                        this.activeBooking = bookedDetail;
+                        return;
+                    }
+                    if (this.isSlotBookedForCourt(courtId, slot)) {
+                        return;
+                    }
+                    this.selectedCourtId = String(courtId);
+                    this.selectedSlot = slot;
+                },
+
+                closeInspector() {
+                    this.activeBooking = null;
                 },
 
                 selectPlayer(event) {
@@ -132,7 +155,7 @@
         }
     </script>
 
-    <div x-data="walkInBookingData()">
+    <div x-data="walkInBookingData()" @keydown.escape.window="closeInspector()">
         <form method="POST" action="{{ route('staff.walkin.store') }}" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             @csrf
 
@@ -178,49 +201,115 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Select the court facility to book.</p>
+                            <p class="text-[11px] mt-1" style="color: var(--gz-muted);">Or click directly on any court column in the schedule matrix below.</p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Time Slot Picker --}}
-                <div class="gz-panel gz-panel-body">
-                    <h2 class="gz-font-display font-bold text-base mb-2 flex items-center justify-between">
-                        <span>2. Choose Available Time Slot</span>
+                {{-- Multi-Court Time Slot Schedule Matrix --}}
+                <div class="gz-panel overflow-hidden">
+                    <div class="p-4 border-b flex items-center justify-between flex-wrap gap-2" style="border-color: var(--gz-border);">
+                        <div>
+                            <h2 class="gz-font-display font-bold text-base">
+                                2. Choose Available Time Slot
+                            </h2>
+                            <p class="text-xs mt-0.5" style="color: var(--gz-muted);">
+                                Click an <strong>Open</strong> slot to select it, or click any <strong>Booked</strong> slot to view who booked that court time and how much they paid.
+                            </p>
+                        </div>
                         <template x-if="selectedSlot">
-                            <span class="gz-badge gz-badge-success" x-text="'Selected: ' + selectedSlot"></span>
+                            <span class="gz-badge gz-badge-success" x-text="(currentCourt ? currentCourt.court_name + ' · ' : '') + selectedSlot"></span>
                         </template>
-                    </h2>
-                    <p class="text-xs mb-4" style="color: var(--gz-muted);">
-                        Slots already booked for this court on <span class="font-bold text-[color:var(--gz-ink)]" x-text="selectedDate"></span> are disabled automatically.
-                    </p>
+                    </div>
 
                     <input type="hidden" name="time_slot" :value="selectedSlot" required>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        @foreach($timeSlots as $slot)
-                            <button
-                                type="button"
-                                @click="if (!isSlotBooked('{{ $slot }}')) { selectedSlot = '{{ $slot }}'; }"
-                                :disabled="isSlotBooked('{{ $slot }}')"
-                                :class="{
-                                    'opacity-80 cursor-not-allowed bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold': getSpecialSlot('{{ $slot }}') && getSpecialSlot('{{ $slot }}').type !== 'tournament',
-                                    'opacity-80 cursor-not-allowed bg-amber-50 border-amber-300 text-amber-800 font-semibold': getSpecialSlot('{{ $slot }}') && getSpecialSlot('{{ $slot }}').type === 'tournament',
-                                    'opacity-40 cursor-not-allowed bg-gray-200 line-through text-gray-500': isSlotBooked('{{ $slot }}') && !getSpecialSlot('{{ $slot }}'),
-                                    'border-2 border-[color:var(--red)] ring-2 ring-[color:var(--red)]/20 font-bold bg-white text-[color:var(--red)]': selectedSlot === '{{ $slot }}' && !isSlotBooked('{{ $slot }}'),
-                                    'bg-[color:var(--gz-surface)] hover:border-[color:var(--gz-ink)] text-[color:var(--gz-ink)]': selectedSlot !== '{{ $slot }}' && !isSlotBooked('{{ $slot }}')
-                                }"
-                                class="p-2.5 text-xs text-center border transition-all flex flex-col items-center justify-center min-h-[58px]"
-                                style="border-color: var(--gz-border);"
-                            >
-                                <span class="font-mono font-medium">{{ $slot }}</span>
-                                <span class="text-[10px] mt-0.5" x-text="getSlotLabel('{{ $slot }}')"></span>
-                            </button>
-                        @endforeach
+                    <div style="max-height: 360px; overflow-y: auto; overflow-x: auto;">
+                        <table class="gz-table" style="font-size: 12px;">
+                            <thead style="position: sticky; top: 0; z-index: 2; background: var(--gz-surface);">
+                                <tr>
+                                    <th class="text-left" style="padding: 10px 14px; min-width: 145px;">TIME</th>
+                                    @foreach($courts as $court)
+                                        <th class="text-left" style="padding: 10px 12px; min-width: 160px;">
+                                            <span class="font-bold uppercase tracking-wide block text-xs" style="color: var(--gz-ink);">
+                                                {{ $court->court_name }}
+                                            </span>
+                                            @if($court->size)
+                                                <span class="inline-block text-[10px] font-semibold uppercase px-2 py-0.5 rounded mt-1" style="background: rgba(46, 125, 50, 0.12); color: #1b5e20;">
+                                                    {{ $court->size }}
+                                                </span>
+                                            @endif
+                                            <span class="block text-[11px] font-normal mt-1" style="color: var(--gz-muted);">
+                                                ₱{{ number_format($court->price_per_hour, 2) }}/HR
+                                            </span>
+                                        </th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($timeSlots as $slot)
+                                    <tr>
+                                        <th scope="row" class="text-left font-bold whitespace-nowrap" style="padding: 6px 14px; color: var(--gz-muted);">
+                                            {{ $slot }}
+                                        </th>
+                                        @foreach($courts as $court)
+                                            <td style="padding: 4px 8px;">
+                                                <button
+                                                    type="button"
+                                                    @click="handleCellClick({{ $court->id }}, @js($slot))"
+                                                    :disabled="getSpecialSlotForCourt({{ $court->id }}, @js($slot)) !== null"
+                                                    class="w-full text-xs font-semibold rounded-lg transition flex items-center justify-center border"
+                                                    style="height: 32px;"
+                                                    :style="
+                                                        getSpecialSlotForCourt({{ $court->id }}, @js($slot))
+                                                            ? (getSpecialSlotForCourt({{ $court->id }}, @js($slot)).type === 'tournament'
+                                                                ? 'background: rgba(245, 158, 11, 0.22); border-color: rgba(245, 158, 11, 0.65); color: #B45309; cursor: not-allowed;'
+                                                                : 'background: rgba(229, 168, 35, 0.2); border-color: rgba(229, 168, 35, 0.6); color: #A67512; cursor: not-allowed;')
+                                                            : (isSlotBookedForCourt({{ $court->id }}, @js($slot))
+                                                                ? 'background: var(--gz-bg); border-color: var(--gz-border); color: var(--gz-muted); font-weight: 700; cursor: pointer;'
+                                                                : (isSlotSelectedForCourt({{ $court->id }}, @js($slot))
+                                                                    ? 'background: var(--gz-pop); border-color: var(--gz-pop-dark); color: #12150F; font-weight: 800;'
+                                                                    : 'background: var(--gz-surface); border-color: var(--gz-border); color: var(--gz-ink); cursor: pointer;'))
+                                                    "
+                                                    x-text="getSlotLabelForCourt({{ $court->id }}, @js($slot))"
+                                                ></button>
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-3 border-t flex flex-wrap items-center justify-between gap-3 text-[11px]" style="border-color: var(--gz-border); background: var(--gz-bg);">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded border" style="background: var(--gz-surface); border-color: var(--gz-border);"></span>
+                                <span style="color: var(--gz-muted);">Open</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded" style="background: var(--gz-pop);"></span>
+                                <span style="color: var(--gz-muted);">Selected</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded border" style="background: var(--gz-bg); border-color: var(--gz-border);"></span>
+                                <span style="color: var(--gz-muted);">Booked (Click to inspect customer &amp; payment)</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded border" style="background: rgba(229, 168, 35, 0.2); border-color: rgba(229, 168, 35, 0.6);"></span>
+                                <span class="font-semibold" style="color: #A67512;">Open Play</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded border" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.6);"></span>
+                                <span class="font-semibold" style="color: #B45309;">Tournament</span>
+                            </span>
+                        </div>
                     </div>
 
                     @error('time_slot')
-                        <p class="gz-error mt-2" role="alert">{{ $message }}</p>
+                        <div class="p-3 border-t" style="border-color: var(--gz-border);">
+                            <p class="gz-error" role="alert">{{ $message }}</p>
+                        </div>
                     @enderror
                 </div>
 
@@ -529,5 +618,112 @@
                 </div>
             </div>
         </form>
+
+        {{-- Modal: Booked Slot Customer & Payment Details Inspector --}}
+        <div
+            x-show="activeBooking !== null"
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style="background: rgba(18, 21, 15, 0.65); backdrop-filter: blur(2px);"
+            @click.self="closeInspector()"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div class="gz-panel w-full max-w-lg rounded-2xl border-2 overflow-hidden shadow-2xl" style="background: var(--gz-surface); border-color: var(--gz-ink);">
+                <div class="p-4 sm:p-5 border-b flex items-center justify-between gap-3" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-[#E5A823] text-[#12150F]">
+                                Booked Appointment
+                            </span>
+                            <span class="font-mono text-xs font-bold" style="color: var(--gz-muted);" x-text="'#' + (activeBooking?.booking_ref || '')"></span>
+                        </div>
+                        <h3 class="gz-font-display font-bold text-lg mt-1" style="color: var(--gz-ink);" x-text="(activeBooking?.court_name || '') + ' · ' + (activeBooking?.time_slot || '')"></h3>
+                        <p class="text-xs" style="color: var(--gz-muted);" x-text="(activeBooking?.date_formatted || '') + ' · ' + (activeBooking?.court_size || '')"></p>
+                    </div>
+                    <button type="button" @click="closeInspector()" class="gz-btn-outline gz-btn-sm px-2.5 py-1 text-xs font-bold">✕</button>
+                </div>
+
+                <div class="p-4 sm:p-5 space-y-4 text-xs">
+                    <div class="p-3.5 rounded-xl border" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                        <div class="text-[10px] font-bold uppercase tracking-wider mb-2" style="color: var(--gz-pop-dark);">
+                            Booked By (Customer / Player)
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Player Name</span>
+                                <span class="font-bold text-sm block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.customer_name"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Email Address</span>
+                                <span class="font-semibold block mt-0.5 break-all" style="color: var(--gz-ink);" x-text="activeBooking?.customer_email"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Reservation Channel</span>
+                                <span class="font-semibold block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.booking_type"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Attendance Status</span>
+                                <span class="font-bold block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.attendance_label"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl border" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider" style="color: var(--gz-pop-dark);">
+                                Payment &amp; Transaction Summary
+                            </span>
+                            <span
+                                class="gz-badge text-[10px] font-bold uppercase"
+                                :class="activeBooking?.payment_status === 'PAID' ? 'gz-badge-success' : 'gz-badge-warning'"
+                                x-text="activeBooking?.payment_status"
+                            ></span>
+                        </div>
+
+                        <div class="space-y-1.5 pt-1">
+                            <div class="flex items-center justify-between">
+                                <span style="color: var(--gz-muted);">Amount Paid / Total Due:</span>
+                                <span class="font-mono font-extrabold text-base" style="color: var(--gz-ink);" x-text="'₱' + Number(activeBooking?.payment_amount || 0).toFixed(2)"></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span style="color: var(--gz-muted);">Payment Method:</span>
+                                <span class="font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_method"></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span style="color: var(--gz-muted);">Payment Reference:</span>
+                                <span class="font-mono font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_ref"></span>
+                            </div>
+
+                            <template x-if="activeBooking?.cash_tendered !== null && activeBooking?.cash_tendered !== undefined">
+                                <div class="pt-2 mt-2 border-t space-y-1" style="border-color: var(--gz-border);">
+                                    <div class="flex items-center justify-between">
+                                        <span style="color: var(--gz-muted);">Cash Tendered:</span>
+                                        <span class="font-mono font-bold" style="color: var(--gz-ink);" x-text="'₱' + Number(activeBooking?.cash_tendered || 0).toFixed(2)"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span style="color: var(--gz-muted);">Change Returned:</span>
+                                        <span class="font-mono font-bold text-emerald-700" x-text="'₱' + Number(activeBooking?.change_amount || 0).toFixed(2)"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t flex items-center justify-between gap-2" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                    <button type="button" @click="closeInspector()" class="gz-btn-outline gz-btn-sm text-xs py-1.5 px-3">
+                        Close
+                    </button>
+                    <a
+                        :href="activeBooking?.receipt_print_url || '#'"
+                        target="_blank"
+                        class="gz-btn-primary gz-btn-sm text-xs py-1.5 px-3 inline-flex items-center gap-1.5"
+                    >
+                        <span>Print Receipt</span>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </x-staff-layout>

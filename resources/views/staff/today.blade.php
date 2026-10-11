@@ -205,6 +205,355 @@
         </form>
     </div>
 
+    {{-- Interactive Court Schedule Matrix & Click-to-Inspect Modal --}}
+    <div
+        x-data="{
+            bookedSlotDetails: @js($bookedSlotDetails ?? []),
+            specialSlotDetails: @js($specialSlotDetails ?? []),
+            activeBooking: null,
+            activeSpecial: null,
+            openBookingInspector(courtId, slot) {
+                const detail = (this.bookedSlotDetails[courtId] || {})[slot] || null;
+                if (detail) {
+                    this.activeSpecial = null;
+                    this.activeBooking = detail;
+                }
+            },
+            openSpecialInspector(courtId, slot) {
+                const special = (this.specialSlotDetails[courtId] || {})[slot] || null;
+                if (special) {
+                    this.activeBooking = null;
+                    this.activeSpecial = special;
+                }
+            },
+            closeInspector() {
+                this.activeBooking = null;
+                this.activeSpecial = null;
+            }
+        }"
+        @keydown.escape.window="closeInspector()"
+        class="gz-panel mb-6 print:hidden overflow-hidden"
+    >
+        <div class="gz-panel-header">
+            <div>
+                <h2 class="gz-font-display font-bold text-base">
+                    Court Schedule Matrix — {{ $selectedDate->format('F j, Y') }}
+                </h2>
+                <p class="text-xs mt-0.5" style="color: var(--gz-muted);">
+                    Booked slots display as <strong>Booked</strong>. Click any <strong>Booked</strong> slot to view who booked that court time, how much they paid, payment method, and attendance.
+                </p>
+            </div>
+            <span class="gz-badge gz-badge-neutral">
+                {{ $courts->count() }} Courts · {{ count($timeSlots ?? []) }} Time Slots
+            </span>
+        </div>
+
+        <div style="max-height: 390px; overflow-y: auto; overflow-x: auto;">
+            <table class="gz-table" style="font-size: 12px;">
+                <thead style="position: sticky; top: 0; z-index: 2; background: var(--gz-surface);">
+                    <tr>
+                        <th class="text-left" style="padding: 10px 14px; min-width: 145px;">TIME</th>
+                        @foreach($courts as $court)
+                            <th class="text-left" style="padding: 10px 12px; min-width: 165px;">
+                                <span class="font-bold uppercase tracking-wide block text-xs" style="color: var(--gz-ink);">
+                                    {{ $court->court_name }}
+                                </span>
+                                @if($court->size)
+                                    <span class="inline-block text-[10px] font-semibold uppercase px-2 py-0.5 rounded mt-1" style="background: rgba(46, 125, 50, 0.12); color: #1b5e20;">
+                                        {{ $court->size }}
+                                    </span>
+                                @endif
+                                <span class="block text-[11px] font-normal mt-1" style="color: var(--gz-muted);">
+                                    ₱{{ number_format($court->price_per_hour, 2) }}/HR
+                                </span>
+                            </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($timeSlots ?? [] as $slot)
+                        <tr>
+                            <th scope="row" class="text-left font-bold whitespace-nowrap" style="padding: 7px 14px; color: var(--gz-muted);">
+                                {{ $slot }}
+                            </th>
+                            @foreach($courts as $court)
+                                @php
+                                    $slotBooking = $bookedSlotDetails[$court->id][$slot] ?? null;
+                                    $slotSpecial = $specialSlotDetails[$court->id][$slot] ?? null;
+                                @endphp
+                                <td style="padding: 5px 8px;">
+                                    @if($slotBooking)
+                                        <button
+                                            type="button"
+                                            @click="openBookingInspector({{ $court->id }}, @js($slot))"
+                                            class="w-full text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 border cursor-pointer hover:opacity-90"
+                                            style="height: 34px; background: var(--gz-pop); color: #12150F; border-color: var(--gz-pop-dark); box-shadow: 0 1px 2px rgba(18,21,15,0.12);"
+                                            title="Click to inspect who booked {{ $court->court_name }} ({{ $slot }}) and payment details"
+                                        >
+                                            <span>Booked</span>
+                                        </button>
+                                    @elseif($slotSpecial)
+                                        <button
+                                            type="button"
+                                            @click="openSpecialInspector({{ $court->id }}, @js($slot))"
+                                            class="w-full text-xs font-bold rounded-lg transition flex items-center justify-center gap-1 border cursor-pointer hover:opacity-90"
+                                            style="height: 34px; {{ $slotSpecial['type'] === 'tournament' ? 'background: rgba(245, 158, 11, 0.22); border-color: rgba(245, 158, 11, 0.65); color: #B45309;' : 'background: rgba(229, 168, 35, 0.2); border-color: rgba(229, 168, 35, 0.6); color: #A67512;' }}"
+                                            title="Click to inspect {{ $slotSpecial['type_label'] }} session details"
+                                        >
+                                            <span>{{ $slotSpecial['type_label'] }}</span>
+                                        </button>
+                                    @else
+                                        <a
+                                            href="{{ route('staff.walkin.create', ['date' => $selectedDate->toDateString(), 'court_id' => $court->id, 'time_slot' => $slot]) }}"
+                                            class="w-full text-xs font-semibold rounded-lg transition flex items-center justify-center border hover:border-[#12150F]"
+                                            style="height: 34px; background: var(--gz-surface); color: var(--gz-ink); border-color: var(--gz-border);"
+                                            title="Open slot — click to book a walk-in for {{ $court->court_name }} at {{ $slot }}"
+                                        >
+                                            Open
+                                        </a>
+                                    @endif
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Schedule Matrix Legend --}}
+        <div class="p-3 border-t flex flex-wrap items-center justify-between gap-3 text-[11px]" style="border-color: var(--gz-border); background: var(--gz-bg);">
+            <div class="flex items-center gap-4 flex-wrap">
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded border" style="background: var(--gz-surface); border-color: var(--gz-border);"></span>
+                    <span style="color: var(--gz-muted);">Open (Click to book walk-in)</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded border" style="background: var(--gz-pop); border-color: var(--gz-pop-dark);"></span>
+                    <span class="font-semibold" style="color: var(--gz-ink);">Booked (Click to view customer &amp; payment details)</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded border" style="background: rgba(229, 168, 35, 0.2); border-color: rgba(229, 168, 35, 0.6);"></span>
+                    <span class="font-semibold" style="color: #A67512;">Open Play</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded border" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.6);"></span>
+                    <span class="font-semibold" style="color: #B45309;">Tournament</span>
+                </span>
+            </div>
+            <span class="text-[11px]" style="color: var(--gz-muted);">
+                Click any <strong>Booked</strong> cell to inspect customer &amp; payment details
+            </span>
+        </div>
+
+        {{-- Modal: Booked Slot Customer & Payment Details Inspector --}}
+        <div
+            x-show="activeBooking !== null"
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style="background: rgba(18, 21, 15, 0.65); backdrop-filter: blur(2px);"
+            @click.self="closeInspector()"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="slot-inspector-title"
+        >
+            <div class="gz-panel w-full max-w-lg rounded-2xl border-2 overflow-hidden shadow-2xl" style="background: var(--gz-surface); border-color: var(--gz-ink);">
+                {{-- Modal Header --}}
+                <div class="p-4 sm:p-5 border-b flex items-center justify-between gap-3" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-[#E5A823] text-[#12150F]">
+                                Booked Appointment
+                            </span>
+                            <span class="font-mono text-xs font-bold" style="color: var(--gz-muted);" x-text="'#' + (activeBooking?.booking_ref || '')"></span>
+                        </div>
+                        <h3 id="slot-inspector-title" class="gz-font-display font-bold text-lg mt-1" style="color: var(--gz-ink);" x-text="(activeBooking?.court_name || '') + ' · ' + (activeBooking?.time_slot || '')"></h3>
+                        <p class="text-xs" style="color: var(--gz-muted);" x-text="(activeBooking?.date_formatted || '') + ' · ' + (activeBooking?.court_size || '')"></p>
+                    </div>
+                    <button
+                        type="button"
+                        @click="closeInspector()"
+                        class="gz-btn-outline gz-btn-sm px-2.5 py-1 text-xs font-bold"
+                        aria-label="Close booking details modal"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {{-- Modal Body --}}
+                <div class="p-4 sm:p-5 space-y-4 text-xs">
+                    {{-- Who Booked Section --}}
+                    <div class="p-3.5 rounded-xl border" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                        <div class="text-[10px] font-bold uppercase tracking-wider mb-2" style="color: var(--gz-pop-dark);">
+                            Booked By (Customer / Player)
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Player Name</span>
+                                <span class="font-bold text-sm block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.customer_name"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Email Address</span>
+                                <span class="font-semibold block mt-0.5 break-all" style="color: var(--gz-ink);" x-text="activeBooking?.customer_email"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Reservation Channel</span>
+                                <span class="font-semibold block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.booking_type"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Attendance Status</span>
+                                <span class="font-bold block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.attendance_label"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Payment & Financial Breakdown Section --}}
+                    <div class="p-3.5 rounded-xl border" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider" style="color: var(--gz-pop-dark);">
+                                Payment &amp; Transaction Summary
+                            </span>
+                            <span
+                                class="gz-badge text-[10px] font-bold uppercase"
+                                :class="activeBooking?.payment_status === 'PAID' ? 'gz-badge-success' : 'gz-badge-warning'"
+                                x-text="activeBooking?.payment_status"
+                            ></span>
+                        </div>
+
+                        <div class="space-y-1.5 pt-1">
+                            <div class="flex items-center justify-between">
+                                <span style="color: var(--gz-muted);">Amount Paid / Total Due:</span>
+                                <span class="font-mono font-extrabold text-base" style="color: var(--gz-ink);" x-text="'₱' + Number(activeBooking?.payment_amount || 0).toFixed(2)"></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span style="color: var(--gz-muted);">Payment Method:</span>
+                                <span class="font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_method"></span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span style="color: var(--gz-muted);">Payment Reference:</span>
+                                <span class="font-mono font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_ref"></span>
+                            </div>
+
+                            <template x-if="activeBooking?.cash_tendered !== null && activeBooking?.cash_tendered !== undefined">
+                                <div class="pt-2 mt-2 border-t space-y-1" style="border-color: var(--gz-border);">
+                                    <div class="flex items-center justify-between">
+                                        <span style="color: var(--gz-muted);">Cash Tendered by Customer:</span>
+                                        <span class="font-mono font-bold" style="color: var(--gz-ink);" x-text="'₱' + Number(activeBooking?.cash_tendered || 0).toFixed(2)"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span style="color: var(--gz-muted);">Change Returned:</span>
+                                        <span class="font-mono font-bold text-emerald-700" x-text="'₱' + Number(activeBooking?.change_amount || 0).toFixed(2)"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Modal Footer Actions --}}
+                <div class="p-4 border-t flex flex-wrap items-center justify-between gap-2" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button
+                            type="button"
+                            @click="const id = activeBooking?.booking_id; closeInspector(); if (id) { $dispatch('open-booking-receipt', id); }"
+                            class="gz-btn-outline gz-btn-sm text-xs py-1.5 px-3"
+                        >
+                            View Receipt
+                        </button>
+                        <a
+                            :href="activeBooking?.receipt_print_url || '#'"
+                            target="_blank"
+                            class="gz-btn-primary gz-btn-sm text-xs py-1.5 px-3 inline-flex items-center gap-1.5"
+                        >
+                            <span>Print Receipt</span>
+                        </a>
+                    </div>
+
+                    <template x-if="activeBooking?.is_today">
+                        <div class="flex items-center gap-1.5">
+                            <form method="POST" :action="activeBooking?.status_update_url || '#'" class="inline">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="attendance_status" value="show">
+                                <button type="submit" class="gz-btn-success gz-btn-sm text-xs py-1.5 px-2.5">
+                                    Mark Show
+                                </button>
+                            </form>
+                            <form method="POST" :action="activeBooking?.status_update_url || '#'" class="inline">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="attendance_status" value="no_show">
+                                <button type="submit" class="gz-btn-danger gz-btn-sm text-xs py-1.5 px-2.5">
+                                    Mark No-Show
+                                </button>
+                            </form>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal: Open Play / Tournament Slot Details Inspector --}}
+        <div
+            x-show="activeSpecial !== null"
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style="background: rgba(18, 21, 15, 0.65); backdrop-filter: blur(2px);"
+            @click.self="closeInspector()"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div class="gz-panel w-full max-w-lg rounded-2xl border-2 overflow-hidden shadow-2xl" style="background: var(--gz-surface); border-color: var(--gz-ink);">
+                <div class="p-4 sm:p-5 border-b flex items-center justify-between gap-3" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                    <div>
+                        <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-[#E5A823] text-[#12150F]" x-text="activeSpecial?.type_label"></span>
+                        <h3 class="gz-font-display font-bold text-lg mt-1" style="color: var(--gz-ink);" x-text="activeSpecial?.title"></h3>
+                        <p class="text-xs" style="color: var(--gz-muted);" x-text="(activeSpecial?.court_name || '') + ' · ' + (activeSpecial?.time_window || '') + ' · ' + (activeSpecial?.skill_level || '')"></p>
+                    </div>
+                    <button type="button" @click="closeInspector()" class="gz-btn-outline gz-btn-sm px-2.5 py-1 text-xs font-bold">✕</button>
+                </div>
+                <div class="p-4 sm:p-5 space-y-4 text-xs">
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="p-2.5 rounded-lg border" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                            <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Slots Booked</span>
+                            <span class="font-bold text-sm" x-text="(activeSpecial?.registered_slots || 0) + ' / ' + (activeSpecial?.max_capacity || 0)"></span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                            <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Fee / Slot</span>
+                            <span class="font-mono font-bold text-sm" x-text="'₱' + Number(activeSpecial?.price_per_slot || 0).toFixed(2)"></span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                            <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Total Fees</span>
+                            <span class="font-mono font-bold text-sm" x-text="'₱' + Number(activeSpecial?.total_revenue || 0).toFixed(2)"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-wider mb-1.5" style="color: var(--gz-pop-dark);">
+                            Registered Players (<span x-text="(activeSpecial?.players || []).length"></span>)
+                        </div>
+                        <div class="max-h-44 overflow-y-auto divide-y border rounded-xl" style="border-color: var(--gz-border); background: var(--gz-bg);">
+                            <template x-for="(p, idx) in (activeSpecial?.players || [])" :key="idx">
+                                <div class="p-2.5 flex items-center justify-between gap-2">
+                                    <div>
+                                        <div class="font-bold" x-text="p.name"></div>
+                                        <div class="text-[11px]" style="color: var(--gz-muted);" x-text="p.email + ' · ' + p.slots_count + ' slot(s)'"></div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-mono font-bold" x-text="'₱' + Number(p.total_fee || 0).toFixed(2)"></div>
+                                        <div class="text-[10px]" style="color: var(--gz-muted);" x-text="p.payment_status + ' (' + p.payment_method + ')'"></div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="!(activeSpecial?.players || []).length">
+                                <div class="p-3 text-center italic" style="color: var(--gz-muted);">No players registered yet.</div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Main Customers Table --}}
     <div class="gz-panel">
         <div class="gz-panel-header">

@@ -55,20 +55,49 @@ class StaffWalkInController extends Controller
             ->orderBy('court_name')
             ->get();
 
-        $existingBookings = Booking::with('user')
+        $existingBookings = Booking::with(['user', 'court', 'payments'])
             ->where('date', $selectedDate)
             ->where('booking_status', '!=', 'cancelled')
             ->get();
 
-        // Map booked slots per court
+        // Map booked slots per court and build detailed inspector payload
         $bookedSlots = [];
+        $bookedSlotDetails = [];
         foreach ($existingBookings as $b) {
             $slotStr = Carbon::parse($b->start_time)->format('g:i A') . ' - ' . Carbon::parse($b->end_time)->format('g:i A');
             $bookedSlots[$b->court_id][] = $slotStr;
+
+            $latestPayment = $b->payments->sortByDesc('id')->first();
+            $courtRate = (float) ($b->court?->price_per_hour ?? 0);
+            $paidAmount = $latestPayment ? (float) $latestPayment->amount : $courtRate;
+
+            $bookedSlotDetails[$b->court_id][$slotStr] = [
+                'booking_id' => $b->id,
+                'booking_ref' => 'BK-' . str_pad((string) $b->id, 6, '0', STR_PAD_LEFT),
+                'customer_name' => $b->user?->name ?? 'Guest Player',
+                'customer_email' => $b->user?->email ?? 'No email on file',
+                'booking_type' => $b->isWalkIn() ? 'Walk-In Counter' : 'Online Reservation',
+                'attendance_label' => match (true) {
+                    $b->booking_status === 'show' => 'Show (Present)',
+                    in_array($b->booking_status, ['no_show', 'no-show']) => 'No-Show (Absent)',
+                    default => 'Scheduled (Awaiting)',
+                },
+                'court_name' => $b->court?->court_name ?? 'Court',
+                'court_size' => $b->court?->size ?: 'Regular (13.41m x 6.10m)',
+                'date_formatted' => Carbon::parse($selectedDate)->format('F j, Y'),
+                'time_slot' => $slotStr,
+                'payment_amount' => $paidAmount,
+                'payment_status' => strtoupper($latestPayment?->payment_status ?? 'PAID'),
+                'payment_method' => ucwords(str_replace('_', ' ', $latestPayment?->payment_method ?? 'cash')),
+                'payment_ref' => $latestPayment?->ref_num ?: 'N/A',
+                'cash_tendered' => $latestPayment?->cash_tendered !== null ? (float) $latestPayment->cash_tendered : null,
+                'change_amount' => $latestPayment?->change_amount !== null ? (float) $latestPayment->change_amount : null,
+                'receipt_print_url' => route('bookings.receipt', ['booking' => $b->id, 'autoprint' => 1]),
+            ];
         }
 
         // Include courts allocated to active Open Play / Tournament sessions
-        $openPlaySessions = \App\Models\OpenPlaySession::with('courts')
+        $openPlaySessions = \App\Models\OpenPlaySession::with(['courts', 'registrations.user'])
             ->whereDate('date', $selectedDate)
             ->whereIn('session_status', ['scheduled', 'approved_pending_payment', 'ongoing'])
             ->get();
@@ -77,6 +106,9 @@ class StaffWalkInController extends Controller
         foreach ($openPlaySessions as $session) {
             $sessionStart = Carbon::parse($session->start_time);
             $sessionEnd = Carbon::parse($session->end_time);
+            $activeRegs = $session->registrations->whereIn('payment_status', ['paid', 'pending']);
+            $sessionSlotsBooked = (int) $activeRegs->sum('slots_count');
+            $sessionRevenue = (float) $activeRegs->sum('total_fee');
 
             $cur = $sessionStart->copy();
             while ($cur->lt($sessionEnd)) {
@@ -86,7 +118,15 @@ class StaffWalkInController extends Controller
                     $bookedSlots[$allocatedCourt->id][] = $slotStr;
                     $specialSlots[$allocatedCourt->id][$slotStr] = [
                         'type' => $session->session_type,
+                        'type_label' => $session->session_type === 'tournament' ? 'Tournament' : 'Open Play',
                         'title' => $session->title,
+                        'skill_level' => $session->skill_level,
+                        'time_window' => $session->time_window,
+                        'court_name' => $allocatedCourt->court_name,
+                        'price_per_slot' => (float) $session->price_per_slot,
+                        'registered_slots' => $sessionSlotsBooked,
+                        'max_capacity' => (int) $session->max_capacity,
+                        'total_revenue' => $sessionRevenue,
                     ];
                 }
                 $cur = $next;
@@ -103,7 +143,10 @@ class StaffWalkInController extends Controller
             'courts' => $courts,
             'timeSlots' => $this->standardTimeSlots,
             'selectedDate' => $selectedDate,
+            'preselectedCourtId' => $request->query('court_id'),
+            'preselectedSlot' => $request->query('time_slot'),
             'bookedSlots' => $bookedSlots,
+            'bookedSlotDetails' => $bookedSlotDetails,
             'specialSlots' => $specialSlots,
             'recentPlayers' => $recentPlayers,
         ]);

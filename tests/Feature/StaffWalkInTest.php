@@ -418,3 +418,57 @@ test('staff walk-in with cash tenders less than amount due fails validation', fu
     expect(Booking::where('court_id', $court->id)->count())->toBe(0);
 });
 
+test('staff schedule matrix displays booked slots as Booked and provides customer and payment details on click', function () {
+    $staff = User::factory()->create(['role' => 'staff']);
+    $player = User::factory()->create([
+        'role' => 'player',
+        'name' => 'Carlos Alcaraz',
+        'email' => 'carlos@example.com',
+    ]);
+
+    $court = Court::create([
+        'court_name' => 'Court 1',
+        'size' => 'Regular (13.41m x 6.10m)',
+        'price_per_hour' => 500,
+        'court_status' => 'available',
+    ]);
+
+    $booking = Booking::create([
+        'user_id' => $player->id,
+        'court_id' => $court->id,
+        'date' => today()->toDateString(),
+        'start_time' => '08:00:00',
+        'end_time' => '09:00:00',
+        'booking_status' => 'confirmed',
+        'booking_type' => 'online',
+    ]);
+
+    Payment::create([
+        'booking_id' => $booking->id,
+        'payment_method' => 'paymongo_gcash',
+        'payment_status' => 'paid',
+        'amount' => 525.00,
+        'ref_num' => 'PM-GCASH-9988',
+        'date' => today()->toDateString(),
+        'time' => '08:00:00',
+    ]);
+
+    $response = $this->actingAs($staff)->get(route('staff.today'));
+    $response->assertOk();
+    $response->assertSee('Court Schedule Matrix');
+    $response->assertSee('8:00 AM - 9:00 AM');
+    $response->assertSee('Booked');
+
+    $bookedSlotDetails = $response->viewData('bookedSlotDetails');
+    expect($bookedSlotDetails)->toHaveKey($court->id);
+    expect($bookedSlotDetails[$court->id])->toHaveKey('8:00 AM - 9:00 AM');
+
+    $slotDetail = $bookedSlotDetails[$court->id]['8:00 AM - 9:00 AM'];
+    expect($slotDetail['customer_name'])->toBe('Carlos Alcaraz');
+    expect($slotDetail['customer_email'])->toBe('carlos@example.com');
+    expect($slotDetail['payment_amount'])->toBe(525.00);
+    expect($slotDetail['payment_status'])->toBe('PAID');
+    expect($slotDetail['payment_ref'])->toBe('PM-GCASH-9988');
+});
+
+
