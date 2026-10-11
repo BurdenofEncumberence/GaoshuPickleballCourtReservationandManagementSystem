@@ -1,7 +1,16 @@
 <x-admin-layout>
     <x-slot name="heading">User &amp; Employee Management</x-slot>
 
-    <div x-data="{ showAddModal: {{ $errors->any() ? 'true' : 'false' }} }">
+    <div x-data="{
+        showAddModal: {{ $errors->any() ? 'true' : 'false' }},
+        managedUser: null,
+        openManageModal(user) {
+            this.managedUser = user;
+        },
+        closeManageModal() {
+            this.managedUser = null;
+        }
+    }">
         <!-- Header Panel -->
         <div class="gz-panel gz-panel-body mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -154,6 +163,27 @@
                                     $isSelf = $u->id === Auth::id();
                                     $isActive = (bool) ($u->is_active ?? true);
                                     $roleLower = strtolower($u->role ?: 'player');
+                                    $roleBadgeStyle = match ($roleLower) {
+                                        'admin' => 'background: rgba(239, 68, 68, 0.14); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.35);',
+                                        'manager' => 'background: rgba(245, 158, 11, 0.16); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.35);',
+                                        'staff' => 'background: rgba(59, 130, 246, 0.14); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.35);',
+                                        default => 'background: rgba(16, 185, 129, 0.14); color: #059669; border: 1px solid rgba(16, 185, 129, 0.35);',
+                                    };
+                                    $userPayload = [
+                                        'id' => $u->id,
+                                        'name' => $u->name ?: $u->email,
+                                        'first_name' => $u->first_name ?: '—',
+                                        'middle_name' => $u->middle_name ?: '—',
+                                        'last_name' => $u->last_name ?: '—',
+                                        'email' => $u->email,
+                                        'role' => $roleLower,
+                                        'is_active' => $isActive,
+                                        'is_self' => $isSelf,
+                                        'email_verified' => $u->email_verified_at ? $u->email_verified_at->format('M d, Y g:i A') : 'Unverified',
+                                        'joined_date' => $u->created_at?->format('F j, Y') ?? 'N/A',
+                                        'role_url' => route('admin.users.role', $u),
+                                        'status_url' => route('admin.users.status', $u),
+                                    ];
                                 @endphp
                                 <tr>
                                     <td>
@@ -168,27 +198,9 @@
                                         </div>
                                     </td>
                                     <td>
-                                        @if($isSelf)
-                                            <span class="inline-block text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full" style="background: rgba(239, 68, 68, 0.14); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.35);">
-                                                {{ strtoupper($roleLower) }}
-                                            </span>
-                                        @else
-                                            <form method="POST" action="{{ route('admin.users.role', $u) }}" class="inline-flex items-center">
-                                                @csrf
-                                                @method('PATCH')
-                                                <select
-                                                    name="role"
-                                                    onchange="this.form.submit()"
-                                                    class="gz-input text-xs py-1 px-2.5 font-semibold"
-                                                    style="min-width: 115px;"
-                                                >
-                                                    <option value="admin" {{ $roleLower === 'admin' ? 'selected' : '' }}>Admin</option>
-                                                    <option value="manager" {{ $roleLower === 'manager' ? 'selected' : '' }}>Manager</option>
-                                                    <option value="staff" {{ $roleLower === 'staff' ? 'selected' : '' }}>Staff</option>
-                                                    <option value="player" {{ $roleLower === 'player' ? 'selected' : '' }}>Player</option>
-                                                </select>
-                                            </form>
-                                        @endif
+                                        <span class="inline-block text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full" style="{{ $roleBadgeStyle }}">
+                                            {{ strtoupper($roleLower) }}
+                                        </span>
                                     </td>
                                     <td class="whitespace-nowrap">
                                         @if($isActive)
@@ -205,31 +217,41 @@
                                         {{ $u->created_at?->format('M d, Y') ?? 'N/A' }}
                                     </td>
                                     <td class="text-right whitespace-nowrap">
-                                        @if($isSelf)
-                                            <span class="text-xs italic" style="color: var(--gz-muted);">Current Session</span>
-                                        @else
-                                            <form method="POST" action="{{ route('admin.users.status', $u) }}" class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                @if($isActive)
-                                                    <button
-                                                        type="submit"
-                                                        class="gz-btn-outline gz-btn-sm text-xs font-semibold"
-                                                        style="color: var(--gz-danger); border-color: rgba(239, 68, 68, 0.4);"
-                                                        onclick="return confirm('Deactivate account for {{ addslashes($u->name ?: $u->email) }}? They will not be able to sign in until reactivated.')"
-                                                    >
-                                                        Deactivate
-                                                    </button>
-                                                @else
-                                                    <button
-                                                        type="submit"
-                                                        class="gz-btn-primary gz-btn-sm text-xs font-semibold"
-                                                    >
-                                                        Activate
-                                                    </button>
-                                                @endif
-                                            </form>
-                                        @endif
+                                        <div class="inline-flex items-center justify-end gap-2">
+                                            <button
+                                                type="button"
+                                                @click="openManageModal(@js($userPayload))"
+                                                class="gz-btn-outline gz-btn-sm text-xs font-semibold"
+                                            >
+                                                Manage
+                                            </button>
+
+                                            @if($isSelf)
+                                                <span class="text-xs italic px-1" style="color: var(--gz-muted);">Current Session</span>
+                                            @else
+                                                <form method="POST" action="{{ route('admin.users.status', $u) }}" class="inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    @if($isActive)
+                                                        <button
+                                                            type="submit"
+                                                            class="gz-btn-outline gz-btn-sm text-xs font-semibold"
+                                                            style="color: var(--gz-danger); border-color: rgba(239, 68, 68, 0.4);"
+                                                            onclick="return confirm('Deactivate account for {{ addslashes($u->name ?: $u->email) }}? They will not be able to sign in until reactivated.')"
+                                                        >
+                                                            Deactivate
+                                                        </button>
+                                                    @else
+                                                        <button
+                                                            type="submit"
+                                                            class="gz-btn-primary gz-btn-sm text-xs font-semibold"
+                                                        >
+                                                            Activate
+                                                        </button>
+                                                    @endif
+                                                </form>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -243,6 +265,137 @@
                     </div>
                 @endif
             @endif
+        </div>
+
+        <!-- Manage Account Modal -->
+        <div
+            x-show="managedUser !== null"
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style="background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px);"
+            @keydown.escape.window="closeManageModal()"
+        >
+            <div
+                @click.outside="closeManageModal()"
+                class="gz-panel w-full max-w-lg overflow-hidden shadow-2xl border"
+                style="background: var(--gz-surface); border-color: var(--gz-border);"
+            >
+                <div class="p-5 border-b flex items-center justify-between" style="border-color: var(--gz-border);">
+                    <div>
+                        <span class="gz-eyebrow">Account Details &amp; Role Permissions</span>
+                        <h2 class="gz-font-display font-bold text-lg mt-0.5" x-text="managedUser?.name || 'Manage Account'"></h2>
+                    </div>
+                    <button
+                        type="button"
+                        @click="closeManageModal()"
+                        class="w-8 h-8 rounded-full flex items-center justify-center border hover:opacity-80"
+                        style="border-color: var(--gz-border); color: var(--gz-ink);"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-4 text-xs">
+                    <!-- Account Information Summary -->
+                    <div class="p-4 rounded-xl border space-y-3" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                        <div class="flex items-center justify-between border-b pb-2.5" style="border-color: var(--gz-border);">
+                            <div>
+                                <span class="block text-[10px] uppercase font-bold tracking-wider" style="color: var(--gz-muted);">Account ID</span>
+                                <span class="font-mono font-bold text-sm" style="color: var(--gz-ink);" x-text="'#' + (managedUser?.id || '')"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-[10px] uppercase font-bold tracking-wider" style="color: var(--gz-muted);">Account Status</span>
+                                <template x-if="managedUser?.is_active">
+                                    <span class="gz-badge gz-badge-success text-[10px] uppercase font-mono font-bold mt-0.5 inline-block">Active</span>
+                                </template>
+                                <template x-if="managedUser && !managedUser.is_active">
+                                    <span class="gz-badge gz-badge-danger text-[10px] uppercase font-mono font-bold mt-0.5 inline-block">Deactivated</span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">First Name</span>
+                                <span class="font-bold text-sm block mt-0.5" style="color: var(--gz-ink);" x-text="managedUser?.first_name"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Middle Name</span>
+                                <span class="font-semibold text-sm block mt-0.5" style="color: var(--gz-ink);" x-text="managedUser?.middle_name"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Last Name</span>
+                                <span class="font-bold text-sm block mt-0.5" style="color: var(--gz-ink);" x-text="managedUser?.last_name"></span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t" style="border-color: var(--gz-border);">
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Email Address</span>
+                                <span class="font-mono font-semibold block mt-0.5 break-all" style="color: var(--gz-ink);" x-text="managedUser?.email"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Joined Date</span>
+                                <span class="font-semibold block mt-0.5" style="color: var(--gz-ink);" x-text="managedUser?.joined_date"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Email Verification</span>
+                                <span class="font-semibold block mt-0.5" style="color: var(--gz-ink);" x-text="managedUser?.email_verified"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Current Assigned Role</span>
+                                <span class="font-mono font-bold uppercase block mt-0.5" style="color: var(--gz-pop-dark);" x-text="managedUser?.role"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role Change Form -->
+                    <template x-if="managedUser && !managedUser.is_self">
+                        <form method="POST" :action="managedUser.role_url" class="p-4 rounded-xl border space-y-3" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                            @csrf
+                            @method('PATCH')
+
+                            <div>
+                                <label for="manage_role_select" class="gz-label">Change Account Role</label>
+                                <p class="text-[11px] mb-2" style="color: var(--gz-muted);">
+                                    Select the role permissions for this user account and click Save Role.
+                                </p>
+                                <select
+                                    id="manage_role_select"
+                                    name="role"
+                                    x-model="managedUser.role"
+                                    class="gz-input text-xs w-full font-semibold"
+                                >
+                                    <option value="admin">Admin — Full system, user, and financial oversight</option>
+                                    <option value="manager">Manager — Courts, Open Play, tournaments, and operations</option>
+                                    <option value="staff">Staff — Front desk check-in and walk-in counter booking</option>
+                                    <option value="player">Player — Customer court booking and Open Play registration</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-2">
+                                <button type="button" @click="closeManageModal()" class="gz-btn-outline gz-btn-sm text-xs">
+                                    Close
+                                </button>
+                                <button type="submit" class="gz-btn-primary gz-btn-sm text-xs">
+                                    Save Role
+                                </button>
+                            </div>
+                        </form>
+                    </template>
+
+                    <template x-if="managedUser && managedUser.is_self">
+                        <div class="p-3.5 rounded-xl border flex items-center justify-between" style="background: var(--gz-bg); border-color: var(--gz-border);">
+                            <span class="text-xs italic" style="color: var(--gz-muted);">
+                                This is your active administrator session. You cannot demote or deactivate your own account.
+                            </span>
+                            <button type="button" @click="closeManageModal()" class="gz-btn-outline gz-btn-sm text-xs shrink-0">
+                                Close
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
         </div>
 
         <!-- Add Staff / Manager Modal -->
