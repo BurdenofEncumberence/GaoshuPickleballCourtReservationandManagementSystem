@@ -28,16 +28,5 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production') || $isVercel) {
             URL::forceScheme('https');
         }
-
-        if ($isVercel && ! $this->app->runningInConsole()) {
-            try {
-                if (! Schema::hasTable('users')) {
-                    Artisan::call('migrate', ['--force' => true]);
-                    Artisan::call('db:seed', ['--force' => true]);
-                }
-            } catch (Throwable) {
-                // Ignore during build/discovery
-            }
-        }
     }
 }
