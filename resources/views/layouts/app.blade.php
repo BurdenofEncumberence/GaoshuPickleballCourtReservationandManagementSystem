@@ -34,7 +34,7 @@
         </div>
 
         @isset($header)
-            <div class="gz-container relative" style="padding-bottom: 0; z-index: 1;">
+            <div class="gz-container relative" style="padding-bottom: 0;">
                 <div style="padding-top: 24px; padding-bottom: 20px; border-bottom: 1.5px solid var(--gz-border);">
                     {{ $header }}
                 </div>
@@ -43,7 +43,7 @@
 
         <div
             class="gz-container relative flex-1"
-            style="z-index: 1; padding-top: 24px;"
+            style="padding-top: 24px;"
         >
             <main>
                 {{ $slot }}

@@ -6,19 +6,20 @@
 --}}
 @php
     $siteSettings = \App\Models\SiteSettings::first();
+    $hasCustomSocial = $siteSettings && ($siteSettings->facebook_link || $siteSettings->twitter_link || $siteSettings->instagram_link || $siteSettings->linkedin_link);
 @endphp
-<footer class="relative z-10 border-t" style="background: #12150F; border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);">
-    <div class="max-w-6xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
+<footer class="border-t mt-12 print:hidden" style="background: #12150F; border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);">
+    <div class="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         <div>
-            <span class="gz-font-display font-bold text-lg" style="color: #FCFBF7;">{{ $siteSettings->business_name ?? 'Gaoshou Pickleball' }}</span>
-            <p class="mt-4 text-sm max-w-xs leading-relaxed">
-                {{ $siteSettings->tagline ?? 'Court booking for the Davao pickleball community. Built by players, for players.' }}
+            <span class="gz-font-display font-bold text-lg" style="color: #FCFBF7;">{{ $siteSettings->business_name ?? ($siteSettings->system_name ?? 'Gaoshou Pickleball') }}</span>
+            <p class="mt-3 text-sm max-w-xs leading-relaxed">
+                {{ $siteSettings->tagline ?? 'Book Your Court, Rally with Ease' }}
             </p>
-            @if($siteSettings && $siteSettings->email_address)
-                <p class="mt-2 text-sm">
-                    <a href="mailto:{{ $siteSettings->email_address }}" class="footer-link">{{ $siteSettings->email_address }}</a>
-                </p>
-            @endif
+            <p class="mt-2 text-sm">
+                <a href="mailto:{{ $siteSettings->email_address ?? 'support@gaoshou.ph' }}" class="hover:text-[#E5A823] transition">
+                    {{ $siteSettings->email_address ?? 'support@gaoshou.ph' }}
+                </a>
+            </p>
             @if($siteSettings && $siteSettings->contact_number)
                 <p class="mt-1 text-sm">{{ $siteSettings->contact_number }}</p>
             @endif
@@ -26,37 +27,47 @@
         <div>
             <h4 class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: #FCFBF7;">Explore</h4>
             <ul class="space-y-2 text-sm">
-                <li><a href="{{ route('booking') }}" class="footer-link">Find courts</a></li>
-                <li><a href="#" class="footer-link">Host a tournament</a></li>
-                <li><a href="#" class="footer-link">Find partners</a></li>
+                <li><a href="{{ route('booking') }}" class="hover:text-[#E5A823] transition">Reserve Courts</a></li>
+                <li><a href="{{ route('open-play.index') }}" class="hover:text-[#E5A823] transition">Open Play &amp; Tournaments</a></li>
+                @auth
+                    <li><a href="{{ route('bookings.index') }}" class="hover:text-[#E5A823] transition">My Bookings</a></li>
+                @else
+                    <li><a href="{{ route('login') }}" class="hover:text-[#E5A823] transition">Player Sign In</a></li>
+                @endauth
             </ul>
         </div>
         <div>
-            <h4 class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: #FCFBF7;">Legal & Support</h4>
+            <h4 class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: #FCFBF7;">Legal &amp; Support</h4>
             <ul class="space-y-2 text-sm">
-                <li><a href="{{ route('terms') }}" class="footer-link">Terms & Conditions</a></li>
-                <li><a href="{{ route('privacy') }}" class="footer-link">Privacy Policy</a></li>
+                <li><a href="{{ route('terms') }}" class="hover:text-[#E5A823] transition">Terms &amp; Conditions</a></li>
+                <li><a href="{{ route('privacy') }}" class="hover:text-[#E5A823] transition">Privacy Policy</a></li>
             </ul>
         </div>
         <div>
             <h4 class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: #FCFBF7;">Connect</h4>
             <ul class="space-y-2 text-sm">
-                @if($siteSettings && $siteSettings->facebook_link)
-                    <li><a href="{{ $siteSettings->facebook_link }}" target="_blank" class="footer-link">Facebook</a></li>
-                @endif
-                @if($siteSettings && $siteSettings->twitter_link)
-                    <li><a href="{{ $siteSettings->twitter_link }}" target="_blank" class="footer-link">Twitter</a></li>
-                @endif
-                @if($siteSettings && $siteSettings->instagram_link)
-                    <li><a href="{{ $siteSettings->instagram_link }}" target="_blank" class="footer-link">Instagram</a></li>
-                @endif
-                @if($siteSettings && $siteSettings->linkedin_link)
-                    <li><a href="{{ $siteSettings->linkedin_link }}" target="_blank" class="footer-link">LinkedIn</a></li>
+                @if($hasCustomSocial)
+                    @if($siteSettings->facebook_link)
+                        <li><a href="{{ $siteSettings->facebook_link }}" target="_blank" rel="noopener noreferrer" class="hover:text-[#E5A823] transition">Facebook</a></li>
+                    @endif
+                    @if($siteSettings->instagram_link)
+                        <li><a href="{{ $siteSettings->instagram_link }}" target="_blank" rel="noopener noreferrer" class="hover:text-[#E5A823] transition">Instagram</a></li>
+                    @endif
+                    @if($siteSettings->twitter_link)
+                        <li><a href="{{ $siteSettings->twitter_link }}" target="_blank" rel="noopener noreferrer" class="hover:text-[#E5A823] transition">X (Twitter)</a></li>
+                    @endif
+                    @if($siteSettings->linkedin_link)
+                        <li><a href="{{ $siteSettings->linkedin_link }}" target="_blank" rel="noopener noreferrer" class="hover:text-[#E5A823] transition">LinkedIn</a></li>
+                    @endif
+                @else
+                    <li><a href="mailto:{{ $siteSettings->email_address ?? 'support@gaoshou.ph' }}" class="hover:text-[#E5A823] transition">Email Front Desk</a></li>
+                    <li><a href="{{ route('open-play.index') }}" class="hover:text-[#E5A823] transition">Community Open Play</a></li>
+                    <li><span style="color: rgba(255,255,255,0.5);">Open Daily: 6:00 AM – 10:00 PM</span></li>
                 @endif
             </ul>
         </div>
     </div>
-    <div class="max-w-6xl mx-auto px-6 pb-8 text-sm" style="color: rgba(255,255,255,0.4);">
-        © {{ date('Y') }} {{ $siteSettings->business_name ?? 'Gaoshou Pickleball' }}. All rights reserved.
+    <div class="max-w-6xl mx-auto px-6 pb-8 text-sm border-t pt-6" style="border-color: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4);">
+        © {{ date('Y') }} {{ $siteSettings->business_name ?? ($siteSettings->system_name ?? 'Gaoshou Pickleball') }}. All rights reserved.
     </div>
 </footer>

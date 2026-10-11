@@ -62,7 +62,8 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+        class="fixed inset-0 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-start sm:items-center justify-center p-4 sm:p-6"
+        style="z-index: 9999;"
         role="dialog"
         aria-modal="true"
         aria-labelledby="receipt-modal-title"
@@ -76,7 +77,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="relative w-full max-w-2xl bg-[#FCFBF7] rounded-2xl border-2 border-[#12150F] shadow-[8px_8px_0_#12150F] overflow-hidden my-8"
+            class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#FCFBF7] rounded-2xl border-2 border-[#12150F] shadow-[8px_8px_0_#12150F] my-4"
         >
             <!-- Loading State -->
             <div x-show="loading" class="p-12 text-center">
