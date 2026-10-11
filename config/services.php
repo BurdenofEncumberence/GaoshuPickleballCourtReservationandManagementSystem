@@ -36,8 +36,8 @@ return [
     ],
 
     'paymongo' => [
-        'secret_key' => env('PAYMONGO_SECRET_KEY') ?: strrev('vav3YaWYZHvELyvieP6FzNmD_tset_ks'),
-        'public_key' => env('PAYMONGO_PUBLIC_KEY') ?: strrev('1dzySuGBLK1nQySxBqV7VktL_tset_kp'),
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
+        'public_key' => env('PAYMONGO_PUBLIC_KEY'),
         'base_url' => env('PAYMONGO_BASE_URL', 'https://api.paymongo.com/v1'),
     ],
 
