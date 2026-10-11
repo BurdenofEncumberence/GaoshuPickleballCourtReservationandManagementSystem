@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
+        "build": "vite build && node -e \"import('fs').then(fs => { fs.mkdirSync('dist', { recursive: true }); for (const p of ['build', 'images', 'favicon.ico', 'robots.txt']) { if (fs.existsSync('public/' + p)) fs.cpSync('public/' + p, 'dist/' + p, { recursive: true }); } })\"",
         "dev": "vite"
     },
     "devDependencies": {
