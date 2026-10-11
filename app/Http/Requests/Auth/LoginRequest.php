@@ -50,6 +50,21 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        /** @var \App\Models\User|null $authenticatedUser */
+        $authenticatedUser = Auth::user();
+        if ($authenticatedUser && $authenticatedUser->is_active === false) {
+            Auth::logout();
+            \App\Models\ActivityLog::record(
+                'Blocked Deactivated Login',
+                "Blocked login attempt for deactivated account {$authenticatedUser->name} ({$authenticatedUser->email}).",
+                $authenticatedUser
+            );
+
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been deactivated by an administrator. Please contact management.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

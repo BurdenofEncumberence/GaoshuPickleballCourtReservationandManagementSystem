@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminEventController;
 use App\Http\Controllers\AdminFinanceController;
 use App\Http\Controllers\AdminOpenPlayController;
 use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingReceiptController;
 use App\Http\Controllers\OpenPlayController;
@@ -116,6 +117,10 @@ Route::middleware(['auth', 'verified', 'role:admin,manager'])
         Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
         Route::get('/customization', [AdminCustomizationController::class, 'index'])->name('customization.index');
         Route::patch('/customization', [AdminCustomizationController::class, 'update'])->name('customization.update');
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        Route::patch('/users/{user}/role', [AdminUserController::class, 'updateRole'])->whereNumber('user')->name('users.role');
+        Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->whereNumber('user')->name('users.status');
         Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 

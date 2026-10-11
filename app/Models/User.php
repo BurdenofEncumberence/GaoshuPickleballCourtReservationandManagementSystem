@@ -26,7 +26,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'is_active',
         'email_verified_at',
+    ];
+
+    protected $attributes = [
+        'is_active' => true,
     ];
 
     /**
@@ -187,6 +192,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
