@@ -310,7 +310,7 @@
                                             <span class="text-[11px]" style="color: var(--gz-muted);">Instant Confirmation</span>
                                         </div>
                                     </div>
-                                    <span class="gz-badge gz-badge-success text-[9px]">Sandbox Test</span>
+                                    <span class="gz-badge gz-badge-success text-[9px]">Online Checkout</span>
                                 </div>
                                 <div class="flex items-center gap-1 flex-wrap mt-2 pt-2 border-t text-[10px]" style="border-color: var(--gz-border);">
                                     <span class="gz-badge gz-badge-pop font-semibold text-[9px]">QR Ph</span>
@@ -342,38 +342,6 @@
                                     Pay in person at the front desk cashier before your scheduled session starts.
                                 </p>
                             </button>
-                        </div>
-
-                        {{-- Online Payment Sandbox Info Panel --}}
-                        <div x-show="paymentMethod === 'paymongo'" x-cloak class="mb-6 p-4 rounded-xl text-xs space-y-2.5" style="background: rgba(229,168,35,0.06); border: 1px solid rgba(229,168,35,0.25);">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="w-2.5 h-2.5 rounded-full inline-block" style="background: var(--gz-pop-dark);"></span>
-                                    <strong class="font-bold text-sm" style="color: var(--gz-pop-dark);">Online Payment Sandbox (Free Test Mode)</strong>
-                                </div>
-                                <span class="gz-badge gz-badge-success text-[10px]">₱0.00 Real Cost</span>
-                            </div>
-                            <p style="color: var(--gz-ink); line-height: 1.4;">
-                                You will be redirected to the secure <strong>Online Checkout</strong> portal where you can test payments with zero real charges:
-                            </p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
-                                <div class="p-2.5 rounded-lg" style="background: var(--gz-surface); border: 1px solid var(--gz-border);">
-                                    <strong class="block mb-0.5" style="color: var(--gz-ink);">QR Ph (Scan-to-Pay)</strong>
-                                    <span style="color: var(--gz-muted);">Simulate instant QR Ph scanning supported by GCash, Maya, BDO, BPI, UnionBank, etc.</span>
-                                </div>
-                                <div class="p-2.5 rounded-lg" style="background: var(--gz-surface); border: 1px solid var(--gz-border);">
-                                    <strong class="block mb-0.5" style="color: var(--gz-ink);">Online Banking</strong>
-                                    <span style="color: var(--gz-muted);">Direct test online bank checkout via supported Philippine banks.</span>
-                                </div>
-                                <div class="p-2.5 rounded-lg" style="background: var(--gz-surface); border: 1px solid var(--gz-border);">
-                                    <strong class="block mb-0.5" style="color: var(--gz-ink);">GCash & Maya</strong>
-                                    <span style="color: var(--gz-muted);">One-click sandbox authorization to test mobile wallet debit.</span>
-                                </div>
-                                <div class="p-2.5 rounded-lg" style="background: var(--gz-surface); border: 1px solid var(--gz-border);">
-                                    <strong class="block mb-0.5" style="color: var(--gz-ink);">Cards</strong>
-                                    <span style="color: var(--gz-muted);">Test card numbers provided directly on checkout screen.</span>
-                                </div>
-                            </div>
                         </div>
 
                         {{-- Cash Info Panel --}}
