@@ -35,7 +35,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between h-16 items-center gap-2">
             {{-- Left: logo --}}
-            <a href="{{ $homeUrl }}" class="flex items-center shrink-0">
+            <a href="{{ url('/') }}" class="flex items-center shrink-0 sm:flex-1">  
                 @php
                     $logoPath = null;
                     if ($siteSettings && $siteSettings->logo && file_exists(public_path('storage/' . $siteSettings->logo))) {
@@ -47,8 +47,7 @@
                     }
                 @endphp
                 @if($logoPath)
-                    <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}" class="h-10 sm:h-12 w-auto max-h-12 max-w-[200px] sm:max-w-[240px] object-contain shrink-0">
-                @else
+<img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}" class="h-12 sm:h-16 w-auto max-h-16 max-w-[220px] sm:max-w-[300px] object-contain shrink-0">                @else
                     <div class="flex items-center gap-2.5">
                         <div class="pixel-mark shrink-0" aria-hidden="true" style="width:34px; height:34px; background:#12150F; border:1px solid var(--gz-border); border-radius:10px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); padding:6px;" id="nav-seal"></div>
                         <div class="flex flex-col">
@@ -60,8 +59,8 @@
             </a>
 
             {{-- Center: navigation links (desktop) --}}
-            <div class="hidden sm:flex items-center gap-8 flex-1 justify-center">
-                <div class="flex gap-6 text-sm font-semibold" style="color: var(--gz-muted);">
+            <div class="hidden sm:flex sm:flex-none items-center justify-center">
+                <div class="flex gap-8 text-sm font-semibold" style="color: var(--gz-muted);">
                     @auth
                         @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
                             <a href="{{ route('admin.dashboard') }}" class="nav-link" @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>
@@ -123,7 +122,7 @@
             </div>
 
             {{-- Right: theme toggle + account/auth buttons (desktop) --}}
-            <div class="hidden sm:flex items-center gap-3 relative">
+            <div class="hidden sm:flex sm:flex-1 justify-end items-center gap-3 relative">
                 <button type="button" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle night mode" title="Toggle night mode">
                     <svg class="theme-icon-moon w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                     <svg class="theme-icon-sun w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/></svg>
