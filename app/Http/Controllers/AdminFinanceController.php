@@ -57,7 +57,7 @@ class AdminFinanceController extends Controller
             'walkInRevenue' => $walkInRevenue,
             'onlinePaidTransactions' => $onlinePaidTransactions,
             'walkInPaidTransactions' => $walkInPaidTransactions,
-            'payments' => Payment::with('booking.user')->latest('date')->latest('created_at')->paginate(10),
+            'payments' => Payment::with(['booking.user', 'processor', 'booking.statusUpdatedBy'])->latest('date')->latest('created_at')->paginate(10),
             'today' => Carbon::today(),
             'utilization' => $utilizationService->getFacilityMetrics(),
             'courtUtilization' => $utilizationService->getCourtBreakdown(),

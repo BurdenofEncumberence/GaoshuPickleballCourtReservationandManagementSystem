@@ -241,6 +241,7 @@
                     <th>Customer</th>
                     <th>Court</th>
                     <th class="text-center">Method</th>
+                    <th>Staff / Cashier</th>
                     <th class="text-center">Status</th>
                     <th class="text-right">Amount (PHP)</th>
                 </tr>
@@ -255,6 +256,18 @@
                         <td>{{ $booking->user->name ?? $booking->customer_name ?? 'Guest Customer' }}</td>
                         <td>{{ $booking->court->court_name ?? 'N/A' }}</td>
                         <td class="text-center">{{ ucfirst($payment->payment_method) }}</td>
+                        <td style="font-size: 8px;">
+                            @if($payment->processor)
+                                <strong>{{ $payment->processor->name }}</strong>
+                            @elseif($booking?->isWalkIn())
+                                <span style="color: #636b59;">Walk-In Desk</span>
+                            @else
+                                <span style="color: #8c9480;">Online Gateway</span>
+                            @endif
+                            @if($booking?->statusUpdatedBy)
+                                <div style="color: #15803d; font-size: 7.5px;">Marked: {{ $booking->statusUpdatedBy->name }}</div>
+                            @endif
+                        </td>
                         <td class="text-center">
                             <span class="badge {{ $payment->payment_status === 'paid' ? 'badge-success' : ($payment->payment_status === 'pending' ? 'badge-warning' : 'badge-danger') }}">
                                 {{ ucfirst($payment->payment_status) }}

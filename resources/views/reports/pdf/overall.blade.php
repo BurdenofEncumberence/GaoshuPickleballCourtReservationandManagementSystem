@@ -218,6 +218,7 @@
                     <th class="text-center">Hours</th>
                     <th class="text-center">Type</th>
                     <th class="text-center">Status</th>
+                    <th>Staff Audit</th>
                     <th class="text-right">Fee (PHP)</th>
                 </tr>
             </thead>
@@ -243,6 +244,19 @@
                             <span class="badge {{ in_array($booking->booking_status, ['confirmed', 'show']) ? 'badge-success' : ($booking->booking_status === 'pending' ? 'badge-warning' : 'badge-danger') }}">
                                 {{ ucfirst($booking->booking_status) }}
                             </span>
+                        </td>
+                        <td style="font-size: 8px;">
+                            @if($payment?->processor)
+                                <div><strong>Cashier:</strong> {{ $payment->processor->name }}</div>
+                            @elseif($booking->booking_type === 'walk_in')
+                                <div style="color: #636b59;">Desk Walk-In</div>
+                            @endif
+                            @if($booking->statusUpdatedBy)
+                                <div style="color: #15803d;"><strong>Marked:</strong> {{ $booking->statusUpdatedBy->name }}</div>
+                            @endif
+                            @if(!$payment?->processor && !$booking->statusUpdatedBy && $booking->booking_type !== 'walk_in')
+                                <span style="color: #8c9480;">Online Gateway</span>
+                            @endif
                         </td>
                         <td class="text-right" style="font-weight: 700;">
                             {{ $payment ? number_format((float) $payment->amount, 2) : '0.00' }}

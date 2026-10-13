@@ -197,6 +197,7 @@
                             <th>Player</th>
                             <th>Channel</th>
                             <th>Status</th>
+                            <th>Staff Audit</th>
                             <th>Amount</th>
                             <th class="text-right">Receipt</th>
                         </tr>
@@ -286,9 +287,38 @@
                                     <span class="gz-badge {{ $statusBadgeClass }} text-[10px] capitalize">
                                         {{ $booking->booking_status }}
                                     </span>
+                                </td>
+
+                                <!-- Staff Audit -->
+                                <td>
+                                    @if($payment?->processor)
+                                        <div class="text-xs font-semibold text-gray-900 flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                            <span>Cashier: {{ $payment->processor->name }}</span>
+                                        </div>
+                                    @elseif($booking->isWalkIn())
+                                        <div class="text-[11px] text-gray-500">
+                                            <span class="font-medium text-gray-700">Cashier:</span> Desk Walk-In
+                                        </div>
+                                    @else
+                                        <div class="text-[11px] text-gray-400">
+                                            <span class="font-medium text-gray-500">Payment:</span> Online Gateway
+                                        </div>
+                                    @endif
+
                                     @if($booking->statusUpdatedBy)
-                                        <div class="text-[10px] text-gray-500 mt-0.5">
-                                            by {{ $booking->statusUpdatedBy->name }}
+                                        <div class="text-xs font-semibold text-emerald-800 mt-1 flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0"></span>
+                                            <span>Marked: {{ $booking->statusUpdatedBy->name }}</span>
+                                        </div>
+                                        @if($booking->status_updated_at)
+                                            <div class="text-[10px] text-gray-500 pl-2.5">
+                                                {{ $booking->status_updated_at->format('M d, g:i A') }}
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="text-[10px] text-gray-400 mt-0.5">
+                                            Attendance: <span class="italic">Pending</span>
                                         </div>
                                     @endif
                                 </td>
@@ -300,9 +330,6 @@
                                     </div>
                                     <div class="text-[10px] capitalize" style="color: var(--gz-muted);">
                                         {{ $payment?->payment_status ?? ($booking->booking_status === 'confirmed' ? 'paid' : 'pending') }}
-                                        @if($payment?->processor)
-                                            <span class="block text-[10px] text-gray-500 font-normal">Staff: {{ $payment->processor->name }}</span>
-                                        @endif
                                     </div>
                                 </td>
 

@@ -374,6 +374,7 @@
                                 <th>Court</th>
                                 <th>Player</th>
                                 <th>Status</th>
+                                <th>Staff Audit</th>
                                 <th class="text-right">Fee</th>
                                 <th class="text-right">Receipt</th>
                             </tr>
@@ -411,6 +412,30 @@
                                             };
                                         @endphp
                                         <span class="gz-badge {{ $badgeClass }}">{{ ucfirst($booking->booking_status) }}</span>
+                                    </td>
+                                    <td>
+                                        @if($booking->statusUpdatedBy)
+                                            <div class="text-xs font-semibold text-emerald-800 flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0"></span>
+                                                <span>Marked: {{ $booking->statusUpdatedBy->name }}</span>
+                                            </div>
+                                            @if($booking->status_updated_at)
+                                                <div class="text-[10px] text-gray-500 pl-2.5">
+                                                    {{ $booking->status_updated_at->format('g:i A') }}
+                                                </div>
+                                            @endif
+                                        @else
+                                            <div class="text-[11px] text-gray-400">
+                                                Attendance: <span class="italic">Pending</span>
+                                            </div>
+                                        @endif
+                                        @php $dashPayment = $booking->payments->first(); @endphp
+                                        @if($dashPayment?->processor)
+                                            <div class="text-xs font-semibold text-gray-800 mt-1 flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                                <span>Cashier: {{ $dashPayment->processor->name }}</span>
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="text-right text-sm font-semibold">
                                         ₱{{ number_format($booking->court?->price_per_hour ?? 0, 2) }}
@@ -507,6 +532,7 @@
                             <th>Ref No.</th>
                             <th>Player</th>
                             <th>Channel</th>
+                            <th>Staff / Cashier</th>
                             <th>Date</th>
                             <th>Status</th>
                             <th class="text-right">Amount</th>
@@ -522,6 +548,21 @@
                                         <span class="gz-badge text-[10px]" style="background: rgba(179,38,30,0.12); color: var(--red); border: 1px solid var(--red);">Walk-In</span>
                                     @else
                                         <span class="gz-badge gz-badge-neutral text-[10px]">Online</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($payment->processor)
+                                        <div class="font-semibold text-xs text-gray-900">{{ $payment->processor->name }}</div>
+                                        <span class="text-[10px] text-emerald-700 font-medium">Cashier</span>
+                                    @elseif($payment->booking?->isWalkIn())
+                                        <span class="text-xs text-gray-500">Walk-In Desk</span>
+                                    @else
+                                        <span class="text-xs text-gray-400">Online Gateway</span>
+                                    @endif
+                                    @if($payment->booking?->statusUpdatedBy)
+                                        <div class="text-[10px] text-gray-500 mt-0.5">
+                                            Marked: {{ $payment->booking->statusUpdatedBy->name }}
+                                        </div>
                                     @endif
                                 </td>
                                 <td class="text-sm" style="color: var(--gz-muted);">

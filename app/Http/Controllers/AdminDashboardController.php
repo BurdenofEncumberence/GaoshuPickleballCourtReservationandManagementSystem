@@ -23,7 +23,7 @@ class AdminDashboardController extends Controller
                 ->whereDate('date', '>=', today()),
         ])->orderBy('id')->get();
 
-        $todayBookings = Booking::with(['court', 'user'])
+        $todayBookings = Booking::with(['court', 'user', 'statusUpdatedBy', 'payments.processor'])
             ->whereDate('date', today())
             ->orderBy('start_time')
             ->get();
@@ -46,7 +46,7 @@ class AdminDashboardController extends Controller
             ? round((($monthlyRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100)
             : null;
 
-        $recentPayments = Payment::with('booking.user')
+        $recentPayments = Payment::with(['booking.user', 'processor', 'booking.statusUpdatedBy'])
             ->latest('date')
             ->latest('created_at')
             ->limit(6)

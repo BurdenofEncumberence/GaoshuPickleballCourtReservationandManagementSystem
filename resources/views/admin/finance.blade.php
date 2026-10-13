@@ -368,6 +368,7 @@
                             <th>Player</th>
                             <th>Channel</th>
                             <th>Method</th>
+                            <th>Staff / Cashier</th>
                             <th>Date</th>
                             <th>Status</th>
                             <th class="text-right">Amount</th>
@@ -390,6 +391,21 @@
                                     @endif
                                 </td>
                                 <td class="text-sm font-medium capitalize">{{ $payment->payment_method ?: 'Standard' }}</td>
+                                <td>
+                                    @if($payment->processor)
+                                        <div class="font-semibold text-xs text-gray-900">{{ $payment->processor->name }}</div>
+                                        <span class="text-[10px] text-emerald-700 font-medium">Staff Cashier</span>
+                                    @elseif($payment->booking?->isWalkIn())
+                                        <span class="text-xs text-gray-500">Desk Staff</span>
+                                    @else
+                                        <span class="text-xs text-gray-400">Online Gateway</span>
+                                    @endif
+                                    @if($payment->booking?->statusUpdatedBy)
+                                        <div class="text-[10px] text-gray-500 mt-0.5">
+                                            Marked: {{ $payment->booking->statusUpdatedBy->name }}
+                                        </div>
+                                    @endif
+                                </td>
                                 <td class="text-sm" style="color: var(--gz-muted);">
                                     {{ \Carbon\Carbon::parse($payment->date)->format('M d, Y') }}
                                 </td>

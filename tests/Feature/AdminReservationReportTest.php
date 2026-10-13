@@ -197,3 +197,58 @@ test('admin financial reports include online and walk-in reservation counts and 
     $response->assertSee('Online');
     $response->assertSee('Walk-In');
 });
+
+test('admin and manager views display staff cashier and attendance audit columns', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $manager = User::factory()->create(['role' => 'manager']);
+    $staff = User::factory()->create(['role' => 'staff', 'name' => 'Staff Alex']);
+    $court = Court::create([
+        'court_name' => 'Court Center',
+        'price_per_hour' => 500,
+        'court_status' => 'available',
+    ]);
+    $player = User::factory()->create(['role' => 'player', 'name' => 'Test Player']);
+
+    $booking = Booking::create([
+        'user_id' => $player->id,
+        'court_id' => $court->id,
+        'date' => today()->toDateString(),
+        'start_time' => '10:00:00',
+        'end_time' => '11:00:00',
+        'booking_status' => 'show',
+        'booking_type' => 'walk_in',
+        'status_updated_by' => $staff->id,
+        'status_updated_at' => now(),
+    ]);
+
+    Payment::create([
+        'booking_id' => $booking->id,
+        'amount' => 500,
+        'payment_status' => 'paid',
+        'payment_method' => 'cash',
+        'date' => today()->toDateString(),
+        'time' => '10:00:00',
+        'ref_num' => 'WALK-AUDIT-1',
+        'processed_by' => $staff->id,
+    ]);
+
+    // 1. Admin bookings list page shows staff audit
+    $bookingsRes = $this->actingAs($manager)->get(route('admin.bookings.index'));
+    $bookingsRes->assertOk();
+    $bookingsRes->assertSee('Staff Audit');
+    $bookingsRes->assertSee('Cashier: Staff Alex');
+    $bookingsRes->assertSee('Marked: Staff Alex');
+
+    // 2. Admin dashboard page shows staff audit in run-sheet and recent payments
+    $dashRes = $this->actingAs($admin)->get(route('admin.dashboard'));
+    $dashRes->assertOk();
+    $dashRes->assertSee('Staff Audit');
+    $dashRes->assertSee('Staff / Cashier');
+    $dashRes->assertSee('Staff Alex');
+
+    // 3. Admin finance page shows staff cashier in master payment ledger
+    $financeRes = $this->actingAs($admin)->get(route('admin.finance'));
+    $financeRes->assertOk();
+    $financeRes->assertSee('Staff / Cashier');
+    $financeRes->assertSee('Staff Alex');
+});

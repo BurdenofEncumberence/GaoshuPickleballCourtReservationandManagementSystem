@@ -64,7 +64,7 @@ class ReportExportService
         $startDate = $range['start']->toDateString();
         $endDate = $range['end']->toDateString();
 
-        $bookings = Booking::with(['court', 'user', 'payments'])
+        $bookings = Booking::with(['court', 'user', 'payments.processor', 'statusUpdatedBy'])
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date')
             ->orderBy('start_time')
@@ -131,6 +131,9 @@ class ReportExportService
                 'Duration (Hours)',
                 'Booking Type',
                 'Booking Status',
+                'Cashier / Processed By',
+                'Attendance Marked By',
+                'Attendance Marked At',
                 'Amount (PHP)',
                 'Payment Method',
                 'Payment Status',
@@ -152,6 +155,9 @@ class ReportExportService
                     number_format($hours, 2, '.', ''),
                     ucfirst(str_replace('_', ' ', $booking->booking_type ?? 'online')),
                     ucfirst($booking->booking_status),
+                    $payment?->processor?->name ?? ($booking->isWalkIn() ? 'Walk-In Desk' : 'Online Gateway'),
+                    $booking->statusUpdatedBy?->name ?? 'Unmarked',
+                    $booking->status_updated_at ? $booking->status_updated_at->toDateTimeString() : 'N/A',
                     $payment ? number_format((float) $payment->amount, 2, '.', '') : '0.00',
                     $payment ? ucfirst($payment->payment_method) : 'N/A',
                     $payment ? ucfirst($payment->payment_status) : 'N/A',
@@ -174,7 +180,7 @@ class ReportExportService
         $startDate = $range['start']->toDateString();
         $endDate = $range['end']->toDateString();
 
-        $payments = Payment::with(['booking.court', 'booking.user'])
+        $payments = Payment::with(['booking.court', 'booking.user', 'processor', 'booking.statusUpdatedBy'])
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date')
             ->orderBy('created_at')
@@ -251,6 +257,8 @@ class ReportExportService
                 'Customer Email',
                 'Court',
                 'Booking Type',
+                'Staff / Cashier',
+                'Attendance Marked By',
                 'Amount (PHP)',
                 'Payment Method',
                 'Payment Status',
@@ -267,6 +275,8 @@ class ReportExportService
                     $booking->user->email ?? $booking->customer_email ?? 'N/A',
                     $booking->court->court_name ?? 'N/A',
                     ucfirst(str_replace('_', ' ', $booking->booking_type ?? 'online')),
+                    $payment->processor?->name ?? ($booking?->isWalkIn() ? 'Walk-In Desk' : 'Online Gateway'),
+                    $booking?->statusUpdatedBy?->name ?? 'Unmarked',
                     number_format((float) $payment->amount, 2, '.', ''),
                     ucfirst($payment->payment_method),
                     ucfirst($payment->payment_status),
@@ -490,7 +500,7 @@ class ReportExportService
         $startDate = $range['start']->toDateString();
         $endDate = $range['end']->toDateString();
 
-        $bookings = Booking::with(['court', 'user', 'payments'])
+        $bookings = Booking::with(['court', 'user', 'payments.processor', 'statusUpdatedBy'])
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date')
             ->orderBy('start_time')
@@ -538,7 +548,7 @@ class ReportExportService
         $startDate = $range['start']->toDateString();
         $endDate = $range['end']->toDateString();
 
-        $payments = Payment::with(['booking.court', 'booking.user'])
+        $payments = Payment::with(['booking.court', 'booking.user', 'processor', 'booking.statusUpdatedBy'])
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date')
             ->orderBy('created_at')
