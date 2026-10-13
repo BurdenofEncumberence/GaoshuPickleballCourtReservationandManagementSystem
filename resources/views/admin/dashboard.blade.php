@@ -414,8 +414,24 @@
                                         <span class="gz-badge {{ $badgeClass }}">{{ ucfirst($booking->booking_status) }}</span>
                                     </td>
                                     <td>
-                                        @if($booking->statusUpdatedBy)
-                                            <div class="text-xs font-semibold text-emerald-800 flex items-center gap-1">
+                                        @php
+                                            $dashPayment = $booking->payments->first();
+                                            $dashCashier = $dashPayment?->processor?->name 
+                                                ?? ($booking->isWalkIn() ? $booking->statusUpdatedBy?->name : null);
+                                        @endphp
+                                        @if($dashCashier)
+                                            <div class="text-xs font-semibold text-gray-800 flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                                <span>Cashier: {{ $dashCashier }}</span>
+                                            </div>
+                                        @elseif($booking->isWalkIn())
+                                            <div class="text-[11px] text-gray-500">
+                                                <span class="font-medium text-gray-700">Cashier:</span> Front Desk Staff
+                                            </div>
+                                        @endif
+
+                                        @if($booking->statusUpdatedBy && $booking->statusUpdatedBy->name !== $dashCashier)
+                                            <div class="text-xs font-semibold text-emerald-800 mt-1 flex items-center gap-1">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0"></span>
                                                 <span>Marked: {{ $booking->statusUpdatedBy->name }}</span>
                                             </div>
@@ -424,16 +440,9 @@
                                                     {{ $booking->status_updated_at->format('g:i A') }}
                                                 </div>
                                             @endif
-                                        @else
-                                            <div class="text-[11px] text-gray-400">
+                                        @elseif(!$booking->statusUpdatedBy)
+                                            <div class="text-[11px] text-gray-400 mt-0.5">
                                                 Attendance: <span class="italic">Pending</span>
-                                            </div>
-                                        @endif
-                                        @php $dashPayment = $booking->payments->first(); @endphp
-                                        @if($dashPayment?->processor)
-                                            <div class="text-xs font-semibold text-gray-800 mt-1 flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                                                <span>Cashier: {{ $dashPayment->processor->name }}</span>
                                             </div>
                                         @endif
                                     </td>
@@ -551,15 +560,19 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($payment->processor)
-                                        <div class="font-semibold text-xs text-gray-900">{{ $payment->processor->name }}</div>
+                                    @php
+                                        $handler = $payment->processor?->name 
+                                            ?? ($payment->booking?->isWalkIn() ? $payment->booking->statusUpdatedBy?->name : null);
+                                    @endphp
+                                    @if($handler)
+                                        <div class="font-semibold text-xs text-gray-900">{{ $handler }}</div>
                                         <span class="text-[10px] text-emerald-700 font-medium">Cashier</span>
                                     @elseif($payment->booking?->isWalkIn())
-                                        <span class="text-xs text-gray-500">Walk-In Desk</span>
+                                        <span class="text-xs text-gray-500">Front Desk Staff</span>
                                     @else
                                         <span class="text-xs text-gray-400">Online Gateway</span>
                                     @endif
-                                    @if($payment->booking?->statusUpdatedBy)
+                                    @if($payment->booking?->statusUpdatedBy && $payment->booking->statusUpdatedBy->name !== $handler)
                                         <div class="text-[10px] text-gray-500 mt-0.5">
                                             Marked: {{ $payment->booking->statusUpdatedBy->name }}
                                         </div>

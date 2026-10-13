@@ -128,8 +128,12 @@ class BookingReceiptController extends Controller
             'customer_name' => $booking->user?->name ?? 'Guest Customer',
             'customer_email' => $booking->user?->email ?? 'N/A',
             'booking_type' => $booking->isWalkIn() ? 'Walk-In Front Desk' : 'Online Booking',
+            'is_walk_in' => $booking->isWalkIn(),
             'overall_status' => $booking->booking_status,
-            'processed_by_name' => $firstPayment?->processor?->name,
+            'processed_by_name' => $firstPayment?->processor?->name 
+                ?? $transactionBookings->flatMap->payments->first(fn ($p) => $p->processor !== null)?->processor?->name
+                ?? $booking->statusUpdatedBy?->name
+                ?? ($booking->isWalkIn() ? 'Front Desk Staff' : null),
             'status_updated_by_name' => $booking->statusUpdatedBy?->name,
             'payment_method' => $methodLabel,
             'payment_status' => $paymentStatus,

@@ -164,6 +164,9 @@
                                 <div class="font-mono text-[11px] font-bold text-[#B87D09] dark:text-[#E5A823] mt-0.5" x-text="'PayMongo ID: ' + receipt.paymongo_payment_id"></div>
                             </template>
                             <div class="text-xs text-[#565A4E] mt-0.5" x-text="'Issued: ' + (receipt?.issued_at || '')"></div>
+                            <template x-if="receipt && receipt.processed_by_name">
+                                <div class="text-xs font-semibold text-[#12150F] mt-0.5" x-text="'Handled By: ' + receipt.processed_by_name"></div>
+                            </template>
                         </div>
                     </div>
 
@@ -182,7 +185,7 @@
                             </div>
                             <template x-if="receipt && receipt.processed_by_name">
                                 <div class="text-[#565A4E] mt-0.5">
-                                    Staff / Cashier: <span class="font-bold text-[#12150F]" x-text="receipt.processed_by_name"></span>
+                                    Handled By Staff: <span class="font-bold text-[#12150F]" x-text="receipt.processed_by_name"></span>
                                 </div>
                             </template>
                             <template x-if="receipt && receipt.status_updated_by_name">

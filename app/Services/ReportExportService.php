@@ -155,7 +155,7 @@ class ReportExportService
                     number_format($hours, 2, '.', ''),
                     ucfirst(str_replace('_', ' ', $booking->booking_type ?? 'online')),
                     ucfirst($booking->booking_status),
-                    $payment?->processor?->name ?? ($booking->isWalkIn() ? 'Walk-In Desk' : 'Online Gateway'),
+                    $payment?->processor?->name ?? ($booking->isWalkIn() ? ($booking->statusUpdatedBy?->name ?? 'Front Desk Staff') : 'Online Gateway'),
                     $booking->statusUpdatedBy?->name ?? 'Unmarked',
                     $booking->status_updated_at ? $booking->status_updated_at->toDateTimeString() : 'N/A',
                     $payment ? number_format((float) $payment->amount, 2, '.', '') : '0.00',
@@ -275,7 +275,7 @@ class ReportExportService
                     $booking->user->email ?? $booking->customer_email ?? 'N/A',
                     $booking->court->court_name ?? 'N/A',
                     ucfirst(str_replace('_', ' ', $booking->booking_type ?? 'online')),
-                    $payment->processor?->name ?? ($booking?->isWalkIn() ? 'Walk-In Desk' : 'Online Gateway'),
+                    $payment->processor?->name ?? ($booking?->isWalkIn() ? ($booking?->statusUpdatedBy?->name ?? 'Front Desk Staff') : 'Online Gateway'),
                     $booking?->statusUpdatedBy?->name ?? 'Unmarked',
                     number_format((float) $payment->amount, 2, '.', ''),
                     ucfirst($payment->payment_method),
@@ -302,7 +302,7 @@ class ReportExportService
         $courts = Court::with(['bookings' => function ($q) use ($startDate, $endDate) {
             $q->where('booking_status', '!=', 'cancelled')
                 ->whereBetween('date', [$startDate, $endDate])
-                ->with('payments');
+                ->with(['payments.processor', 'statusUpdatedBy', 'user']);
         }])->orderBy('court_name')->get();
 
         $days = $range['days'];
@@ -413,12 +413,16 @@ class ReportExportService
                 'Booking Reference',
                 'Customer Name',
                 'Booking Type',
+                'Staff / Cashier',
                 'Attendance Status',
             ]);
 
             foreach ($courts as $court) {
                 foreach ($court->bookings as $booking) {
                     $hours = $this->calculateBookingHours($booking);
+                    $payment = $booking->payments->first();
+                    $staff = $payment?->processor?->name
+                        ?? ($booking->isWalkIn() ? ($booking->statusUpdatedBy?->name ?? 'Front Desk Staff') : 'Online Gateway');
                     fputcsv($handle, [
                         $booking->date,
                         $court->court_name,
@@ -428,6 +432,7 @@ class ReportExportService
                         $booking->reference_number ?? ('BK-' . $booking->id),
                         $booking->user->name ?? $booking->customer_name ?? 'Guest Customer',
                         ucfirst(str_replace('_', ' ', $booking->booking_type ?? 'online')),
+                        $staff,
                         ucfirst($booking->booking_status),
                     ]);
                 }

@@ -99,6 +99,11 @@
                     <div class="text-[11px] text-[#565A4E] mt-0.5">
                         Issued: {{ $receipt['issued_at'] }}
                     </div>
+                    @if(!empty($receipt['processed_by_name']))
+                        <div class="text-[11px] font-semibold text-[#12150F] mt-0.5">
+                            Handled By: <span class="font-bold">{{ $receipt['processed_by_name'] }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </header>
@@ -121,7 +126,7 @@
                 </div>
                 @if(!empty($receipt['processed_by_name']))
                     <div class="text-[11px] text-[#565A4E]">
-                        Staff / Cashier: <span class="font-bold text-[#12150F]">{{ $receipt['processed_by_name'] }}</span>
+                        Handled By Staff: <span class="font-bold text-[#12150F]">{{ $receipt['processed_by_name'] }}</span>
                     </div>
                 @endif
                 @if(!empty($receipt['paymongo_payment_id']))
@@ -254,7 +259,12 @@
                     </svg>
                     <span>VERIFIED OFFICIAL RECEIPT</span>
                 </div>
-                <div class="text-[9px] text-[#7A7E73] mt-1 font-mono">
+                @if(!empty($receipt['processed_by_name']))
+                    <div class="text-[10px] text-[#12150F] font-semibold mt-1">
+                        Handled by Staff: <span class="font-bold">{{ $receipt['processed_by_name'] }}</span>
+                    </div>
+                @endif
+                <div class="text-[9px] text-[#7A7E73] mt-0.5 font-mono">
                     {{ $receipt['system_name'] }} · SECURE TRANSACTION
                 </div>
             </div>

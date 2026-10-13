@@ -291,14 +291,18 @@
 
                                 <!-- Staff Audit -->
                                 <td>
-                                    @if($payment?->processor)
+                                    @php
+                                        $cashierName = $payment?->processor?->name 
+                                            ?? ($booking->isWalkIn() ? $booking->statusUpdatedBy?->name : null);
+                                    @endphp
+                                    @if($cashierName)
                                         <div class="text-xs font-semibold text-gray-900 flex items-center gap-1">
                                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                                            <span>Cashier: {{ $payment->processor->name }}</span>
+                                            <span>Cashier: {{ $cashierName }}</span>
                                         </div>
                                     @elseif($booking->isWalkIn())
                                         <div class="text-[11px] text-gray-500">
-                                            <span class="font-medium text-gray-700">Cashier:</span> Desk Walk-In
+                                            <span class="font-medium text-gray-700">Cashier:</span> Front Desk Staff
                                         </div>
                                     @else
                                         <div class="text-[11px] text-gray-400">

@@ -246,15 +246,19 @@
                             </span>
                         </td>
                         <td style="font-size: 8px;">
-                            @if($payment?->processor)
-                                <div><strong>Cashier:</strong> {{ $payment->processor->name }}</div>
+                            @php
+                                $staffHandler = $payment?->processor?->name 
+                                    ?? ($booking->booking_type === 'walk_in' ? $booking->statusUpdatedBy?->name : null);
+                            @endphp
+                            @if($staffHandler)
+                                <div><strong>Staff:</strong> {{ $staffHandler }}</div>
                             @elseif($booking->booking_type === 'walk_in')
-                                <div style="color: #636b59;">Desk Walk-In</div>
+                                <div style="color: #636b59;">Front Desk Staff</div>
                             @endif
-                            @if($booking->statusUpdatedBy)
+                            @if($booking->statusUpdatedBy && $booking->statusUpdatedBy->name !== $staffHandler)
                                 <div style="color: #15803d;"><strong>Marked:</strong> {{ $booking->statusUpdatedBy->name }}</div>
                             @endif
-                            @if(!$payment?->processor && !$booking->statusUpdatedBy && $booking->booking_type !== 'walk_in')
+                            @if(!$staffHandler && !$booking->statusUpdatedBy && $booking->booking_type !== 'walk_in')
                                 <span style="color: #8c9480;">Online Gateway</span>
                             @endif
                         </td>

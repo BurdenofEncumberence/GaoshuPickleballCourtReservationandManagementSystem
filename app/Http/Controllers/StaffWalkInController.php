@@ -517,6 +517,7 @@ class StaffWalkInController extends Controller
             'receipt_payment_method' => $validated['payment_method'],
             'receipt_cash_tendered' => $cashTendered,
             'receipt_change_amount' => $changeAmount,
+            'receipt_staff_name' => Auth::user()?->name,
         ]);
     }
 
@@ -629,6 +630,7 @@ class StaffWalkInController extends Controller
                 'receipt_time_slot' => $bookings->map(fn ($b) => Carbon::parse($b->start_time)->format('g:i A') . ' - ' . Carbon::parse($b->end_time)->format('g:i A'))->join(', '),
                 'receipt_amount' => $totalPaid,
                 'receipt_payment_method' => 'paymongo',
+                'receipt_staff_name' => Auth::user()?->name ?? $firstBooking?->statusUpdatedBy?->name,
             ]);
         }
 

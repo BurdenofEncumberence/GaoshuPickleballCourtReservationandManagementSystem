@@ -222,6 +222,18 @@
                 <td class="meta-label">Date Issued:</td>
                 <td class="meta-val">{{ now()->format('F j, Y \a\t g:i A') }}</td>
             </tr>
+            @php
+                $firstB = collect($bookings)->first();
+                $staffHandler = $firstB?->payments?->first(fn ($p) => $p->processor !== null)?->processor?->name
+                    ?? $firstB?->statusUpdatedBy?->name
+                    ?? ($firstB?->isWalkIn() ? 'Front Desk Staff' : null);
+            @endphp
+            @if($staffHandler)
+                <tr>
+                    <td class="meta-label">Handled By Staff:</td>
+                    <td class="meta-val">{{ $staffHandler }}</td>
+                </tr>
+            @endif
         </table>
 
         <!-- Booked Courts Table -->

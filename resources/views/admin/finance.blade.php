@@ -392,15 +392,19 @@
                                 </td>
                                 <td class="text-sm font-medium capitalize">{{ $payment->payment_method ?: 'Standard' }}</td>
                                 <td>
-                                    @if($payment->processor)
-                                        <div class="font-semibold text-xs text-gray-900">{{ $payment->processor->name }}</div>
+                                    @php
+                                        $handler = $payment->processor?->name 
+                                            ?? ($payment->booking?->isWalkIn() ? $payment->booking->statusUpdatedBy?->name : null);
+                                    @endphp
+                                    @if($handler)
+                                        <div class="font-semibold text-xs text-gray-900">{{ $handler }}</div>
                                         <span class="text-[10px] text-emerald-700 font-medium">Staff Cashier</span>
                                     @elseif($payment->booking?->isWalkIn())
-                                        <span class="text-xs text-gray-500">Desk Staff</span>
+                                        <span class="text-xs text-gray-500">Front Desk Staff</span>
                                     @else
                                         <span class="text-xs text-gray-400">Online Gateway</span>
                                     @endif
-                                    @if($payment->booking?->statusUpdatedBy)
+                                    @if($payment->booking?->statusUpdatedBy && $payment->booking->statusUpdatedBy->name !== $handler)
                                         <div class="text-[10px] text-gray-500 mt-0.5">
                                             Marked: {{ $payment->booking->statusUpdatedBy->name }}
                                         </div>

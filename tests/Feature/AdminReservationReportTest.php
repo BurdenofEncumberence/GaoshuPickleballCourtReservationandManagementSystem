@@ -251,4 +251,47 @@ test('admin and manager views display staff cashier and attendance audit columns
     $financeRes->assertOk();
     $financeRes->assertSee('Staff / Cashier');
     $financeRes->assertSee('Staff Alex');
+
+    // 4. Booking receipt page and JSON endpoint display handled by staff
+    $receiptRes = $this->actingAs($admin)->get(route('bookings.receipt', $booking));
+    $receiptRes->assertOk();
+    $receiptRes->assertSee('Handled By:');
+    $receiptRes->assertSee('Staff Alex');
+
+    $receiptJsonRes = $this->actingAs($admin)->getJson(route('bookings.receipt', $booking));
+    $receiptJsonRes->assertOk();
+    $receiptJsonRes->assertJsonPath('processed_by_name', 'Staff Alex');
+
+    // 5. Overall Operations CSV report includes staff cashier and attendance marker
+    $overallCsvRes = $this->actingAs($admin)->get(route('admin.reports.export', [
+        'type' => 'overall',
+        'period' => 'this_month',
+        'format' => 'csv',
+    ]));
+    $overallCsvRes->assertOk();
+    $overallCsvStream = $overallCsvRes->streamedContent();
+    expect($overallCsvStream)->toContain('Cashier / Processed By');
+    expect($overallCsvStream)->toContain('Staff Alex');
+
+    // 6. Financial Audit CSV report includes staff cashier
+    $finCsvRes = $this->actingAs($admin)->get(route('admin.reports.export', [
+        'type' => 'financial',
+        'period' => 'this_month',
+        'format' => 'csv',
+    ]));
+    $finCsvRes->assertOk();
+    $finCsvStream = $finCsvRes->streamedContent();
+    expect($finCsvStream)->toContain('Staff / Cashier');
+    expect($finCsvStream)->toContain('Staff Alex');
+
+    // 7. Court Utilization CSV report itemized court sessions include staff handler
+    $utilCsvRes = $this->actingAs($admin)->get(route('admin.reports.export', [
+        'type' => 'utilization',
+        'period' => 'this_month',
+        'format' => 'csv',
+    ]));
+    $utilCsvRes->assertOk();
+    $utilCsvStream = $utilCsvRes->streamedContent();
+    expect($utilCsvStream)->toContain('Staff / Cashier');
+    expect($utilCsvStream)->toContain('Staff Alex');
 });

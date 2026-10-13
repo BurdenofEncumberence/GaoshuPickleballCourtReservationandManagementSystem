@@ -376,18 +376,20 @@ test('staff walk-in with cash tenders more than amount due and records change co
     expect((float) $payment->cash_tendered)->toBe(1000.00);
     expect((float) $payment->change_amount)->toBe(600.00);
 
-    // Verify receipt page shows cash breakdown and non-refundable badge
+    // Verify receipt page shows cash breakdown, staff handler, and non-refundable badge
     $receiptResponse = $this->actingAs($staff)->get(route('bookings.receipt', ['booking' => $booking->id]));
     $receiptResponse->assertOk();
     $receiptResponse->assertSee('1,000.00');
     $receiptResponse->assertSee('600.00');
     $receiptResponse->assertSee('Non-Refundable Transaction');
+    $receiptResponse->assertSee($staff->name);
 
-    // Verify receipt JSON endpoint returns cash tendered and change
+    // Verify receipt JSON endpoint returns cash tendered, change, and staff processor name
     $jsonResponse = $this->actingAs($staff)->getJson(route('bookings.receipt', ['booking' => $booking->id]));
     $jsonResponse->assertOk();
     $jsonResponse->assertJsonPath('cash_tendered', 1000);
     $jsonResponse->assertJsonPath('change_amount', 600);
+    $jsonResponse->assertJsonPath('processed_by_name', $staff->name);
 });
 
 test('staff walk-in with cash tenders less than amount due fails validation', function () {

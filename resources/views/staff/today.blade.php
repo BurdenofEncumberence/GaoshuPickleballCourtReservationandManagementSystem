@@ -61,6 +61,9 @@
                         @if(session('receipt_amount') !== null)
                             <span>Total: <strong class="font-mono" style="color: var(--gz-pop-dark);">₱{{ number_format(session('receipt_amount'), 2) }}</strong></span>
                         @endif
+                        @if(session('receipt_staff_name'))
+                            <span>Handled By: <strong style="color: var(--gz-ink);">{{ session('receipt_staff_name') }}</strong></span>
+                        @endif
                         @if(session('receipt_cash_tendered') !== null)
                             <span>Tendered: <strong class="font-mono" style="color: var(--gz-ink);">₱{{ number_format(session('receipt_cash_tendered'), 2) }}</strong></span>
                             <span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800">
@@ -698,11 +701,12 @@
                                     @endif
 
                                     @php
-                                        $paymentStaff = $booking->payments->first(fn ($p) => $p->processor !== null)?->processor;
+                                        $paymentStaff = $booking->payments->first(fn ($p) => $p->processor !== null)?->processor?->name
+                                            ?? ($booking->isWalkIn() ? $booking->statusUpdatedBy?->name : null);
                                     @endphp
                                     @if($paymentStaff)
-                                        <div class="text-[10px] mt-0.5 text-gray-500">
-                                            Payment: <span class="font-medium text-gray-700">{{ $paymentStaff->name }}</span>
+                                        <div class="text-[10px] mt-0.5 text-gray-700 font-medium">
+                                            Handled by: <span class="font-bold text-gray-900">{{ $paymentStaff }}</span>
                                         </div>
                                     @endif
                                 </td>
