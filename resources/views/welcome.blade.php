@@ -284,7 +284,6 @@
 <body class="antialiased relative">
     <div class="grain"></div>
 
-
     <x-loading-screen />
 
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -761,35 +760,6 @@
                 </p>
             </div>
 
-            <div class="surface-card p-7">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background: rgba(229, 168, 35, 0.15); color: var(--pop-dark);">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                </div>
-                <h3 class="font-display font-bold text-lg mb-2">Pro Shop & Gear Rentals</h3>
-                <p class="text-sm leading-relaxed" style="color: var(--muted);">
-                    No paddle? No problem! Rent tournament-grade carbon fiber paddles and official outdoor balls at the front counter, or test out new overgrips.
-                </p>
-            </div>
-
-            <div class="surface-card p-7">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background: rgba(229, 168, 35, 0.15); color: var(--pop-dark);">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                </div>
-                <h3 class="font-display font-bold text-lg mb-2">Showers & Locker Rooms</h3>
-                <p class="text-sm leading-relaxed" style="color: var(--muted);">
-                    Clean shower stalls, changing rooms, and secured lockers ensure you can rally before work or head straight out with friends feeling completely refreshed.
-                </p>
-            </div>
-
-            <div class="surface-card p-7">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style="background: rgba(229, 168, 35, 0.15); color: var(--pop-dark);">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                </div>
-                <h3 class="font-display font-bold text-lg mb-2">Lounge & Refreshment Bar</h3>
-                <p class="text-sm leading-relaxed" style="color: var(--muted);">
-                    Refuel between games with complimentary filtered water refills, chilled electrolyte beverages, shaded spectator benches, and free high-speed Wi-Fi.
-                </p>
-            </div>
         </div>
     </section>
 
@@ -810,9 +780,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
                 <div class="flex flex-col">
-                    <div class="w-12 h-12 rounded-2xl text-white font-display font-bold text-xl flex items-center justify-center mb-4" style="background: var(--dark-bg); border: 1px solid var(--border);">
-                        01
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl font-display font-bold text-xl flex items-center justify-center mb-4 shadow-sm" style="background: var(--pop); color: var(--on-pop);">
+                    01
+                  </div>
                     <h3 class="font-display font-bold text-lg mb-2">Pick Your Date & Time</h3>
                     <p class="text-sm leading-relaxed" style="color: var(--muted);">
                         Select which court you prefer and see real-time color-coded slot availability. What you see is guaranteed open.
@@ -830,7 +800,7 @@
                 </div>
 
                 <div class="flex flex-col">
-                    <div class="w-12 h-12 rounded-2xl font-display font-bold text-xl flex items-center justify-center mb-4 shadow-sm" style="background: var(--pop); color: var(--on-pop);">
+                    <div class="w-12 h-12 rounded-2xl text-white font-display font-bold text-xl flex items-center justify-center mb-4" style="background: var(--dark-bg); border: 1px solid var(--border);">
                         03
                     </div>
                     <h3 class="font-display font-bold text-lg mb-2">Instant Confirmation & Play</h3>
@@ -874,22 +844,22 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="surface-card p-7 flex flex-col justify-between">
+                      <div class="surface-card p-7 flex flex-col justify-between">
                 <div>
                     <div class="flex text-amber-500 mb-3 text-sm tracking-widest" aria-label="5 stars">
                         ★★★★★
                     </div>
                     <p class="text-sm leading-relaxed mb-6" style="color: var(--ink);">
-                        "The court grip and cushion are the best in Davao. My knees don't hurt even after 3 straight hours of tournament drills. And being able to reserve in under 30 seconds without calling anyone is amazing."
+                        "Great courts, great lighting, and a very welcoming team. We booked 2 courts for our company round-robin and everything was ready right on the dot."
                     </p>
                 </div>
                 <div class="flex items-center gap-3 pt-4 border-t border-[color:var(--border)]">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-emerald-100 text-emerald-800">
-                        CM
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-amber-100 text-amber-800">
+                        PR
                     </div>
                     <div>
-                        <div class="font-bold text-sm">Carlo Mendoza</div>
-                        <div class="text-xs" style="color: var(--muted);">DUPR 4.0 Club Player</div>
+                        <div class="font-bold text-sm">Paolo Rodriguez</div>
+                        <div class="text-xs" style="color: var(--muted);">Company League Captain</div>
                     </div>
                 </div>
             </div>
