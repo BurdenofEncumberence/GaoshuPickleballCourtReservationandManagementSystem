@@ -1,4 +1,4 @@
-<x-app-layout title="Secure Court Appointment — Gaoshou Pickleball">
+<x-app-layout title="Secure Court Reservation — Gaoshou Pickleball">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6" x-data="{ paymentMethod: 'paymongo' }">
         {{-- Breadcrumbs & Header --}}
         <div class="mb-6">
@@ -12,7 +12,7 @@
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
                     <h1 class="gz-font-display font-extrabold text-2xl sm:text-3xl tracking-tight" style="color: var(--gz-ink);">
-                        Secure Court Appointment
+                        Secure Court Reservation
                     </h1>
                     <p class="text-sm mt-1" style="color: var(--gz-muted);">
                         Your Open Play session has been accepted by the facility manager! Complete payment to finalize your court reservation.
@@ -28,20 +28,20 @@
         </div>
 
         {{-- Accepted Request Banner --}}
-        <div class="gz-panel p-4 mb-6" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25);">
+        <div class="gz-panel p-4 mb-6" style="background: rgba(229, 168, 35, 0.08); border: 1px solid rgba(229, 168, 35, 0.28);">
             <div class="flex items-start gap-3">
-                <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <div class="p-2 rounded-lg bg-[#E5A823]/15 text-[#B87D09] dark:text-[#E5A823] shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <div class="text-xs space-y-1" style="color: var(--gz-ink);">
-                    <p class="font-bold text-sm text-emerald-700 dark:text-emerald-400">Request Accepted by Facility Manager</p>
+                    <p class="font-bold text-sm text-[#B87D09] dark:text-[#E5A823]">Request Accepted by Facility Manager</p>
                     <p style="color: var(--gz-muted);">
-                        The manager has approved your date and court allocations. Pay the court appointment fee below to officially lock in the courts and open registrations for other players.
+                        The manager has approved your date and court allocations. Pay the court reservation fee below to officially lock in the courts and open registrations for other players.
                     </p>
                     @if ($session->manager_note)
-                        <div class="mt-2 p-2.5 rounded bg-white/60 dark:bg-black/20 border border-emerald-500/20 text-xs">
+                        <div class="mt-2 p-2.5 rounded bg-white/60 dark:bg-black/20 border border-[#E5A823]/25 text-xs">
                             <span class="font-bold uppercase tracking-wider text-[10px]" style="color: var(--gz-muted);">Manager Note:</span>
                             <p class="mt-0.5" style="color: var(--gz-ink);">{{ $session->manager_note }}</p>
                         </div>
@@ -125,8 +125,8 @@
                 </div>
                 <div class="border-t my-2" style="border-color: var(--gz-border);"></div>
                 <div class="flex items-center justify-between pt-1">
-                    <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--gz-ink);">Total Court Appointment Fee:</span>
-                    <span class="gz-font-display text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                    <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--gz-ink);">Total Court Reservation Fee:</span>
+                    <span class="gz-font-display text-2xl font-extrabold" style="color: var(--gz-pop-dark);">
                         ₱{{ number_format($session->court_fee, 2) }}
                     </span>
                 </div>
@@ -139,7 +139,7 @@
                 Payment Method
             </h2>
             <p class="text-xs mb-4" style="color: var(--gz-muted);">
-                Complete online payment of the court hire fee to officially secure your appointment.
+                Complete online payment of the court hire fee to officially secure your reservation.
             </p>
 
             <form method="POST" action="{{ route('open-play.host.pay.process', $session) }}">
@@ -149,16 +149,19 @@
 
                 <div class="space-y-3 mb-6">
                     <label class="flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition"
-                           style="border-color: #10b981; background: rgba(16, 185, 129, 0.05);">
+                           style="border-color: var(--gz-pop-dark); background: rgba(229, 168, 35, 0.08);">
                         <input
                             type="radio"
                             checked
-                            class="mt-1 text-emerald-600 focus:ring-emerald-500"
+                            class="mt-1 text-[#E5A823] focus:ring-[#E5A823]"
                         >
                         <div class="flex-1">
-                            <span class="block text-sm font-bold" style="color: var(--gz-ink);">
-                                Pay Online (PayMongo)
-                            </span>
+                            <div class="flex items-center justify-between">
+                                <span class="block text-sm font-bold" style="color: var(--gz-pop-dark);">
+                                    Pay Online (PayMongo)
+                                </span>
+                                <span class="gz-badge gz-badge-success text-[10px]">Online Gateway</span>
+                            </div>
                             <span class="block text-xs mt-0.5" style="color: var(--gz-muted);">
                                 Instant verification via QR Ph, GCash, Maya, Debit/Credit Card, or Online Banking. Your courts are secured immediately.
                             </span>

@@ -11,6 +11,7 @@ use App\Services\PayMongoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -56,7 +57,7 @@ class StaffWalkInController extends Controller
             ->get()
             ->values();
 
-        $existingBookings = Booking::with(['user', 'court', 'payments'])
+        $existingBookings = Booking::with(['user', 'court', 'payments.processor', 'statusUpdatedBy'])
             ->where('date', $selectedDate)
             ->where('booking_status', '!=', 'cancelled')
             ->get();
@@ -83,6 +84,9 @@ class StaffWalkInController extends Controller
                     in_array($b->booking_status, ['no_show', 'no-show']) => 'No-Show (Absent)',
                     default => 'Scheduled (Awaiting)',
                 },
+                'status_updated_by_name' => $b->statusUpdatedBy?->name,
+                'status_updated_at' => $b->status_updated_at?->format('g:i A'),
+                'processed_by_name' => $latestPayment?->processor?->name,
                 'court_name' => $b->court?->court_name ?? 'Court',
                 'court_size' => $b->court?->size ?: 'Regular (13.41m x 6.10m)',
                 'date_formatted' => Carbon::parse($selectedDate)->format('F j, Y'),
@@ -380,12 +384,15 @@ class StaffWalkInController extends Controller
                 ]);
             }
 
+            $staffId = Auth::id();
+
             DB::transaction(function () use (
                 $user,
                 $parsedItems,
                 $validated,
                 $paymentRef,
-                $sessionId
+                $sessionId,
+                $staffId
             ) {
                 foreach ($parsedItems as $item) {
                     $booking = Booking::create([
@@ -397,6 +404,8 @@ class StaffWalkInController extends Controller
                         'end_time' => $item['end_time'],
                         'booking_status' => 'pending',
                         'booking_type' => 'walk_in',
+                        'status_updated_by' => $staffId,
+                        'status_updated_at' => now(),
                     ]);
 
                     Payment::create([
@@ -404,6 +413,7 @@ class StaffWalkInController extends Controller
                         'payment_method' => 'paymongo',
                         'payment_status' => 'pending',
                         'amount' => $item['amount'],
+                        'processed_by' => $staffId,
                         'ref_num' => $paymentRef,
                         'checkout_session_id' => $sessionId,
                         'date' => now()->toDateString(),
@@ -412,13 +422,17 @@ class StaffWalkInController extends Controller
                 }
             });
 
-            session(['walkin_attendance_' . $paymentRef => $validated['attendance_status']]);
+            session([
+                'walkin_attendance_' . $paymentRef => $validated['attendance_status'],
+                'walkin_staff_' . $paymentRef => $staffId,
+            ]);
 
             return redirect()->away($checkoutUrl);
         }
 
         // Standard counter payments (cash, manual gcash/maya/card)
         $createdBookings = [];
+        $staffId = Auth::id();
 
         DB::transaction(function () use (
             $user,
@@ -427,6 +441,7 @@ class StaffWalkInController extends Controller
             $cashTendered,
             $changeAmount,
             $paymentRef,
+            $staffId,
             &$createdBookings
         ) {
             foreach ($parsedItems as $item) {
@@ -439,6 +454,8 @@ class StaffWalkInController extends Controller
                     'end_time' => $item['end_time'],
                     'booking_status' => $validated['attendance_status'],
                     'booking_type' => 'walk_in',
+                    'status_updated_by' => $staffId,
+                    'status_updated_at' => now(),
                 ]);
 
                 $booking->setRelation('court', $item['court']);
@@ -450,6 +467,7 @@ class StaffWalkInController extends Controller
                     'amount' => $item['amount'],
                     'cash_tendered' => $cashTendered,
                     'change_amount' => $changeAmount,
+                    'processed_by' => $staffId,
                     'ref_num' => $paymentRef,
                     'date' => now()->toDateString(),
                     'time' => now()->format('H:i:s'),
@@ -557,21 +575,26 @@ class StaffWalkInController extends Controller
             $paymongoPaymentId = $details['payment_id'] ?? null;
             $sourceType = $details['source_type'] ?? 'online';
 
-            $attendanceStatus = session()->pull('walkin_attendance_' . ($refNum ?: $firstPayment->ref_num), 'show');
+            $refKey = $refNum ?: $firstPayment->ref_num;
+            $attendanceStatus = session()->pull('walkin_attendance_' . $refKey, 'show');
+            $staffId = Auth::id() ?? session()->pull('walkin_staff_' . $refKey);
 
-            DB::transaction(function () use ($payments, $bookings, $actualSessionId, $paymongoPaymentId, $sourceType, $attendanceStatus) {
+            DB::transaction(function () use ($payments, $bookings, $actualSessionId, $paymongoPaymentId, $sourceType, $attendanceStatus, $staffId) {
                 foreach ($payments as $payment) {
                     $payment->update([
                         'payment_status' => 'paid',
                         'checkout_session_id' => $actualSessionId ?: $payment->checkout_session_id,
                         'paymongo_payment_id' => $paymongoPaymentId ?: $payment->paymongo_payment_id,
                         'payment_method' => 'paymongo_' . $sourceType,
+                        'processed_by' => $payment->processed_by ?: $staffId,
                     ]);
                 }
 
                 foreach ($bookings as $booking) {
                     $booking->update([
                         'booking_status' => $attendanceStatus,
+                        'status_updated_by' => $staffId ?: $booking->status_updated_by,
+                        'status_updated_at' => now(),
                     ]);
                 }
             });

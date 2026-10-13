@@ -18,6 +18,12 @@ class Booking extends Model
         'end_time',
         'booking_status',
         'booking_type',
+        'status_updated_by',
+        'status_updated_at',
+    ];
+
+    protected $casts = [
+        'status_updated_at' => 'datetime',
     ];
 
     public function isWalkIn(): bool
@@ -63,5 +69,10 @@ class Booking extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function statusUpdatedBy()
+    {
+        return $this->belongsTo(User::class, 'status_updated_by');
     }
 }

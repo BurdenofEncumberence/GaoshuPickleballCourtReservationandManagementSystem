@@ -7,22 +7,22 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            {{-- Events Section --}}
+            {{-- Promos Section --}}
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-display font-bold text-xl" style="color: var(--gz-ink);">All Events & Promotions</h3>
-                    <a href="{{ route('booking') }}" class="text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300">
+                    <h3 class="font-display font-bold text-xl" style="color: var(--gz-ink);">All Promos & Special Offers</h3>
+                    <a href="{{ route('booking') }}" class="text-sm font-semibold hover:underline" style="color: var(--gz-pop-dark);">
                         Book a Court →
                     </a>
                 </div>
                 
                 @if($events->isEmpty())
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-8 text-center border border-gray-200 dark:border-gray-700">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: rgba(229,168,35,0.12); color: var(--gz-pop-dark);">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-lg">No events or promotions at the moment.</p>
-                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Check back later for special offers!</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-lg">No active promos at the moment.</p>
+                        <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Check back later for special offers and discounts!</p>
                     </div>
                 @else
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -31,8 +31,8 @@
                                 @if($event->image)
                                     <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->event_title }}" class="w-full h-48 object-cover">
                                 @else
-                                    <div class="w-full h-48 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 flex items-center justify-center">
-                                        <svg class="w-12 h-12 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                    <div class="w-full h-48 flex items-center justify-center" style="background: rgba(229,168,35,0.12); color: var(--gz-pop-dark);">
+                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                                     </div>
                                 @endif
                                 
@@ -49,7 +49,7 @@
                                     </div>
                                     
                                     @if($event->discount)
-                                        <div class="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm font-semibold mb-3">
+                                        <div class="inline-block px-3 py-1 rounded-full text-sm font-bold mb-3" style="background: rgba(229,168,35,0.18); color: var(--gz-pop-dark);">
                                             {{ $event->discount }}% OFF
                                         </div>
                                     @else
@@ -64,7 +64,7 @@
                                         </p>
                                     @endif
                                     
-                                    <a href="{{ route('booking') }}" class="inline-block text-sm font-semibold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300">
+                                    <a href="{{ route('booking') }}" class="inline-block text-sm font-semibold hover:underline" style="color: var(--gz-pop-dark);">
                                         Book a Court →
                                     </a>
                                 </div>

@@ -143,7 +143,7 @@ class ActivityLog extends Model
                         'user_name' => $actor?->name ?: $playerName,
                         'user_email' => $actor?->email,
                         'user_role' => $actor?->role ?: 'player',
-                        'action' => 'Booked Court Appointment',
+                        'action' => 'Booked Court Reservation',
                         'description' => "Reserved {$courtName} on {$booking->date} ({$booking->start_time} - {$booking->end_time}) — Status: " . ucfirst((string) $booking->booking_status) . ", Paid ₱" . number_format($amountPaid, 2) . " ({$ref}).",
                         'ip_address' => '127.0.0.1',
                         'created_at' => $booking->created_at ?? now()->subDay(),

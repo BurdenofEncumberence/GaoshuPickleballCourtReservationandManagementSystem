@@ -1,7 +1,7 @@
 @props(['title' => null, 'heading' => "Today's Schedule"])
 
 @php
-    $siteSettings = \App\Models\SiteSettings::first();
+    $siteSettings = $siteSettings ?? \App\Models\SiteSettings::current();
     $currentUser = Auth::user();
     $shortName = $currentUser->first_name
         ?: (\Illuminate\Support\Str::of($currentUser->name ?? 'Staff')->before(' ')->value() ?: 'Staff');
@@ -51,7 +51,7 @@
 
                 <div class="flex items-center gap-2">
                     @if($logoPath)
-                        <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-7 w-auto max-h-7 max-w-[100px] object-contain rounded-lg">
+                        <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-8 sm:h-9 w-auto max-h-9 max-w-[120px] object-contain rounded-lg">
                     @else
                         <div class="w-6 h-6 rounded flex items-center justify-center font-bold text-xs" style="background: var(--gz-pop); color: var(--gz-ink);">
                             G
@@ -95,7 +95,7 @@
                 <div class="h-16 px-6 border-b flex items-center justify-between shrink-0" style="border-color: var(--gz-border);">
                     <a href="{{ route('staff.today') }}" class="flex items-center gap-2.5">
                         @if($logoPath)
-                            <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-8 w-auto max-h-8 max-w-[110px] object-contain rounded-lg shrink-0">
+                            <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-9 sm:h-10 w-auto max-h-10 max-w-[130px] object-contain rounded-lg shrink-0">
                         @else
                             <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm" style="background: var(--gz-pop); color: var(--gz-ink);">
                                 G

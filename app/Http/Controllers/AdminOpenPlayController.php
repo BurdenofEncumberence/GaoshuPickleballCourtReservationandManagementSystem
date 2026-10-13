@@ -371,7 +371,7 @@ class AdminOpenPlayController extends Controller
             'manager_note' => $request->input('manager_note'),
         ]);
 
-        return back()->with('status', "Host request for '{$open_play->title}' has been accepted! The host can now pay to secure the court appointment.");
+        return back()->with('status', "Host request for '{$open_play->title}' has been accepted! The host can now pay to secure the court reservation.");
     }
 
     /**

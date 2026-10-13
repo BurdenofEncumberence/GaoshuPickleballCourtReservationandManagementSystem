@@ -530,7 +530,7 @@
                             {{-- Option 1: PayMongo Online Gateway --}}
                             <label class="flex items-start gap-2.5 p-2.5 border cursor-pointer text-xs rounded transition"
                                    :style="selectedPaymentMethod === 'paymongo' ? 'border-color: var(--gz-pop-dark); background: rgba(229,168,35,0.08);' : 'border-color: var(--gz-border);'">
-                                <input type="radio" name="payment_method" value="paymongo" x-model="selectedPaymentMethod" class="mt-0.5">
+                                <input type="radio" name="payment_method" value="paymongo" x-model="selectedPaymentMethod" class="mt-0.5 text-[#E5A823] focus:ring-[#E5A823]">
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="font-bold" style="color: var(--gz-pop-dark);">Pay Online (PayMongo)</span>
@@ -543,7 +543,7 @@
                             {{-- Option 2: Cash --}}
                             <label class="flex items-start gap-2.5 p-2.5 border cursor-pointer text-xs rounded transition"
                                    :style="selectedPaymentMethod === 'cash' ? 'border-color: var(--gz-pop-dark); background: rgba(229,168,35,0.08);' : 'border-color: var(--gz-border);'">
-                                <input type="radio" name="payment_method" value="cash" x-model="selectedPaymentMethod" class="mt-0.5">
+                                <input type="radio" name="payment_method" value="cash" x-model="selectedPaymentMethod" class="mt-0.5 text-[#E5A823] focus:ring-[#E5A823]">
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="font-bold text-[color:var(--gz-ink)]">Cash</span>
@@ -719,7 +719,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-[#E5A823] text-[#12150F]">
-                                Booked Appointment
+                                Booked Reservation
                             </span>
                             <span class="font-mono text-xs font-bold" style="color: var(--gz-muted);" x-text="'#' + (activeBooking?.booking_ref || '')"></span>
                         </div>
@@ -750,6 +750,9 @@
                             <div>
                                 <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Attendance Status</span>
                                 <span class="font-bold block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.attendance_label"></span>
+                                <template x-if="activeBooking?.status_updated_by_name">
+                                    <span class="block text-[10px] mt-0.5 font-semibold text-emerald-800" x-text="'Marked by: ' + activeBooking?.status_updated_by_name + (activeBooking?.status_updated_at ? (' (' + activeBooking?.status_updated_at + ')') : '')"></span>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -775,6 +778,12 @@
                                 <span style="color: var(--gz-muted);">Payment Method:</span>
                                 <span class="font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_method"></span>
                             </div>
+                            <template x-if="activeBooking?.processed_by_name">
+                                <div class="flex items-center justify-between">
+                                    <span style="color: var(--gz-muted);">Payment Processed By:</span>
+                                    <span class="font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.processed_by_name"></span>
+                                </div>
+                            </template>
                             <div class="flex items-center justify-between">
                                 <span style="color: var(--gz-muted);">Payment Reference:</span>
                                 <span class="font-mono font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_ref"></span>

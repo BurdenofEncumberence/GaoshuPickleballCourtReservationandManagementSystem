@@ -16,7 +16,7 @@
                         {{ $court->exists ? 'Update court: ' . $court->court_name : 'Register new court' }}
                     </h2>
                     <p class="text-sm mt-1" style="color: var(--gz-muted);">
-                        Set operational details and pricing displayed in the court appointment system.
+                        Set operational details and pricing displayed in the court reservation system.
                     </p>
                 </div>
             </div>

@@ -23,7 +23,7 @@ class AdminBookingController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $query = Booking::query()
-            ->with(['court', 'user', 'payments', 'event']);
+            ->with(['court', 'user', 'payments.processor', 'event', 'statusUpdatedBy']);
 
         // Search filter (booking ID, reference number, user name, user email, court name)
         if ($search !== '') {

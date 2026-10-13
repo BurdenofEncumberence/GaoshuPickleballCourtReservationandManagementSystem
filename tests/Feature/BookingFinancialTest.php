@@ -15,7 +15,7 @@ it('records full payment upon successful customer booking and reflects in admin 
         'court_status' => 'available',
     ]);
 
-    // Customer books an appointment
+    // Customer books a reservation
     $response = $this->actingAs($player)->post(route('bookings.store'), [
         'court_id' => $court->id,
         'date' => today()->addDay()->toDateString(),

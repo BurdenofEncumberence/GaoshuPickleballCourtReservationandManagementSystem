@@ -3,7 +3,7 @@
         <div class="kymnet-loader-icon">
             <div class="kymnet-loader-ball"></div>
         </div>
-        <div class="kymnet-loader-title">{{ \App\Models\SiteSettings::first()?->system_name ?? 'GAOSHOU PICKLEBALL' }}</div>
+        <div class="kymnet-loader-title">{{ $siteSettings?->system_name ?? 'GAOSHOU PICKLEBALL' }}</div>
         <div id="kymnet-loader-msg" class="kymnet-loader-subtitle">Loading arena...</div>
         <div class="kymnet-loader-bar" role="progressbar" aria-label="Loading">
             <div class="kymnet-loader-bar-fill"></div>
@@ -24,7 +24,7 @@
                 if (loader.classList.contains('is-hidden')) {
                     loader.style.display = 'none';
                 }
-            }, 400);
+            }, 200);
         }
 
         function showLoader(msg) {
@@ -42,15 +42,13 @@
         window.showKymnetLoader = showLoader;
         window.hideKymnetLoader = hideLoader;
 
-        // Auto hide once window is ready, with safety fallback
-        if (document.readyState === 'complete') {
-            setTimeout(hideLoader, 250);
+        // Immediately dismiss once DOM is interactive
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            hideLoader();
         } else {
-            window.addEventListener('load', function () {
-                setTimeout(hideLoader, 250);
-            });
-            // Max fallback: don't block user for more than 1.5 seconds if slow network assets stall
-            setTimeout(hideLoader, 1500);
+            document.addEventListener('DOMContentLoaded', hideLoader);
+            window.addEventListener('load', hideLoader);
+            setTimeout(hideLoader, 600);
         }
 
         // Optional: show loader when forms with data-show-loader or standard booking forms submit

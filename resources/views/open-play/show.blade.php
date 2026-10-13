@@ -278,7 +278,7 @@
                                         <div class="border-t my-2" style="border-color: var(--gz-border);"></div>
                                         <div class="flex items-center justify-between">
                                             <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--gz-ink);">Total Due:</span>
-                                            <span class="font-mono font-extrabold text-lg text-emerald-600 dark:text-emerald-400" x-text="'₱' + (slotsCount * pricePerSlot).toFixed(2)"></span>
+                                            <span class="font-mono font-extrabold text-lg" style="color: var(--gz-pop-dark);" x-text="'₱' + (slotsCount * pricePerSlot).toFixed(2)"></span>
                                         </div>
                                     </div>
 

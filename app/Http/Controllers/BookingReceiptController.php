@@ -30,7 +30,7 @@ class BookingReceiptController extends Controller
             abort(403, 'Unauthorized access to this booking receipt.');
         }
 
-        $booking->load(['court', 'user', 'payments', 'event']);
+        $booking->load(['court', 'user', 'payments.processor', 'event', 'statusUpdatedBy']);
 
         $firstPayment = $booking->payments->first();
         $refNum = $firstPayment?->ref_num ?: ('BK-' . str_pad((string) $booking->id, 6, '0', STR_PAD_LEFT));
@@ -38,7 +38,7 @@ class BookingReceiptController extends Controller
         // Group sibling bookings if they were booked in the same transaction with the same payment reference
         $transactionBookings = $firstPayment?->ref_num
             ? Booking::whereHas('payments', fn ($q) => $q->where('ref_num', $firstPayment->ref_num))
-                ->with(['court', 'payments', 'event'])
+                ->with(['court', 'payments.processor', 'event', 'statusUpdatedBy'])
                 ->orderBy('date')
                 ->orderBy('start_time')
                 ->get()
@@ -118,7 +118,7 @@ class BookingReceiptController extends Controller
             }
         }
 
-        $siteSettings = SiteSettings::first();
+        $siteSettings = SiteSettings::current();
 
         $receiptData = [
             'ref_num' => $refNum,
@@ -129,6 +129,8 @@ class BookingReceiptController extends Controller
             'customer_email' => $booking->user?->email ?? 'N/A',
             'booking_type' => $booking->isWalkIn() ? 'Walk-In Front Desk' : 'Online Booking',
             'overall_status' => $booking->booking_status,
+            'processed_by_name' => $firstPayment?->processor?->name,
+            'status_updated_by_name' => $booking->statusUpdatedBy?->name,
             'payment_method' => $methodLabel,
             'payment_status' => $paymentStatus,
             'cash_tendered' => $firstPayment?->cash_tendered !== null ? (float) $firstPayment->cash_tendered : null,

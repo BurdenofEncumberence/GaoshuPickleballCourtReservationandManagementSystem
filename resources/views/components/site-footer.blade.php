@@ -3,7 +3,7 @@
     Universal footer used by every page, including the home page.
 --}}
 @php
-    $siteSettings = \App\Models\SiteSettings::first();
+    $siteSettings = $siteSettings ?? \App\Models\SiteSettings::current();
     $businessName = $siteSettings->business_name ?? ($siteSettings->system_name ?? 'Gaoshou Pickleball');
     $email = $siteSettings->email_address ?? 'support@gaoshou.ph';
     $tagline = $siteSettings->tagline ?? 'Court booking for the Davao pickleball community. Built by players, for players.';

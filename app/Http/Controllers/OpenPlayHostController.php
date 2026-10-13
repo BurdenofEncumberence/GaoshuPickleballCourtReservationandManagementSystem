@@ -226,7 +226,7 @@ class OpenPlayHostController extends Controller
     }
 
     /**
-     * Process payment to secure the court appointment for the accepted session.
+     * Process payment to secure the court reservation for the accepted session.
      */
     public function processPayment(Request $request, OpenPlaySession $session, PayMongoService $payMongoService)
     {
@@ -248,7 +248,7 @@ class OpenPlayHostController extends Controller
             ]);
 
             return redirect()->route('open-play.host.index')
-                ->with('status', "Your court appointment for '{$session->title}' is secured! Please settle your cash payment of ₱" . number_format($session->court_fee, 2) . " at the front desk cashier.");
+                ->with('status', "Your court reservation for '{$session->title}' is secured! Please settle your cash payment of ₱" . number_format($session->court_fee, 2) . " at the front desk cashier.");
         }
 
         // Online PayMongo Checkout
@@ -283,7 +283,7 @@ class OpenPlayHostController extends Controller
 
             if (empty($lineItems)) {
                 $lineItems[] = [
-                    'name' => "Court Appointment Fee: {$session->title}",
+                    'name' => "Court Reservation Fee: {$session->title}",
                     'description' => "{$formattedDate} | {$session->time_window} | {$courtCount} court(s)",
                     'amount' => $totalCentavos,
                     'currency' => 'PHP',
@@ -295,7 +295,7 @@ class OpenPlayHostController extends Controller
                 return "{$c->court_name} (₱" . number_format($c->price_per_hour, 2) . "/hr x {$durationHours}h = ₱" . number_format($c->price_per_hour * $durationHours, 2) . ")";
             })->join(', ');
 
-            $checkoutDescription = "Gaoshou Pickleball Court Appointment: {$session->title} [{$courtCount} court" . ($courtCount > 1 ? 's' : '') . ": {$courtSummaryList}]";
+            $checkoutDescription = "Gaoshou Pickleball Court Reservation: {$session->title} [{$courtCount} court" . ($courtCount > 1 ? 's' : '') . ": {$courtSummaryList}]";
 
             $successUrl = route('open-play.host.paymongo.success') . '?open_play_id=' . $session->id;
             $cancelUrl = route('open-play.host.paymongo.cancel') . '?open_play_id=' . $session->id;
@@ -336,7 +336,7 @@ class OpenPlayHostController extends Controller
         ]);
 
         return redirect()->route('open-play.host.index')
-            ->with('status', "Payment of ₱" . number_format($session->court_fee, 2) . " successful! Your court appointment is secured and the Open Play session is now scheduled.");
+            ->with('status', "Payment of ₱" . number_format($session->court_fee, 2) . " successful! Your court reservation is secured and the Open Play session is now scheduled.");
     }
 
     /**
@@ -357,7 +357,7 @@ class OpenPlayHostController extends Controller
         ]);
 
         return redirect()->route('open-play.host.index')
-            ->with('status', "Payment of ₱" . number_format($session->court_fee, 2) . " verified! Your court appointment is secured and the session is now live.");
+            ->with('status', "Payment of ₱" . number_format($session->court_fee, 2) . " verified! Your court reservation is secured and the session is now live.");
     }
 
     /**
@@ -366,7 +366,7 @@ class OpenPlayHostController extends Controller
     public function paymongoCancel(Request $request): RedirectResponse
     {
         return redirect()->route('open-play.host.index')
-            ->with('status', "Online payment was cancelled. You can complete payment at any time to secure your court appointment.");
+            ->with('status', "Online payment was cancelled. You can complete payment at any time to secure your court reservation.");
     }
 
     /**

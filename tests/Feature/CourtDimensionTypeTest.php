@@ -117,7 +117,7 @@ test('players see court dimensions on public welcome page and booking history', 
     $historyResponse->assertSee('Regular (13.41m x 6.10m)');
 });
 
-test('newly added court by manager immediately appears across all appointment booking pages and can be booked', function () {
+test('newly added court by manager immediately appears across all reservation booking pages and can be booked', function () {
     $manager = User::factory()->create(['role' => 'manager']);
     $staff = User::factory()->create(['role' => 'staff']);
     $player = User::factory()->create(['role' => 'player']);
@@ -146,13 +146,13 @@ test('newly added court by manager immediately appears across all appointment bo
     expect($newCourt)->not->toBeNull();
     expect($newCourt->court_status)->toBe('available');
 
-    // 1. Player appointment booking page (/booking) shows Court 5 in the schedule matrix
+    // 1. Player reservation booking page (/booking) shows Court 5 in the schedule matrix
     $playerBookingPage = $this->actingAs($player)->get(route('booking'));
     $playerBookingPage->assertStatus(200);
     $playerBookingPage->assertSee('Court 5');
     $playerBookingPage->assertSee('550.00');
 
-    // 2. Staff walk-in appointment booking page (/staff/walk-in) shows Court 5
+    // 2. Staff walk-in reservation booking page (/staff/walk-in) shows Court 5
     $staffWalkInPage = $this->actingAs($staff)->get(route('staff.walkin.create'));
     $staffWalkInPage->assertStatus(200);
     $staffWalkInPage->assertSee('Court 5');
@@ -162,7 +162,7 @@ test('newly added court by manager immediately appears across all appointment bo
     $staffTodayPage->assertStatus(200);
     $staffTodayPage->assertSee('Court 5');
 
-    // 4. Player Host Open Play court appointment page (/open-play/host) shows Court 5
+    // 4. Player Host Open Play court reservation page (/open-play/host) shows Court 5
     $hostOpenPlayPage = $this->actingAs($player)->get(route('open-play.host.create'));
     $hostOpenPlayPage->assertStatus(200);
     $hostOpenPlayPage->assertSee('Court 5');
@@ -172,7 +172,7 @@ test('newly added court by manager immediately appears across all appointment bo
     $adminOpenPlayPage->assertStatus(200);
     $adminOpenPlayPage->assertSee('Court 5');
 
-    // 6. Player can book an appointment on the newly added Court 5
+    // 6. Player can book a reservation on the newly added Court 5
     $targetDate = today()->addDay()->toDateString();
     $bookResponse = $this->actingAs($player)->post(route('bookings.store'), [
         'slots' => [

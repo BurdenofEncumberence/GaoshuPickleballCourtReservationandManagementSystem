@@ -13,7 +13,7 @@
         <nav class="hidden sm:flex items-center gap-8 text-sm font-semibold" style="color: var(--gz-muted);" aria-label="Primary">
             <a href="{{ url('/') }}" class="nav-link" @if(request()->is('/')) aria-current="page" @endif>Home</a>
             <a href="{{ route('booking') }}" class="nav-link" @if(request()->routeIs('booking')) aria-current="page" @endif>Courts</a>
-            <a href="#" class="nav-link">Events</a>
+            <a href="{{ url('/#promos') }}" class="nav-link">Promos</a>
         </nav>
 
         <div class="flex items-center gap-3">
@@ -43,7 +43,7 @@
     >
         <a href="{{ url('/') }}" class="nav-link" @if(request()->is('/')) aria-current="page" @endif>Home</a>
         <a href="{{ route('booking') }}" class="nav-link" @if(request()->routeIs('booking')) aria-current="page" @endif>Courts</a>
-        <a href="#" class="nav-link">Events</a>
+        <a href="{{ url('/#promos') }}" class="nav-link">Promos</a>
         <a href="{{ route('login') }}" class="gz-btn-outline gz-btn-sm text-center">Login</a>
         <a href="{{ route('register') }}" class="gz-btn-primary gz-btn-sm justify-center">Register</a>
     </nav>

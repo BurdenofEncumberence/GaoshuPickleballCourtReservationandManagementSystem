@@ -68,7 +68,7 @@ test('player can submit open play host request which starts in pending_approval 
     $followResponse->assertSee('Hosting Request Submitted!');
     $followResponse->assertSee('Sunday Social Open Play');
     $followResponse->assertSee('Pending Manager Approval');
-    $followResponse->assertSee('Pay Court Fee to Secure Appointment');
+    $followResponse->assertSee('Pay Court Fee to Secure Reservation');
 });
 
 test('player strictly cannot host a tournament and validation fails', function () {
@@ -177,7 +177,7 @@ test('manager can reject host request with a note', function () {
     expect($session->manager_note)->toBe('Courts are under scheduled lighting maintenance.');
 });
 
-test('host player can pay via cash to secure the appointment and schedule courts', function () {
+test('host player pays via paymongo to secure the reservation and schedule courts', function () {
     $player = User::factory()->create(['role' => 'player']);
 
     $session = OpenPlaySession::create([
@@ -199,19 +199,39 @@ test('host player can pay via cash to secure the appointment and schedule courts
     // Player visits payment view
     $this->actingAs($player)->get(route('open-play.host.pay.show', $session))
         ->assertOk()
-        ->assertSee('Secure Court Appointment');
+        ->assertSee('Secure Court Reservation');
 
-    // Player submits cash payment
-    $response = $this->actingAs($player)->post(route('open-play.host.pay.process', $session), [
-        'payment_method' => 'cash',
+    Http::fake([
+        'https://api.paymongo.com/v1/checkout_sessions' => Http::response([
+            'data' => [
+                'id' => 'cs_test_host_session_123',
+                'type' => 'checkout_session',
+                'attributes' => [
+                    'checkout_url' => 'https://checkout.paymongo.com/cs_test_host_session_123',
+                    'status' => 'active',
+                ],
+            ],
+        ], 200),
     ]);
 
-    $response->assertRedirect(route('open-play.host.index'));
+    // Player submits online payment
+    $response = $this->actingAs($player)->post(route('open-play.host.pay.process', $session), [
+        'payment_method' => 'paymongo',
+    ]);
+
+    $response->assertRedirect('https://checkout.paymongo.com/cs_test_host_session_123');
+
+    // PayMongo success callback marks session as scheduled and paid
+    $successResponse = $this->actingAs($player)->get(route('open-play.host.paymongo.success', [
+        'open_play_id' => $session->id,
+    ]));
+
+    $successResponse->assertRedirect(route('open-play.host.index'));
 
     $session->refresh();
     expect($session->session_status)->toBe('scheduled');
-    expect($session->host_payment_status)->toBe('pending');
-    expect($session->host_payment_method)->toBe('cash');
+    expect($session->host_payment_status)->toBe('paid');
+    expect($session->host_payment_method)->toBe('paymongo');
     expect($session->host_paid_at)->not->toBeNull();
 
     // Now it appears in public open play directory

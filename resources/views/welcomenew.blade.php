@@ -221,7 +221,7 @@
             <nav class="hidden sm:flex items-center gap-8 text-sm font-semibold" style="color: var(--muted);" aria-label="Primary">
                 <a href="#" class="nav-link" aria-current="page">Home</a>
                 <a href="#" class="nav-link">Courts</a>
-                <a href="#" class="nav-link">Events</a>
+                <a href="{{ url('/#promos') }}" class="nav-link">Promos</a>
             </nav>
 
             <div class="flex items-center gap-3">
@@ -251,7 +251,7 @@
         >
             <a href="#" class="nav-link" aria-current="page">Home</a>
             <a href="#" class="nav-link">Courts</a>
-            <a href="#" class="nav-link">Events</a>
+            <a href="{{ url('/#promos') }}" class="nav-link">Promos</a>
             <a href="{{ route('login') }}" class="btn-outline text-sm text-center">Login</a>
             <a href="{{ route('register') }}" class="btn-primary text-sm justify-center">Register</a>
         </nav>

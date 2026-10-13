@@ -9,6 +9,7 @@ use App\Models\OpenPlaySession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class StaffTodayController extends Controller
@@ -38,7 +39,9 @@ class StaffTodayController extends Controller
         $dateParam = $request->input('date', $today->toDateString());
         $selectedDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dateParam) ? Carbon::parse($dateParam) : $today;
 
-        $query = Booking::with(['court', 'user', 'payments'])
+        $hasFilter = $request->filled('court_id') || $request->filled('status') || $request->filled('search');
+
+        $query = Booking::with(['court', 'user', 'payments.processor', 'statusUpdatedBy'])
             ->whereDate('date', $selectedDate)
             ->where('booking_status', '!=', 'cancelled')
             ->orderBy('start_time');
@@ -75,19 +78,22 @@ class StaffTodayController extends Controller
             });
         }
 
-        $bookings = $query->get();
+        if ($hasFilter) {
+            $bookings = $query->get();
+            $selectedDateAll = Booking::with(['court', 'user', 'payments.processor', 'statusUpdatedBy'])
+                ->whereDate('date', $selectedDate)
+                ->where('booking_status', '!=', 'cancelled')
+                ->get();
+        } else {
+            $selectedDateAll = $query->get();
+            $bookings = $selectedDateAll;
+        }
 
         // Query Open Play / Tournament sessions and registrations for selected date
         $openPlaySessions = OpenPlaySession::with(['courts', 'registrations.user'])
             ->whereDate('date', $selectedDate)
             ->whereIn('session_status', ['scheduled', 'ongoing', 'completed', 'approved_pending_payment'])
             ->orderBy('start_time')
-            ->get();
-
-        // Baseline attendance statistics & full slot matrix for the selected date
-        $selectedDateAll = Booking::with(['court', 'user', 'payments'])
-            ->whereDate('date', $selectedDate)
-            ->where('booking_status', '!=', 'cancelled')
             ->get();
 
         $totalBookingsToday = $selectedDateAll->count();
@@ -116,6 +122,9 @@ class StaffTodayController extends Controller
                     in_array($b->booking_status, ['no_show', 'no-show']) => 'No-Show (Absent)',
                     default => 'Scheduled (Awaiting)',
                 },
+                'status_updated_by_name' => $b->statusUpdatedBy?->name,
+                'status_updated_at' => $b->status_updated_at?->format('g:i A'),
+                'processed_by_name' => $latestPayment?->processor?->name,
                 'court_id' => $b->court_id,
                 'court_name' => $b->court?->court_name ?? 'Court',
                 'court_size' => $b->court?->size ?: 'Regular (13.41m x 6.10m)',
@@ -232,6 +241,8 @@ class StaffTodayController extends Controller
 
         $booking->update([
             'booking_status' => $statusValue,
+            'status_updated_by' => Auth::id(),
+            'status_updated_at' => now(),
         ]);
 
         $customerName = $booking->user?->name ?? 'Customer';

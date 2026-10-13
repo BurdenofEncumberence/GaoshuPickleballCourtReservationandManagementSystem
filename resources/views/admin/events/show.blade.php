@@ -1,20 +1,20 @@
 <x-admin-layout>
-    <x-slot name="heading">Event Details</x-slot>
+    <x-slot name="heading">Promo Details</x-slot>
 
     <div class="max-w-3xl mx-auto">
         <div class="mb-4">
             <a href="{{ route('admin.events.index') }}" class="gz-link text-sm">
-                ← Back to events
+                ← Back to promos
             </a>
         </div>
 
         <div class="gz-panel">
             <div class="gz-panel-header">
                 <div>
-                    <span class="gz-eyebrow" style="color: var(--gz-pop-dark);">Event information</span>
+                    <span class="gz-eyebrow" style="color: var(--gz-pop-dark);">Promo information</span>
                     <h2 class="gz-font-display font-bold text-lg mt-1">{{ $event->event_title }}</h2>
                     <p class="text-sm mt-1" style="color: var(--gz-muted);">
-                        View complete event details and booking statistics.
+                        View complete promo details and booking statistics.
                     </p>
                 </div>
                 <div class="flex gap-2">
@@ -22,7 +22,7 @@
                         Edit
                     </a>
                     @if($event->bookings_count === 0)
-                        <form class="inline" method="POST" action="{{ route('admin.events.destroy', $event) }}" onsubmit="return confirm('Delete this event?')">
+                        <form class="inline" method="POST" action="{{ route('admin.events.destroy', $event) }}" onsubmit="return confirm('Delete this promo?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="gz-btn-sm font-bold" style="background: var(--gz-danger-bg); color: var(--gz-danger); border: 1.5px solid rgba(196, 69, 58, 0.35);">
@@ -44,7 +44,7 @@
                 {{-- Event Details Grid --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <p class="gz-eyebrow mb-1" style="color: var(--gz-muted);">Event title</p>
+                        <p class="gz-eyebrow mb-1" style="color: var(--gz-muted);">Promo title</p>
                         <p class="font-semibold">{{ $event->event_title }}</p>
                     </div>
 
@@ -72,10 +72,10 @@
                     </div>
                 </div>
 
-                {{-- Event Description --}}
+                {{-- Promo Description --}}
                 @if($event->details)
                     <div class="mb-6">
-                        <p class="gz-eyebrow mb-2" style="color: var(--gz-muted);">Event details</p>
+                        <p class="gz-eyebrow mb-2" style="color: var(--gz-muted);">Promo details</p>
                         <div class="p-4 rounded" style="background: var(--gz-surface); border: 1px solid var(--gz-border);">
                             <p class="text-sm whitespace-pre-wrap">{{ $event->details }}</p>
                         </div>
@@ -99,8 +99,8 @@
             <div class="gz-panel mt-6">
                 <div class="gz-panel-header">
                     <div>
-                        <h2 class="gz-font-display font-bold text-base">Event Bookings</h2>
-                        <p class="text-xs" style="color: var(--gz-muted);">Reservations associated with this event</p>
+                        <h2 class="gz-font-display font-bold text-base">Promo Bookings</h2>
+                        <p class="text-xs" style="color: var(--gz-muted);">Reservations associated with this promo</p>
                     </div>
                     <span class="gz-badge gz-badge-neutral">{{ $event->bookings_count }} bookings</span>
                 </div>

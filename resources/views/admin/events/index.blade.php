@@ -1,20 +1,20 @@
 <x-admin-layout>
-    <x-slot name="heading">Events Management</x-slot>
+    <x-slot name="heading">Promos Management</x-slot>
 
     {{-- Top Action Bar --}}
     <div class="gz-panel gz-panel-body mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-1">
                 <span class="inline-block w-2 h-2 rounded-full" style="background: var(--gz-pop);"></span>
-                <span class="gz-eyebrow" style="color: var(--gz-pop-dark);">Special events & promotions</span>
+                <span class="gz-eyebrow" style="color: var(--gz-pop-dark);">Special promos & discounts</span>
             </div>
-            <h1 class="gz-font-display font-bold text-xl">Events Overview</h1>
+            <h1 class="gz-font-display font-bold text-xl">Promos Overview</h1>
             <p class="text-sm mt-1" style="color: var(--gz-muted);">
-                Manage special events, tournaments, and promotional campaigns.
+                Manage promotional campaigns, seasonal discounts, and specials.
             </p>
         </div>
         <a href="{{ route('admin.events.create') }}" class="gz-btn-primary gz-btn-sm">
-            + Add event
+            + Add promo
         </a>
     </div>
 
@@ -34,11 +34,11 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div class="gz-kpi-card">
             <div class="flex items-center justify-between mb-3">
-                <span class="gz-eyebrow">Total events</span>
+                <span class="gz-eyebrow">Total promos</span>
                 <span class="gz-badge gz-badge-neutral">All</span>
             </div>
             <div class="gz-kpi-value text-right">{{ $events->count() }}</div>
-            <p class="text-xs mt-2" style="color: var(--gz-muted);">Registered events</p>
+            <p class="text-xs mt-2" style="color: var(--gz-muted);">Registered promos</p>
         </div>
 
         <div class="gz-kpi-card">
@@ -58,31 +58,31 @@
                 <span class="gz-badge gz-badge-neutral">Bookings</span>
             </div>
             <div class="gz-kpi-value text-right">{{ $events->sum('bookings_count') }}</div>
-            <p class="text-xs mt-2" style="color: var(--gz-muted);">Event reservations</p>
+            <p class="text-xs mt-2" style="color: var(--gz-muted);">Promo reservations</p>
         </div>
     </div>
 
-    {{-- Events Table --}}
+    {{-- Promos Table --}}
     <div class="gz-panel">
         <div class="gz-panel-header">
             <div>
-                <h2 class="gz-font-display font-bold text-base">Events Matrix</h2>
-                <p class="text-xs" style="color: var(--gz-muted);">All configured events and promotions</p>
+                <h2 class="gz-font-display font-bold text-base">Promos Matrix</h2>
+                <p class="text-xs" style="color: var(--gz-muted);">All configured promos and discounts</p>
             </div>
-            <span class="gz-badge gz-badge-neutral">{{ $events->count() }} events</span>
+            <span class="gz-badge gz-badge-neutral">{{ $events->count() }} promos</span>
         </div>
 
         <div class="gz-panel-body overflow-x-auto">
             @if($events->isEmpty())
                 <div class="p-8 text-center border border-dashed" style="border-color: var(--gz-border); background: var(--gz-surface);">
-                    <p class="font-semibold">No events found</p>
-                    <p class="text-sm mt-1" style="color: var(--gz-muted);">Create your first event to promote special occasions.</p>
+                    <p class="font-semibold">No promos found</p>
+                    <p class="text-sm mt-1" style="color: var(--gz-muted);">Create your first promo to offer special discounts and rates.</p>
                 </div>
             @else
                 <table class="gz-table">
                     <thead>
                         <tr>
-                            <th>Event</th>
+                            <th>Promo</th>
                             <th>Date Range</th>
                             <th>Discount</th>
                             <th>Bookings</th>
@@ -130,7 +130,7 @@
                                         Edit
                                     </a>
                                     @if($event->bookings_count === 0)
-                                        <form class="inline" method="POST" action="{{ route('admin.events.destroy', $event) }}" onsubmit="return confirm('Delete this event?')">
+                                        <form class="inline" method="POST" action="{{ route('admin.events.destroy', $event) }}" onsubmit="return confirm('Delete this promo?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="gz-btn-sm font-bold" style="background: var(--gz-danger-bg); color: var(--gz-danger); border: 1.5px solid rgba(196, 69, 58, 0.35);">

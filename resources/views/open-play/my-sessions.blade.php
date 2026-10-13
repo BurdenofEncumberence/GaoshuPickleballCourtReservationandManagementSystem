@@ -131,8 +131,8 @@
                                 </div>
 
                                 <div class="pt-2 border-t flex items-center justify-between" style="border-color: var(--gz-border);">
-                                    <span class="text-xs font-semibold" style="color: var(--gz-muted);">Court Appointment Fee:</span>
-                                    <span class="gz-font-display text-base font-bold text-emerald-600 dark:text-emerald-400">
+                                    <span class="text-xs font-semibold" style="color: var(--gz-muted);">Court Reservation Fee:</span>
+                                    <span class="gz-font-display text-base font-bold" style="color: var(--gz-pop-dark);">
                                         ₱{{ number_format($submitted['court_fee'] ?? 0, 2) }}
                                     </span>
                                 </div>
@@ -177,9 +177,9 @@
                                             3
                                         </div>
                                         <div class="flex-1">
-                                            <p class="font-bold text-xs" style="color: var(--gz-ink);">Pay Court Fee to Secure Appointment</p>
+                                            <p class="font-bold text-xs" style="color: var(--gz-ink);">Pay Court Fee to Secure Reservation</p>
                                             <p class="text-[11px] mt-0.5 leading-relaxed" style="color: var(--gz-muted);">
-                                                Once accepted, a payment action will unlock on this page. Settle the court fee (₱{{ number_format($submitted['court_fee'] ?? 0, 2) }}) via Cash or Online Checkout to lock in the appointment and publish the session for player registrations.
+                                                Once accepted, a payment action will unlock on this page. Settle the court fee (₱{{ number_format($submitted['court_fee'] ?? 0, 2) }}) via Cash or Online Checkout to lock in the reservation and publish the session for player registrations.
                                             </p>
                                         </div>
                                     </div>
@@ -394,7 +394,7 @@
                             {{-- Financial & Action Column --}}
                             <div class="flex flex-col sm:items-end justify-between gap-3 pt-3 sm:pt-0 border-t sm:border-t-0" style="border-color: var(--gz-border);">
                                 <div class="sm:text-right">
-                                    <div class="text-[11px] uppercase tracking-wider" style="color: var(--gz-muted);">Court Appointment Fee</div>
+                                    <div class="text-[11px] uppercase tracking-wider" style="color: var(--gz-muted);">Court Reservation Fee</div>
                                     <div class="gz-font-display text-xl font-bold" style="color: var(--gz-ink);">
                                         ₱{{ number_format($session->court_fee, 2) }}
                                     </div>

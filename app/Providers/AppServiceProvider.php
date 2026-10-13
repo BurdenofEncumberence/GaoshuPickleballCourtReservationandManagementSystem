@@ -16,6 +16,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -38,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production') || $isVercel) {
             URL::forceScheme('https');
         }
+
+        View::composer('*', function ($view) {
+            $view->with('siteSettings', SiteSettings::current());
+        });
 
         $this->registerActivityLogListeners();
     }
@@ -113,7 +118,7 @@ class AppServiceProvider extends ServiceProvider
                 );
             } else {
                 ActivityLog::record(
-                    'Booked Court Appointment',
+                    'Booked Court Reservation',
                     "Reserved {$courtName} on {$booking->date} ({$booking->start_time} - {$booking->end_time}) — Ref: {$ref}.",
                     $actor
                 );

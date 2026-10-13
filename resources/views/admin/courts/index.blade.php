@@ -93,7 +93,7 @@
             @if($courts->isEmpty())
                 <div class="p-8 text-center border border-dashed" style="border-color: var(--gz-border); background: var(--gz-surface);">
                     <p class="font-semibold">No courts found</p>
-                    <p class="text-sm mt-1" style="color: var(--gz-muted);">Add your first court to open public appointments.</p>
+                    <p class="text-sm mt-1" style="color: var(--gz-muted);">Add your first court to open public reservations.</p>
                 </div>
             @else
                 <table class="gz-table">

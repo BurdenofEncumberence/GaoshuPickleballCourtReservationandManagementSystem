@@ -250,12 +250,12 @@
                             </template>
                         </div>
 
-                        {{-- Event Discounts --}}
+                        {{-- Promo Discounts --}}
                         <template x-if="events && events.length > 0">
                             <div class="pt-3 border-t mb-3" style="border-color: var(--gz-border);">
-                                <label class="text-xs font-bold uppercase tracking-wider block mb-2" style="color: var(--gz-pop-dark);">Special Event Promotion</label>
+                                <label class="text-xs font-bold uppercase tracking-wider block mb-2" style="color: var(--gz-pop-dark);">Promo / Special Discount</label>
                                 <select x-model="selectedEvent" class="gz-input text-xs w-full py-1.5 mb-2">
-                                    <option :value="null">No promotional discount</option>
+                                    <option :value="null">No promo applied</option>
                                     <template x-for="event in events" :key="event.id">
                                         <option :value="event.id" x-text="event.title + ' (' + event.discount + '% OFF)'"></option>
                                     </template>
@@ -271,7 +271,7 @@
                             </div>
                             <template x-if="discountAmount > 0">
                                 <div class="flex justify-between" style="color: var(--gz-pop-dark);">
-                                    <span>Event Discount (<span x-text="eventDiscountPercent + '%'"></span>)</span>
+                                    <span>Promo Discount (<span x-text="eventDiscountPercent + '%'"></span>)</span>
                                     <span class="font-semibold" x-text="'-₱' + discountAmount.toFixed(2)"></span>
                                 </div>
                             </template>

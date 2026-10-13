@@ -138,7 +138,7 @@
                 {{ $noShowCount }}
             </div>
             <p class="text-xs mt-2" style="color: {{ $noShowCount > 0 ? 'var(--gz-danger)' : 'var(--gz-muted)' }};">
-                {{ $noShowCount > 0 ? 'Missed appointment' : 'No missed matches' }}
+                {{ $noShowCount > 0 ? 'Missed reservation' : 'No missed matches' }}
             </p>
         </div>
 
@@ -362,7 +362,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-[#E5A823] text-[#12150F]">
-                                Booked Appointment
+                                Booked Reservation
                             </span>
                             <span class="font-mono text-xs font-bold" style="color: var(--gz-muted);" x-text="'#' + (activeBooking?.booking_ref || '')"></span>
                         </div>
@@ -402,6 +402,9 @@
                             <div>
                                 <span class="block text-[10px] uppercase" style="color: var(--gz-muted);">Attendance Status</span>
                                 <span class="font-bold block mt-0.5" style="color: var(--gz-ink);" x-text="activeBooking?.attendance_label"></span>
+                                <template x-if="activeBooking?.status_updated_by_name">
+                                    <span class="block text-[10px] mt-0.5 font-semibold text-emerald-800" x-text="'Marked by: ' + activeBooking?.status_updated_by_name + (activeBooking?.status_updated_at ? (' (' + activeBooking?.status_updated_at + ')') : '')"></span>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -428,6 +431,12 @@
                                 <span style="color: var(--gz-muted);">Payment Method:</span>
                                 <span class="font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_method"></span>
                             </div>
+                            <template x-if="activeBooking?.processed_by_name">
+                                <div class="flex items-center justify-between">
+                                    <span style="color: var(--gz-muted);">Payment Processed By:</span>
+                                    <span class="font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.processed_by_name"></span>
+                                </div>
+                            </template>
                             <div class="flex items-center justify-between">
                                 <span style="color: var(--gz-muted);">Payment Reference:</span>
                                 <span class="font-mono font-semibold" style="color: var(--gz-ink);" x-text="activeBooking?.payment_ref"></span>
@@ -677,6 +686,24 @@
                                         <span class="gz-badge gz-badge-danger">No-show (Absent)</span>
                                     @else
                                         <span class="gz-badge gz-badge-warning">Awaiting arrival</span>
+                                    @endif
+
+                                    @if($booking->statusUpdatedBy)
+                                        <div class="text-[11px] mt-1 font-medium" style="color: var(--gz-muted);">
+                                            Marked by: <span class="font-bold" style="color: var(--gz-ink);">{{ $booking->statusUpdatedBy->name }}</span>
+                                            @if($booking->status_updated_at)
+                                                <span class="text-[10px]">({{ $booking->status_updated_at->format('g:i A') }})</span>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    @php
+                                        $paymentStaff = $booking->payments->first(fn ($p) => $p->processor !== null)?->processor;
+                                    @endphp
+                                    @if($paymentStaff)
+                                        <div class="text-[10px] mt-0.5 text-gray-500">
+                                            Payment: <span class="font-medium text-gray-700">{{ $paymentStaff->name }}</span>
+                                        </div>
                                     @endif
                                 </td>
 

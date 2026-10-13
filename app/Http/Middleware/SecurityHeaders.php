@@ -31,6 +31,13 @@ class SecurityHeaders
         // Restrict unnecessary browser permissions and APIs
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
+        // Prevent browsers from serving stale cached HTML during local testing
+        if (!app()->environment('production')) {
+            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', '0');
+        }
+
         return $response;
     }
 }

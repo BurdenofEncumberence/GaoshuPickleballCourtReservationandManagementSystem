@@ -16,6 +16,7 @@ class Payment extends Model
         'amount',
         'cash_tendered',
         'change_amount',
+        'processed_by',
         'ref_num',
         'checkout_session_id',
         'paymongo_payment_id',
@@ -32,5 +33,10 @@ class Payment extends Model
     public function booking()
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function processor()
+    {
+        return $this->belongsTo(User::class, 'processed_by');
     }
 }

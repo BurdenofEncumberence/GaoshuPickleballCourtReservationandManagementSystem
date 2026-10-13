@@ -1,7 +1,7 @@
 @props(['title' => null, 'heading' => 'Overview'])
 
 @php
-    $siteSettings = \App\Models\SiteSettings::first();
+    $siteSettings = $siteSettings ?? \App\Models\SiteSettings::current();
     $currentUser = Auth::user();
     $shortName = $currentUser->first_name 
         ?: (\Illuminate\Support\Str::of($currentUser->name ?? 'Admin')->before(' ')->value() ?: 'Admin');
@@ -58,7 +58,7 @@
 
                 <div class="flex items-center gap-2">
                     @if($logoPath)
-                        <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-7 w-auto max-h-7 max-w-[100px] object-contain rounded-lg">
+                        <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-8 sm:h-9 w-auto max-h-9 max-w-[120px] object-contain rounded-lg">
                     @else
                         <div class="w-6 h-6 rounded flex items-center justify-center font-bold text-xs" style="background: var(--gz-pop); color: var(--gz-ink);">
                             G
@@ -104,7 +104,7 @@
                 <div class="h-16 px-6 border-b flex items-center justify-between shrink-0" style="border-color: var(--gz-border);">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5">
                         @if($logoPath)
-                            <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-8 w-auto max-h-8 max-w-[110px] object-contain rounded-lg shrink-0">
+                            <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Logo' }}" class="h-9 sm:h-10 w-auto max-h-10 max-w-[130px] object-contain rounded-lg shrink-0">
                         @else
                             <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm" style="background: var(--gz-pop); color: var(--gz-ink);">
                                 G
@@ -174,16 +174,16 @@
                                 <span>Courts</span>
                             </a>
 
-                            {{-- Events --}}
+                            {{-- Promos --}}
                             <a
                                 href="{{ route('admin.events.index') }}"
-                                class="gz-sidebar-nav-link {{ request()->routeIs('admin.events.*') ? 'is-active' : '' }}"
-                                @if(request()->routeIs('admin.events.*')) aria-current="page" @endif
+                                class="gz-sidebar-nav-link {{ request()->routeIs('admin.events.*') || request()->routeIs('admin.promos.*') ? 'is-active' : '' }}"
+                                @if(request()->routeIs('admin.events.*') || request()->routeIs('admin.promos.*')) aria-current="page" @endif
                             >
                                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
-                                <span>Events</span>
+                                <span>Promos</span>
                             </a>
 
                             {{-- Open Play & Tournaments --}}

@@ -31,7 +31,7 @@ class AdminEventController extends Controller
 
         Event::create($data);
 
-        return redirect()->route('admin.events.index')->with('status', 'Event created successfully.');
+        return redirect()->route('admin.events.index')->with('status', 'Promo created successfully.');
     }
 
     public function show(Event $event): View
@@ -55,18 +55,18 @@ class AdminEventController extends Controller
 
         $event->update($data);
 
-        return redirect()->route('admin.events.index')->with('status', 'Event updated successfully.');
+        return redirect()->route('admin.events.index')->with('status', 'Promo updated successfully.');
     }
 
     public function destroy(Event $event): RedirectResponse
     {
         if ($event->bookings()->exists()) {
-            return back()->with('error', 'This event has bookings and cannot be deleted.');
+            return back()->with('error', 'This promo has bookings and cannot be deleted.');
         }
 
         $event->delete();
 
-        return redirect()->route('admin.events.index')->with('status', 'Event deleted successfully.');
+        return redirect()->route('admin.events.index')->with('status', 'Promo deleted successfully.');
     }
 
     private function validatedData(Request $request): array

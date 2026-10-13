@@ -1,7 +1,7 @@
 @props(['title' => null, 'heading' => 'Overview'])
 
 @php
-    $siteSettings = \App\Models\SiteSettings::first();
+    $siteSettings = $siteSettings ?? \App\Models\SiteSettings::current();
 @endphp
 
 <!DOCTYPE html>

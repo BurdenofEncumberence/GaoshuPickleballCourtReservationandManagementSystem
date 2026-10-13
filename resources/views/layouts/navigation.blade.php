@@ -1,5 +1,5 @@
 @php
-    $siteSettings = $siteSettings ?? \App\Models\SiteSettings::first();
+    $siteSettings = $siteSettings ?? \App\Models\SiteSettings::current();
     $homeUrl = match(true) {
         Auth::check() && (Auth::user()->isAdmin() || Auth::user()->hasRole('manager')) => route('admin.dashboard'),
         Auth::check() && Auth::user()->hasRole('staff') => route('staff.today'),
@@ -33,7 +33,7 @@
 
 <nav x-data="{ mobileOpen: false, profileOpen: false }" class="border-b relative" style="border-color: var(--gz-border);">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="flex justify-between h-16 items-center gap-2">
+        <div class="flex justify-between h-16 sm:h-20 items-center gap-2">
             {{-- Left: logo --}}
             <a href="{{ $homeUrl }}" class="flex items-center shrink-0">
                 @php
@@ -47,10 +47,10 @@
                     }
                 @endphp
                 @if($logoPath)
-                    <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}" class="h-10 sm:h-12 w-auto max-h-12 max-w-[200px] sm:max-w-[240px] object-contain shrink-0">
+                    <img src="{{ $logoPath }}" alt="{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}" class="h-12 sm:h-16 w-auto max-h-12 sm:max-h-16 max-w-[220px] sm:max-w-[280px] object-contain shrink-0 transition-transform duration-150 hover:scale-[1.02]">
                 @else
                     <div class="flex items-center gap-2.5">
-                        <div class="pixel-mark shrink-0" aria-hidden="true" style="width:34px; height:34px; background:#12150F; border:1px solid var(--gz-border); border-radius:10px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); padding:6px;" id="nav-seal"></div>
+                        <div class="pixel-mark shrink-0" aria-hidden="true" style="width:38px; height:38px; background:#12150F; border:1px solid var(--gz-border); border-radius:10px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); padding:6px;" id="nav-seal"></div>
                         <div class="flex flex-col">
                             <span class="gz-font-display font-bold text-base tracking-tight leading-none" style="color: var(--gz-ink);">{{ $siteSettings->system_name ?? 'Gaoshou Pickleball' }}</span>
                             <span class="text-[9px] uppercase tracking-wider font-semibold opacity-70 mt-0.5 leading-none hidden sm:block" style="color: var(--gz-muted);">Pickleball Arena</span>
@@ -70,8 +70,8 @@
                             <a href="{{ route('admin.courts.index') }}" class="nav-link" @if(request()->routeIs('admin.courts.*')) aria-current="page" @endif>
                                 Courts
                             </a>
-                            <a href="{{ route('admin.events.index') }}" class="nav-link" @if(request()->routeIs('admin.events.*')) aria-current="page" @endif>
-                                Events
+                            <a href="{{ route('admin.events.index') }}" class="nav-link" @if(request()->routeIs('admin.events.*') || request()->routeIs('admin.promos.*')) aria-current="page" @endif>
+                                Promos
                             </a>
                             <a href="{{ route('admin.finance') }}" class="nav-link" @if(request()->routeIs('admin.finance')) aria-current="page" @endif>
                                 Financials
@@ -165,7 +165,7 @@
                             @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
                                 <a href="{{ route('admin.dashboard') }}" class="gz-dropdown-item">Admin Overview</a>
                                 <a href="{{ route('admin.courts.index') }}" class="gz-dropdown-item">Courts Inventory</a>
-                                <a href="{{ route('admin.events.index') }}" class="gz-dropdown-item">Events Management</a>
+                                <a href="{{ route('admin.events.index') }}" class="gz-dropdown-item">Promos Management</a>
                                 <a href="{{ route('admin.finance') }}" class="gz-dropdown-item">Financial Reports</a>
                                 <a href="{{ route('admin.customization.index') }}" class="gz-dropdown-item">Customization</a>
                                 @if(Auth::user()->isAdmin())
@@ -245,7 +245,7 @@
             @if(Auth::user()->isAdmin() || Auth::user()->hasRole('manager'))
                 <a href="{{ route('admin.dashboard') }}" class="gz-dropdown-item font-bold">Admin Dashboard</a>
                 <a href="{{ route('admin.courts.index') }}" class="gz-dropdown-item">Courts Inventory</a>
-                <a href="{{ route('admin.events.index') }}" class="gz-dropdown-item">Events Management</a>
+                <a href="{{ route('admin.events.index') }}" class="gz-dropdown-item">Promos Management</a>
                 <a href="{{ route('admin.finance') }}" class="gz-dropdown-item">Financial Reports</a>
                 <a href="{{ route('admin.customization.index') }}" class="gz-dropdown-item">Customization</a>
                 @if(Auth::user()->isAdmin())

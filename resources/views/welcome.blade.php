@@ -132,14 +132,6 @@
             user-select: none;
         }
 
-        @keyframes subtleDrift {
-            0%, 100% { transform: translateY(0px) translateX(0px); }
-            50% { transform: translateY(-8px) translateX(5px); }
-        }
-        .cloud-drift {
-            animation: subtleDrift 14s ease-in-out infinite;
-        }
-
         .font-display {
             font-family: 'Space Grotesk', sans-serif;
             letter-spacing: -0.02em;
@@ -292,17 +284,6 @@
 <body class="antialiased relative">
     <div class="grain"></div>
 
-    <!-- Auspicious Clouds floating in background -->
-    <div class="absolute top-12 left-6 w-48 h-28 opacity-[0.035] pointer-events-none cloud-drift z-0" style="color: var(--ink);">
-        <svg viewBox="0 0 100 60" fill="currentColor">
-            <path d="M20 35 A 12 12 0 0 1 42 27 A 18 18 0 0 1 73 30 A 12 12 0 0 1 90 42 A 10 10 0 0 1 80 55 L 20 55 A 10 10 0 0 1 10 45 A 12 12 0 0 1 20 35 Z"/>
-        </svg>
-    </div>
-    <div class="absolute top-[480px] right-8 w-64 h-36 opacity-[0.03] pointer-events-none cloud-drift z-0" style="color: var(--ink); animation-delay: -7s;">
-        <svg viewBox="0 0 100 60" fill="currentColor">
-            <path d="M20 35 A 12 12 0 0 1 42 27 A 18 18 0 0 1 73 30 A 18 18 0 0 1 90 42 A 10 10 0 0 1 80 55 L 20 55 A 10 10 0 0 1 10 45 A 12 12 0 0 1 20 35 Z"/>
-        </svg>
-    </div>
 
     <x-loading-screen />
 
@@ -318,7 +299,7 @@
             <p class="font-semibold">
                 <span style="color: var(--pop);">●</span>
                 Grand Opening Tournament — registration opens soon.
-                <a href="#events" class="underline underline-offset-2 ml-1">Learn more →</a>
+                <a href="#promos" class="underline underline-offset-2 ml-1">Learn more →</a>
             </p>
             <button
                 type="button"
@@ -493,15 +474,15 @@
     </section>
 
     @if(isset($events) && $events->isNotEmpty())
-    <!-- Active Events & Promotions Section -->
-    <section id="events" class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20" aria-labelledby="events-heading">
+    <!-- Active Promos & Special Offers Section -->
+    <section id="promos" class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20" aria-labelledby="promos-heading">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
                 <span class="text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--pop-dark)]">
-                    Events & Tournaments
+                    Promos & Specials
                 </span>
-                <h2 id="events-heading" class="font-display text-2xl md:text-3xl font-bold mt-2">Active Events & Special Promotions</h2>
-                <p class="text-sm mt-1" style="color: var(--muted);">Join upcoming tournaments or claim exclusive promotional discounts on court bookings.</p>
+                <h2 id="promos-heading" class="font-display text-2xl md:text-3xl font-bold mt-2">Active Promos & Special Offers</h2>
+                <p class="text-sm mt-1" style="color: var(--muted);">Claim exclusive promotional discounts and limited-time savings on court bookings.</p>
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -510,8 +491,8 @@
                     @if($event->image)
                         <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->event_title }}" class="w-full h-40 object-cover rounded-lg mb-4">
                     @else
-                        <div class="w-full h-40 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-lg mb-4 flex items-center justify-center">
-                            <svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <div class="w-full h-40 rounded-lg mb-4 flex items-center justify-center" style="background: rgba(229,168,35,0.12); color: var(--gz-pop-dark);">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                         </div>
                     @endif
 
@@ -524,7 +505,7 @@
                     </div>
 
                     @if($event->discount)
-                        <div class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mb-3">
+                        <div class="inline-block px-3 py-1 rounded-full text-sm font-bold mb-3" style="background: rgba(229,168,35,0.18); color: var(--gz-pop-dark);">
                             {{ $event->discount }}% OFF
                         </div>
                     @endif
@@ -965,7 +946,7 @@
                 Frequently Asked Questions
             </h2>
             <p class="text-base mt-2" style="color: var(--muted);">
-                Everything you need to know before booking your court appointment.
+                Everything you need to know before booking your court reservation.
             </p>
         </div>
 

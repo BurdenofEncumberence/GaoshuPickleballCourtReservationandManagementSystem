@@ -107,6 +107,7 @@ Route::middleware(['auth', 'verified', 'role:admin,manager'])
             ->except(['show'])
             ->whereNumber('court');
         Route::resource('events', AdminEventController::class);
+        Route::resource('promos', AdminEventController::class)->names('promos');
         Route::resource('open-play', AdminOpenPlayController::class);
         Route::post('/open-play/{open_play}/accept', [AdminOpenPlayController::class, 'acceptHostRequest'])
             ->name('open-play.accept');

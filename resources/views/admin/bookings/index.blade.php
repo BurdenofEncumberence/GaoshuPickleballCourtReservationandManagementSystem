@@ -286,6 +286,11 @@
                                     <span class="gz-badge {{ $statusBadgeClass }} text-[10px] capitalize">
                                         {{ $booking->booking_status }}
                                     </span>
+                                    @if($booking->statusUpdatedBy)
+                                        <div class="text-[10px] text-gray-500 mt-0.5">
+                                            by {{ $booking->statusUpdatedBy->name }}
+                                        </div>
+                                    @endif
                                 </td>
 
                                 <!-- Amount -->
@@ -295,6 +300,9 @@
                                     </div>
                                     <div class="text-[10px] capitalize" style="color: var(--gz-muted);">
                                         {{ $payment?->payment_status ?? ($booking->booking_status === 'confirmed' ? 'paid' : 'pending') }}
+                                        @if($payment?->processor)
+                                            <span class="block text-[10px] text-gray-500 font-normal">Staff: {{ $payment->processor->name }}</span>
+                                        @endif
                                     </div>
                                 </td>
 

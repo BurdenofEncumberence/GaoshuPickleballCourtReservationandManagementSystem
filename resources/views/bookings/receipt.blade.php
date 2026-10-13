@@ -69,7 +69,7 @@
                     <img
                         src="{{ $receipt['logo_url'] }}"
                         alt="{{ $receipt['system_name'] }}"
-                        class="h-12 w-auto max-h-12 max-w-[160px] object-contain rounded-xl shrink-0"
+                        class="h-14 sm:h-16 w-auto max-h-16 max-w-[180px] object-contain rounded-xl shrink-0"
                     >
                     <div>
                         <h1 class="font-display font-extrabold text-xl sm:text-2xl tracking-tight leading-none text-[#12150F]">
@@ -92,7 +92,7 @@
                         REF: {{ $receipt['ref_num'] }}
                     </div>
                     @if(!empty($receipt['paymongo_payment_id']))
-                        <div class="font-mono text-[11px] font-semibold text-emerald-800 mt-0.5">
+                        <div class="font-mono text-[11px] font-bold text-[#B87D09] dark:text-[#E5A823] mt-0.5">
                             PayMongo ID: {{ $receipt['paymongo_payment_id'] }}
                         </div>
                     @endif
@@ -119,6 +119,11 @@
                 <div class="font-semibold text-sm text-[#12150F]">
                     Method: {{ $receipt['payment_method'] }}
                 </div>
+                @if(!empty($receipt['processed_by_name']))
+                    <div class="text-[11px] text-[#565A4E]">
+                        Staff / Cashier: <span class="font-bold text-[#12150F]">{{ $receipt['processed_by_name'] }}</span>
+                    </div>
+                @endif
                 @if(!empty($receipt['paymongo_payment_id']))
                     <div class="font-mono text-[11px] text-[#12150F]">
                         PayMongo Payment ID: <span class="font-bold">{{ $receipt['paymongo_payment_id'] }}</span>
@@ -136,6 +141,11 @@
                         {{ ucfirst($receipt['overall_status']) }}
                     </span>
                 </div>
+                @if(!empty($receipt['status_updated_by_name']))
+                    <div class="text-[11px] text-[#565A4E]">
+                        Attendance Handled By: <span class="font-semibold text-[#12150F]">{{ $receipt['status_updated_by_name'] }}</span>
+                    </div>
+                @endif
             </div>
         </section>
 

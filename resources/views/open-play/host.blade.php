@@ -13,7 +13,7 @@
                         Host an Open Play Session
                     </h1>
                     <p class="text-sm mt-1" style="color: var(--gz-muted);">
-                        Submit your session details for manager approval. Once approved, you can pay the court fee to secure your appointment.
+                        Submit your session details for manager approval. Once approved, you can pay the court fee to secure your reservation.
                     </p>
                 </div>
                 <a href="{{ route('open-play.index') }}" class="gz-btn-outline gz-btn-sm flex items-center gap-2">
@@ -26,9 +26,9 @@
         </div>
 
         {{-- How It Works Card --}}
-        <div class="gz-panel p-4 mb-6" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2);">
+        <div class="gz-panel p-4 mb-6" style="background: rgba(229, 168, 35, 0.08); border: 1px solid rgba(229, 168, 35, 0.28);">
             <div class="flex items-start gap-3">
-                <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <div class="p-2 rounded-lg bg-[#E5A823]/15 text-[#B87D09] dark:text-[#E5A823] shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -42,7 +42,7 @@
                         2. <strong>Manager Review:</strong> A facility manager inspects court schedule and accepts or declines your request.
                     </p>
                     <p style="color: var(--gz-muted);">
-                        3. <strong>Court Payment:</strong> Once accepted, you pay the court hire fee (online via PayMongo or cash at desk) to secure the appointment and publish it for players to join.
+                        3. <strong>Court Payment:</strong> Once accepted, you pay the court hire fee (online via PayMongo or cash at desk) to secure the reservation and publish it for players to join.
                     </p>
                 </div>
             </div>
@@ -279,13 +279,13 @@
                     <div class="p-4 rounded-xl border" style="background: var(--gz-surface); border-color: var(--gz-border);">
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <div>
-                                <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--gz-muted);">Estimated Court Appointment Fee</span>
+                                <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--gz-muted);">Estimated Court Reservation Fee</span>
                                 <p class="text-xs mt-0.5" style="color: var(--gz-muted);">
                                     Calculated as <span id="summary-duration">3.0</span> hrs × <span id="summary-courts-count">0</span> court(s). Due upon manager approval.
                                 </p>
                             </div>
                             <div class="text-right">
-                                <span class="gz-font-display text-2xl font-extrabold text-emerald-600 dark:text-emerald-400" id="estimated-total">
+                                <span class="gz-font-display text-2xl font-extrabold" style="color: var(--gz-pop-dark);" id="estimated-total">
                                     ₱0.00
                                 </span>
                             </div>

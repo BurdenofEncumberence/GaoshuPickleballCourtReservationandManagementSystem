@@ -148,7 +148,7 @@
                                 <img
                                     :src="receipt.logo_url"
                                     :alt="receipt.system_name"
-                                    class="h-10 w-10 rounded-xl object-contain border border-black/10 shrink-0"
+                                    class="h-12 w-auto max-h-12 max-w-[140px] rounded-xl object-contain border border-black/10 shrink-0"
                                 >
                             </template>
                             <div>
@@ -161,7 +161,7 @@
                         <div class="text-left sm:text-right">
                             <div class="font-mono font-bold text-sm text-[#12150F]" x-text="'REF: ' + (receipt?.ref_num || '')"></div>
                             <template x-if="receipt && receipt.paymongo_payment_id">
-                                <div class="font-mono text-[11px] font-semibold text-emerald-800 mt-0.5" x-text="'PayMongo ID: ' + receipt.paymongo_payment_id"></div>
+                                <div class="font-mono text-[11px] font-bold text-[#B87D09] dark:text-[#E5A823] mt-0.5" x-text="'PayMongo ID: ' + receipt.paymongo_payment_id"></div>
                             </template>
                             <div class="text-xs text-[#565A4E] mt-0.5" x-text="'Issued: ' + (receipt?.issued_at || '')"></div>
                         </div>
@@ -180,6 +180,16 @@
                             <div class="text-[#565A4E] mt-0.5">
                                 Method: <span class="font-medium text-[#12150F]" x-text="receipt?.payment_method"></span>
                             </div>
+                            <template x-if="receipt && receipt.processed_by_name">
+                                <div class="text-[#565A4E] mt-0.5">
+                                    Staff / Cashier: <span class="font-bold text-[#12150F]" x-text="receipt.processed_by_name"></span>
+                                </div>
+                            </template>
+                            <template x-if="receipt && receipt.status_updated_by_name">
+                                <div class="text-[#565A4E] mt-0.5">
+                                    Attendance By: <span class="font-medium text-[#12150F]" x-text="receipt.status_updated_by_name"></span>
+                                </div>
+                            </template>
                             <template x-if="receipt && receipt.paymongo_payment_id">
                                 <div class="font-mono text-[11px] text-[#565A4E] mt-0.5">
                                     PayMongo ID: <span class="font-bold text-[#12150F]" x-text="receipt.paymongo_payment_id"></span>
@@ -259,7 +269,7 @@
 
                         <div class="flex items-center justify-between text-[11px] text-[#7A7E73] pt-1">
                             <span>Payment Status</span>
-                            <span class="font-bold uppercase tracking-wider" :class="receipt?.payment_status === 'paid' ? 'text-emerald-700' : 'text-amber-700'" x-text="receipt?.payment_status"></span>
+                            <span class="font-bold uppercase tracking-wider" :class="receipt?.payment_status === 'paid' ? 'text-[#B87D09] dark:text-[#E5A823]' : 'text-amber-700'" x-text="receipt?.payment_status"></span>
                         </div>
                     </div>
 

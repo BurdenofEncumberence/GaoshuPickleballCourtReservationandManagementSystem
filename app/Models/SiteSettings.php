@@ -19,4 +19,22 @@ class SiteSettings extends Model
         'linkedin_link',
         'logo',
     ];
+
+    public static function current(): ?self
+    {
+        return \Illuminate\Support\Facades\Cache::remember('site_settings_current', 3600, function () {
+            return static::first();
+        });
+    }
+
+    public static function clearCache(): void
+    {
+        \Illuminate\Support\Facades\Cache::forget('site_settings_current');
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => static::clearCache());
+        static::deleted(fn () => static::clearCache());
+    }
 }
