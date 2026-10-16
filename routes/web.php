@@ -14,6 +14,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingReceiptController;
 use App\Http\Controllers\OpenPlayController;
 use App\Http\Controllers\OpenPlayHostController;
+use App\Http\Controllers\PayMongoGatewayController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffTodayController;
 use App\Http\Controllers\StaffWalkInController;
@@ -88,6 +89,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/bookings/{booking}/receipt', [BookingReceiptController::class, 'show'])
         ->whereNumber('booking')
         ->name('bookings.receipt');
+
+    Route::get('/paymongo/checkout/{session_id}', [PayMongoGatewayController::class, 'show'])
+        ->name('paymongo.gateway.show');
+    Route::post('/paymongo/checkout/{session_id}/complete', [PayMongoGatewayController::class, 'complete'])
+        ->name('paymongo.gateway.complete');
 });
 
 /*

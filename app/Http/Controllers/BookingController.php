@@ -184,10 +184,6 @@ class BookingController extends Controller
                     ],
                     'payment_method_types' => [
                         'qrph',
-                        'dob',
-                        'paymaya',
-                        'gcash',
-                        'card',
                     ],
                 ]);
             } catch (\Throwable $e) {

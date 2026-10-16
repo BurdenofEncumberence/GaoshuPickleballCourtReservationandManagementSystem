@@ -184,10 +184,6 @@ class OpenPlayController extends Controller
                     ],
                     'payment_method_types' => [
                         'qrph',
-                        'dob',
-                        'paymaya',
-                        'gcash',
-                        'card',
                     ],
                 ]);
 

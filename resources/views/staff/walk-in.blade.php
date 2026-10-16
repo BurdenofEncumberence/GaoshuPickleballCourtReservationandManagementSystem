@@ -533,10 +533,10 @@
                                 <input type="radio" name="payment_method" value="paymongo" x-model="selectedPaymentMethod" class="mt-0.5 text-[#E5A823] focus:ring-[#E5A823]">
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
-                                        <span class="font-bold" style="color: var(--gz-pop-dark);">Pay Online (PayMongo)</span>
-                                        <span class="gz-badge gz-badge-success text-[9px]">Online Gateway</span>
+                                        <span class="font-bold" style="color: var(--gz-pop-dark);">GCash QR Scan (PayMongo)</span>
+                                        <span class="gz-badge gz-badge-pop text-[9px]">GCash QR Gateway</span>
                                     </div>
-                                    <span class="text-[10px] block mt-0.5" style="color: var(--gz-muted);">QR Ph · GCash · Maya · Debit/Credit Card · Online Banking</span>
+                                    <span class="text-[10px] block mt-0.5" style="color: var(--gz-muted);">Scan to pay via GCash QR Code</span>
                                 </div>
                             </label>
 

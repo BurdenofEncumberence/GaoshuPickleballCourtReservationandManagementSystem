@@ -306,6 +306,7 @@ class OpenPlayHostController extends Controller
                     'reference_number' => "HOST-{$session->id}",
                     'success_url' => $successUrl,
                     'cancel_url' => $cancelUrl,
+                    'payment_method_types' => ['qrph'],
                     'customer' => [
                         'name' => Auth::user()->name,
                         'email' => Auth::user()->email,

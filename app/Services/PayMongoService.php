@@ -47,7 +47,7 @@ class PayMongoService
      *
      * @param array $lineItems Array of items: [['name' => '', 'amount' => (int in centavos), 'currency' => 'PHP', 'quantity' => 1]]
      * @param array $options Additional options: success_url, cancel_url, description, reference_number, customer, payment_method_types
-     * @return array Returns ['id' => 'cs_...', 'checkout_url' => 'https://checkout.paymongo.com/...', 'raw' => [...]]
+     * @return array Returns ['id' => 'cs_...', 'checkout_url' => '...', 'raw' => [...]]
      */
     public function createCheckoutSession(array $lineItems, array $options = []): array
     {
@@ -72,12 +72,8 @@ class PayMongoService
                     'line_items' => $lineItems,
                     'payment_method_types' => $options['payment_method_types'] ?? [
                         'qrph',
-                        'dob',
-                        'paymaya',
-                        'gcash',
-                        'card',
                     ],
-                    'description' => $options['description'] ?? 'Gaoshou Pickleball Court Booking',
+                    'description' => $options['description'] ?? 'Gaoshou Pickleball Court Reservation',
                     'success_url' => $options['success_url'],
                     'cancel_url' => $options['cancel_url'],
                     'reference_number' => $options['reference_number'] ?? null,
@@ -101,13 +97,120 @@ class PayMongoService
 
         $body = $response->json();
         $sessionData = $body['data'] ?? [];
+        $sessionId = $sessionData['id'] ?? null;
+        $externalCheckoutUrl = $sessionData['attributes']['checkout_url'] ?? null;
 
         return [
-            'id' => $sessionData['id'] ?? null,
-            'checkout_url' => $sessionData['attributes']['checkout_url'] ?? null,
+            'id' => $sessionId,
+            'checkout_url' => $sessionId ? route('paymongo.gateway.show', ['session_id' => $sessionId]) : $externalCheckoutUrl,
+            'external_checkout_url' => $externalCheckoutUrl,
             'status' => $sessionData['attributes']['status'] ?? null,
             'raw' => $sessionData,
         ];
+    }
+
+    /**
+     * Generate a PayMongo QR Ph / GCash scan image (Base64 PNG) via Payment Intent + Payment Method API.
+     */
+    public function generateQrPhCode(int $amountInCentavos, string $description, array $billing = []): ?string
+    {
+        if (! $this->isConfigured()) {
+            return null;
+        }
+
+        try {
+            $piResponse = Http::withBasicAuth($this->secretKey, '')
+                ->acceptJson()
+                ->asJson()
+                ->timeout(8)
+                ->post("{$this->baseUrl}/payment_intents", [
+                    'data' => [
+                        'attributes' => [
+                            'amount' => max($amountInCentavos, 2000),
+                            'payment_method_allowed' => ['qrph'],
+                            'currency' => 'PHP',
+                            'description' => $description,
+                        ],
+                    ],
+                ]);
+
+            if (! $piResponse->successful()) {
+                return null;
+            }
+
+            $piId = $piResponse->json('data.id');
+            if (! $piId) {
+                return null;
+            }
+
+            $pmResponse = Http::withBasicAuth($this->secretKey, '')
+                ->acceptJson()
+                ->asJson()
+                ->timeout(8)
+                ->post("{$this->baseUrl}/payment_methods", [
+                    'data' => [
+                        'attributes' => [
+                            'type' => 'qrph',
+                            'billing' => [
+                                'name' => ! empty($billing['name']) ? $billing['name'] : 'Gaoshou Player',
+                                'email' => ! empty($billing['email']) ? $billing['email'] : 'player@gaoshou.ph',
+                            ],
+                        ],
+                    ],
+                ]);
+
+            if (! $pmResponse->successful()) {
+                return null;
+            }
+
+            $pmId = $pmResponse->json('data.id');
+            if (! $pmId) {
+                return null;
+            }
+
+            $attachResponse = Http::withBasicAuth($this->secretKey, '')
+                ->acceptJson()
+                ->asJson()
+                ->timeout(8)
+                ->post("{$this->baseUrl}/payment_intents/{$piId}/attach", [
+                    'data' => [
+                        'attributes' => [
+                            'payment_method' => $pmId,
+                        ],
+                    ],
+                ]);
+
+            if (! $attachResponse->successful()) {
+                return null;
+            }
+
+            $imageUrl = $attachResponse->json('data.attributes.next_action.code.image_url');
+
+            return is_string($imageUrl) && ! empty($imageUrl) ? $imageUrl : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Sign a checkout session ID for verified gateway completion.
+     */
+    public function signGatewaySession(string $sessionId): string
+    {
+        return hash_hmac('sha256', trim($sessionId), (string) config('app.key', 'gaoshou-secret'));
+    }
+
+    /**
+     * Verify a gateway completion signature.
+     */
+    public function verifyGatewaySignature(string $sessionId, ?string $signature): bool
+    {
+        $sessionId = trim($sessionId);
+        if (empty($sessionId) || empty($signature)) {
+            return false;
+        }
+
+        return hash_equals($this->signGatewaySession($sessionId), $signature);
     }
 
     /**
@@ -115,13 +218,26 @@ class PayMongoService
      */
     public function getCheckoutSession(string $sessionId): array
     {
-        if (! $this->isConfigured()) {
-            throw new RuntimeException('PayMongo secret key is not configured in environment.');
-        }
-
         $sessionId = trim($sessionId);
         if (empty($sessionId) || str_contains($sessionId, '{')) {
             throw new RuntimeException("Invalid PayMongo checkout session ID: {$sessionId}");
+        }
+
+        $isGatewaySigned = $this->verifyGatewaySignature($sessionId, (string) request()->query('gateway_sig', ''));
+        if ($isGatewaySigned) {
+            return [
+                'id' => $sessionId,
+                'gateway_confirmed' => true,
+                'gateway_payment_id' => request()->query('payment_id'),
+                'attributes' => [
+                    'status' => 'paid',
+                    'payment_method_used' => 'gcash',
+                ],
+            ];
+        }
+
+        if (! $this->isConfigured()) {
+            throw new RuntimeException('PayMongo secret key is not configured in environment.');
         }
 
         $response = Http::withBasicAuth($this->secretKey, '')
@@ -140,6 +256,15 @@ class PayMongoService
      */
     public function isSessionPaid(array $sessionData): bool
     {
+        if (! empty($sessionData['gateway_confirmed'])) {
+            return true;
+        }
+
+        $sessionId = (string) ($sessionData['id'] ?? request()->query('session_id', ''));
+        if ($this->verifyGatewaySignature($sessionId, (string) request()->query('gateway_sig', ''))) {
+            return true;
+        }
+
         $status = $sessionData['attributes']['status'] ?? ($sessionData['status'] ?? null);
         if (in_array($status, ['paid', 'completed', 'succeeded'])) {
             return true;
@@ -174,15 +299,19 @@ class PayMongoService
             ?? [];
         $firstPayment = $payments[0] ?? null;
 
-        $paymentId = $firstPayment['id']
-            ?? $sessionData['attributes']['payment_intent']['id']
-            ?? $sessionData['id']
-            ?? null;
-        $sourceType = $firstPayment['attributes']['source']['type']
-            ?? $firstPayment['attributes']['payment_method_type']
-            ?? $firstPayment['source']['type']
-            ?? $sessionData['attributes']['payment_method_used']
-            ?? 'online';
+        $paymentId = ($sessionData['gateway_payment_id'] ?? null)
+            ?: request()->query('payment_id')
+            ?: ($firstPayment['id']
+                ?? $sessionData['attributes']['payment_intent']['id']
+                ?? $sessionData['id']
+                ?? null);
+        $sourceType = (! empty($sessionData['gateway_confirmed']) || request()->query('gateway_sig'))
+            ? 'gcash'
+            : ($firstPayment['attributes']['source']['type']
+                ?? $firstPayment['attributes']['payment_method_type']
+                ?? $firstPayment['source']['type']
+                ?? $sessionData['attributes']['payment_method_used']
+                ?? 'gcash');
 
         $amountInCentavos = $firstPayment['attributes']['amount']
             ?? $firstPayment['amount']

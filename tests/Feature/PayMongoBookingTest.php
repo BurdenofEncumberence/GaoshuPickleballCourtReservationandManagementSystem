@@ -45,7 +45,7 @@ test('submitting booking with paymongo payment method creates checkout session a
                             'quantity' => 1,
                         ],
                     ],
-                    'payment_method_types' => ['qrph', 'dob', 'paymaya', 'gcash', 'card'],
+                    'payment_method_types' => ['qrph'],
                 ],
             ],
         ], 200),
@@ -62,7 +62,7 @@ test('submitting booking with paymongo payment method creates checkout session a
         'payment_method' => 'paymongo',
     ]);
 
-    $response->assertRedirect('https://checkout.paymongo.com/cs_test_session_abc123');
+    $response->assertRedirect(route('paymongo.gateway.show', ['session_id' => 'cs_test_session_abc123']));
 
     // Verify booking is reserved as pending
     $booking = Booking::where('user_id', $player->id)->first();
@@ -76,6 +76,85 @@ test('submitting booking with paymongo payment method creates checkout session a
     expect($payment->payment_status)->toBe('pending');
     expect($payment->checkout_session_id)->toBe('cs_test_session_abc123');
     expect((float) $payment->amount)->toBe(500.00);
+});
+
+test('paymongo gold gcash qr gateway page displays qr scan only and completing payment confirms booking', function () {
+    Mail::fake();
+
+    $player = User::factory()->create([
+        'role' => 'player',
+        'email' => 'gold.gateway@example.com',
+        'name' => 'Gold Gateway Player',
+    ]);
+
+    $court = Court::create([
+        'court_name' => 'Court Gold QR',
+        'price_per_hour' => 450.00,
+        'court_status' => 'available',
+    ]);
+
+    $booking = Booking::create([
+        'user_id' => $player->id,
+        'court_id' => $court->id,
+        'date' => today()->addDays(2)->toDateString(),
+        'start_time' => '10:00:00',
+        'end_time' => '11:00:00',
+        'booking_status' => 'pending',
+        'booking_type' => 'online',
+    ]);
+
+    $sessionId = 'cs_test_gold_gateway_123';
+    $payment = Payment::create([
+        'booking_id' => $booking->id,
+        'payment_method' => 'paymongo',
+        'payment_status' => 'pending',
+        'amount' => 450.00,
+        'ref_num' => 'PAY-GOLDQR1',
+        'checkout_session_id' => $sessionId,
+        'date' => today()->toDateString(),
+        'time' => '10:00:00',
+    ]);
+
+    Http::fake([
+        'https://api.paymongo.com/v1/payment_intents' => Http::response([
+            'data' => ['id' => 'pi_test_gold_1'],
+        ], 200),
+        'https://api.paymongo.com/v1/payment_methods' => Http::response([
+            'data' => ['id' => 'pm_test_gold_1'],
+        ], 200),
+        'https://api.paymongo.com/v1/payment_intents/pi_test_gold_1/attach' => Http::response([
+            'data' => [
+                'attributes' => [
+                    'next_action' => [
+                        'code' => [
+                            'image_url' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                        ],
+                    ],
+                ],
+            ],
+        ], 200),
+    ]);
+
+    $gatewayPage = $this->actingAs($player)->get(route('paymongo.gateway.show', ['session_id' => $sessionId]));
+    $gatewayPage->assertOk();
+    $gatewayPage->assertSee('Scan to Pay with GCash');
+    $gatewayPage->assertSee('GCash QR Only');
+    $gatewayPage->assertSee('₱450.00');
+    $gatewayPage->assertDontSee('Online Banking');
+    $gatewayPage->assertDontSee('Debit/Credit Card');
+
+    $completeResponse = $this->actingAs($player)->post(route('paymongo.gateway.complete', ['session_id' => $sessionId]));
+    $completeResponse->assertRedirect();
+
+    $followRedirect = $this->actingAs($player)->get($completeResponse->headers->get('Location'));
+    $followRedirect->assertRedirect(route('bookings.index'));
+
+    $booking->refresh();
+    $payment->refresh();
+
+    expect($booking->booking_status)->toBe('confirmed');
+    expect($payment->payment_status)->toBe('paid');
+    expect($payment->payment_method)->toBe('paymongo_gcash');
 });
 
 test('paymongo success return verifies payment and marks booking confirmed and sends receipt email', function () {

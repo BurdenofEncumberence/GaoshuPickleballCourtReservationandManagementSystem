@@ -258,11 +258,11 @@
                                                     class="mt-0.5 text-[#E5A823] focus:ring-[#E5A823]"
                                                 >
                                                 <div>
-                                                    <span class="block text-xs font-bold" style="color: var(--gz-ink);">
-                                                        Pay Online
+                                                    <span class="block text-xs font-bold" style="color: var(--gz-pop-dark);">
+                                                        GCash QR Scan (PayMongo)
                                                     </span>
                                                     <span class="block text-[11px]" style="color: var(--gz-muted);">
-                                                        QR Ph, GCash, Maya, Debit/Credit Card, Online Banking
+                                                        Scan to pay via GCash QR Code
                                                     </span>
                                                 </div>
                                             </label>

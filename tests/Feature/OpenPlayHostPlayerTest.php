@@ -219,7 +219,7 @@ test('host player pays via paymongo to secure the reservation and schedule court
         'payment_method' => 'paymongo',
     ]);
 
-    $response->assertRedirect('https://checkout.paymongo.com/cs_test_host_session_123');
+    $response->assertRedirect(route('paymongo.gateway.show', ['session_id' => 'cs_test_host_session_123']));
 
     // PayMongo success callback marks session as scheduled and paid
     $successResponse = $this->actingAs($player)->get(route('open-play.host.paymongo.success', [
@@ -319,7 +319,7 @@ test('host player payment breakdown shows individual courts and creates detailed
         'payment_method' => 'paymongo',
     ]);
 
-    $response->assertRedirect('https://checkout.paymongo.com/cs_test_host_session_xyz789');
+    $response->assertRedirect(route('paymongo.gateway.show', ['session_id' => 'cs_test_host_session_xyz789']));
 
     Http::assertSent(function ($request) {
         $payload = $request->data();

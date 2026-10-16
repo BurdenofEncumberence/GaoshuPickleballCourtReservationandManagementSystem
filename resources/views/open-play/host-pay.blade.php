@@ -158,12 +158,12 @@
                         <div class="flex-1">
                             <div class="flex items-center justify-between">
                                 <span class="block text-sm font-bold" style="color: var(--gz-pop-dark);">
-                                    Pay Online (PayMongo)
+                                    GCash QR Scan (PayMongo)
                                 </span>
-                                <span class="gz-badge gz-badge-success text-[10px]">Online Gateway</span>
+                                <span class="gz-badge gz-badge-pop text-[10px]">GCash QR Gateway</span>
                             </div>
                             <span class="block text-xs mt-0.5" style="color: var(--gz-muted);">
-                                Instant verification via QR Ph, GCash, Maya, Debit/Credit Card, or Online Banking. Your courts are secured immediately.
+                                Instant verification via GCash QR Code scanning. Your courts are secured immediately.
                             </span>
                         </div>
                     </label>

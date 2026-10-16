@@ -201,7 +201,7 @@ test('staff can create a walk-in booking with paymongo payment method and is red
         'attendance_status' => 'show',
     ]);
 
-    $response->assertRedirect('https://checkout.paymongo.com/cs_test_walkin_session_123');
+    $response->assertRedirect(route('paymongo.gateway.show', ['session_id' => 'cs_test_walkin_session_123']));
 
     $booking = Booking::where('court_id', $court->id)->first();
     expect($booking)->not->toBeNull();

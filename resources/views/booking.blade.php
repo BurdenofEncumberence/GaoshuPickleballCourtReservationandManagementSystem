@@ -299,13 +299,13 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h3 class="gz-font-display font-bold text-base">Payment Method</h3>
-                                <p class="text-xs" style="color: var(--gz-muted);">Online payment required to lock in your court reservation.</p>
+                                <p class="text-xs" style="color: var(--gz-muted);">GCash QR scanning payment required to lock in your court reservation.</p>
                             </div>
-                            <span class="gz-badge gz-badge-success text-[10px]">Instant Lock</span>
+                            <span class="gz-badge gz-badge-pop text-[10px]">Instant Lock</span>
                         </div>
 
                         <div class="grid grid-cols-1 gap-3 mb-6" role="radiogroup" aria-label="Payment method">
-                            {{-- PayMongo Online --}}
+                            {{-- PayMongo Online (GCash QR Scanning Only) --}}
                             <button type="button" @click="paymentMethod = 'paymongo'"
                                     role="radio" :aria-checked="paymentMethod === 'paymongo' ? 'true' : 'false'"
                                     class="gz-kpi-card text-left p-3.5 cursor-pointer transition relative"
@@ -313,21 +313,18 @@
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
                                         <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0" style="background: rgba(229,168,35,0.2); color: var(--gz-pop-dark);">
-                                            PAY
+                                            QR
                                         </div>
                                         <div>
-                                            <span class="text-sm font-bold block leading-tight">Pay Online</span>
-                                            <span class="text-[11px]" style="color: var(--gz-muted);">Instant Confirmation</span>
+                                            <span class="text-sm font-bold block leading-tight">GCash QR Scan (PayMongo)</span>
+                                            <span class="text-[11px]" style="color: var(--gz-muted);">Instant Confirmation via GCash QR Code</span>
                                         </div>
                                     </div>
-                                    <span class="gz-badge gz-badge-success text-[9px]">Online Checkout</span>
+                                    <span class="gz-badge gz-badge-pop text-[9px]">GCash QR Only</span>
                                 </div>
                                 <div class="flex items-center gap-1 flex-wrap mt-2 pt-2 border-t text-[10px]" style="border-color: var(--gz-border);">
+                                    <span class="gz-badge gz-badge-pop font-semibold text-[9px]">GCash QR Scan</span>
                                     <span class="gz-badge gz-badge-pop font-semibold text-[9px]">QR Ph</span>
-                                    <span class="gz-badge gz-badge-neutral text-[9px]">Bank</span>
-                                    <span class="gz-badge gz-badge-neutral text-[9px]">GCash</span>
-                                    <span class="gz-badge gz-badge-neutral text-[9px]">Maya</span>
-                                    <span class="gz-badge gz-badge-neutral text-[9px]">Cards</span>
                                 </div>
                             </button>
                         </div>
